@@ -22,7 +22,7 @@ void printResults() {
 	
 	/* create the name of the file with timestamp */
 	sprintf(filename, 
-	"../results/ANY-%d-%d-%d-%dh-%dm-%ds-Agents_%d_to_%d.txt",
+	"../../results/LNS-%d-%d-%d-%dh-%dm-%ds-Agents_%d_to_%d.txt",
 	localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
 	localTime.tm_hour, localTime.tm_min, localTime.tm_sec,
 	agentsMin, agentsMax);
@@ -36,7 +36,7 @@ void printResults() {
 	
 	/* print expectation time, number of states, elapsed time etc. */
 	fprintf(fp,"==========================================\n");
-	fprintf(fp,"||        The ANY protocol              ||\n");
+	fprintf(fp,"||        The LNS protocol              ||\n");
 	fprintf(fp,"==========================================\n");
 	fprintf(fp,"   Timestamp = %d-%d-%d-%dh-%dm-%ds   \n",
 		localTime.tm_year + 1900, localTime.tm_mon + 1, 

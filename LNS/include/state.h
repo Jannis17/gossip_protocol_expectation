@@ -1,4 +1,4 @@
-#include "../nauty26r7/nauty.h"
+#include "../../nauty26r7/nauty.h"
 
 /* maximum nuber of isomorphic states */
 #define MAXSTATES 10000

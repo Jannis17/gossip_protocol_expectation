@@ -1,6 +1,6 @@
 #include "mainHeader.h"
 #include "state.h"
-#include "../nauty26r7/nauty.h"
+#include "../../nauty26r7/nauty.h"
 #include "prob.h"
 
 

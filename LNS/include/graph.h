@@ -1,4 +1,4 @@
-#include "../nauty26r7/nauty.h"
+#include "../../nauty26r7/nauty.h"
 
 extern int edgesOf(graph*, int);
 

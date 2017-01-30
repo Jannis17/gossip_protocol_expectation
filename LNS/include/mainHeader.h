@@ -6,5 +6,5 @@
  * WORDSIZE = 64 */
 #define MAXN 10
 
-#include "../nauty26r7/nauty.h"
+#include "../../nauty26r7/nauty.h"
 
