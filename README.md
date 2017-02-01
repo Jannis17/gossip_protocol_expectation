@@ -1,10 +1,8 @@
-README file for gossip_protocol_expectation 
+### Gossip Protocol Expectation 
 
 Ioannis Kokkinis, ykokkinis@gmail.com
 
-------------------------------------------------------------
-
-Short Description:
+###Short Description:
 
 The aim of this project is to compute the expected duration
 of some sequential gossip protocols. The current version of
@@ -16,14 +14,13 @@ by computing the average time that this Markov chain needs
 in order to hit the absorption state (i.e. the state where
 all the agents know all the secrets).
 
-------------------------------------------------------------
+---
 
-Download:
+###Download:
 git clone https://github.com/Jannis17/gossip_protocol_expectation
+---
 
-------------------------------------------------------------
-
-Building:
+###Build:
 We use the nauty program for checking the graphs that we
 generate for isomorphism. The files of this program are
 in the folder /gossip_protocol_expectation/nauty26r7 and
@@ -36,7 +33,9 @@ gossip_protocol_expectation/LNS/src
 
 and type make.
 
-Run:
+---
+
+###Run:
 Navigate to the folder
 
 gossip_protocol_expectation/LNS/src
@@ -47,5 +46,3 @@ where aMin and aMax are the minimum and maximum number
 of agents respectively. The current version of our
 program will give results in reasonable time
 (approx. 15 minutes) for aMax <= 7.
-
-
