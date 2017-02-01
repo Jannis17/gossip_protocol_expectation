@@ -57,3 +57,11 @@ program will give results in reasonable time
 
 The results will be generated in a file with timestamp
 in the folder gossip_protocol_expectation/results.
+
+---
+
+### Examples
+
+The Markoc Chain that corresponds to the execution of LNS with 4 agents can be found here: https://sites.google.com/site/ykokkinis/MarkovChain4agents.pdf.
+The states of the Markov chain are tuples that describe the configuration of secrets.
+The transition matrix and the expected duration of the protocol can be found here: https://sites.google.com/site/ykokkinis/transMatrix4agents.pdf: 
