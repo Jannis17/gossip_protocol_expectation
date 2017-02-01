@@ -64,4 +64,6 @@ in the folder gossip_protocol_expectation/results.
 
 The Markoc Chain that corresponds to the execution of LNS with 4 agents can be found here: https://sites.google.com/site/ykokkinis/MarkovChain4agents.pdf.
 The states of the Markov chain are tuples that describe the configuration of secrets.
-The transition matrix and the expected duration of the protocol can be found here: https://sites.google.com/site/ykokkinis/transMatrix4agents.pdf: 
+The transition matrix and the expected duration of the protocol can be found here: https://sites.google.com/site/ykokkinis/transMatrix4agents.pdf. The states in the
+transition matrix are numbered bottom to top, left to right as they appear in the
+Markov Chain.
