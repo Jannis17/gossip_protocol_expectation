@@ -15,6 +15,10 @@ by computing the average time that this Markov chain needs
 in order to hit the absorption state (i.e. the state where
 all the agents know all the secrets).
 
+The downloading, building and running instructions are
+for a UNIX system. The commands should be run in the
+command line.
+
 ---
 
 ### Download:
@@ -28,7 +32,7 @@ git clone https://github.com/Jannis17/gossip_protocol_expectation
 We use the nauty program for checking the graphs that we
 generate for isomorphism. The files of this program are
 in the folder /gossip_protocol_expectation/nauty26r7 and
-can be build using the the installation directives from
+can be build using the the installation instructions from
 the page http://pallini.di.uniroma1.it/.
 
 In order to build our program navigate to the folder
@@ -50,3 +54,6 @@ where aMin and aMax are the minimum and maximum number
 of agents respectively. The current version of our
 program will give results in reasonable time
 (approx. 15 minutes) for aMax <= 7.
+
+The results will be generated in a file with timestamp
+in the folder gossip_protocol_expectation/results.
