@@ -8,7 +8,7 @@
 /* state structure */
 typedef struct state_tag {
 	graph secrets[MAXN*MAXM];
-	int availCalls;
+	int edges;
 	int id;
 	int agents;
 	struct state_tag* children[MAXN * (MAXN - 1)];
@@ -21,7 +21,7 @@ typedef struct queue_t LNSstateList;
  * the total number of edges in the secrets graph */
 LNSstateList hashedStates[MAXN*MAXN];
 
-LNSstate* createLNSstate(graph g[MAXN*MAXM], int agents)
+LNSstate* newLNSstate(graph g[MAXN*MAXM], int agents)
 {
 	LNSstate* s = (LNSstate*) malloc(sizeof(LNSstate));
 	exitIfNULL(s);
@@ -39,11 +39,11 @@ LNSstate* createLNSstate(graph g[MAXN*MAXM], int agents)
 	/* select option for canonical labelling */
     options.getcanon = TRUE;
     
-    /* create the cannonicaly labeled graphs */        		
-	densenauty(g,lab,ptn,orbits,&options,&stats, MAXM,n, s->secrets);
+    /* create the cannonicaly labeled graph */        		
+	densenauty(g,lab,ptn,orbits,&options,&stats, MAXM, agents, s->secrets);
     	
 	s->id = 0;
-	s->availCalls = availCalls(g,agents);
+	s->edges = edgesOf(s->secrets,agents);
 	s->agents=agents;
 	
 	int i;
@@ -51,6 +51,7 @@ LNSstate* createLNSstate(graph g[MAXN*MAXM], int agents)
 	for(i=0; i< MAXN * (MAXN - 1); i++)
 		s->children[i] = NULL;
 		
+	return s;		
 }
 
 int findStateInList 
@@ -71,12 +72,10 @@ int findStateInList
 
 /* adds a new state to the list sList 
  * return value = the id of the state of the just added state */
-LNSstate* addChildToHash (graph secrets[MAXN*MAXM], int agents) 
+LNSstate* addChildToHash (graph secrets[MAXN*MAXM]) 
 {
-	LNSstateList childsList = hashedStates[edgesOf(newSecrets, agents)];
-	
-	
-		  
+	LNSstateList childsList = hashedStates[child->edges];
+			  
 	newStateID = findStateInList(newSecrets, agents, newSList);
 		  
 	if (newStateID == -1)
@@ -107,7 +106,11 @@ void genChildren(int agents, state* parent)
 		{
 		  copyGraph(newSecrets, parent->secrets, agents);
 		  makeCall(newSecrets, i ,j);
-		  child = addChildToHash(newSecrets, agents);
+		  
+		  child = newLNSstate(newSecrets, agents);
+		  
+		  addChildToHash(child);
+		  
 		  addChildToParent(parent, child, possCalls);		  
 	    }
 	  }	
