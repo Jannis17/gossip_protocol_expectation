@@ -22,7 +22,7 @@ typedef struct stateList_tag {
 }* stateList;
 
 /* hash table that contains all the possible states
-	 * each dimension corresponds to the total number of secrets */
+ * each dimension corresponds to the total number of secrets */
 stateList hashedStates[MAXN*MAXN];
 
 /* the transition probability matrix */
