@@ -3,63 +3,68 @@
 #include "memory.h"
 #include "prob.h"
 #include "state.h"
+#include "queue.h"
 
-/* state structure
- * next = pointer to the next state 
- * id = unique identifier */
+/* state structure */
 typedef struct state_tag {
 	graph secrets[MAXN*MAXM];
+	int availCalls;
 	int id;
-	struct state_tag* next;
-} state;
+} LNSstate;
 
-/* list of states structure
- * first = pointer to the first state
- * last = pointer to the last state */
-typedef struct stateList_tag {
-	state* first;
-	state* last;
-}* stateList;
+typedef struct queue_t LNSstateList;
 
 /* hash table that contains all the possible states
- * each dimension corresponds to the total number of secrets */
-stateList hashedStates[MAXN*MAXN];
+ * each dimension corresponds to the total number of secrets, i.e.
+ * the total number of edges in the secrets graph */
+LNSstateList hashedStates[MAXN*MAXN];
 
-/* the transition probability matrix */
-float trMat[MAXSTATES][MAXSTATES+1];
-
-int absorbStateID = -1;
 
 /* adds a new state to the list sList 
  * return value = the id of the state of the just added state */
-int addNewStateInList 
-	(graph secrets[MAXN*MAXM], stateList sList, int agents) 
+int addChildToHash (graph secrets[MAXN*MAXM], int agents) 
 {
-	state* newState = (state *) malloc(sizeof(state));
-	exitIfNULL(newState);
-		
+	int hashEntry = edgesOf(secrets, agents);
+	
+	stateList newSList;
+	
+	newSList = hashedStates[edgesOf(newSecrets, agents)];
+		  
+	newStateID = findStateInList(newSecrets, agents, newSList);
+		  
+	if (newStateID == -1)
+	   newStateID = addNewStateInList(newSecrets, newSList, agents);
+	
+	
 	copyGraph(newState->secrets, secrets, agents);
 	newState->id = totalStates[agents];
 	newState->next = NULL;
-		
-	if (sList->first == NULL)
-		sList->first = sList->last = newState;
-	else 
-	{	
-		sList->last->next = newState;			
-		sList->last = newState;	
-	}
-	
+			
 	totalStates[agents] = totalStates[agents]+1;
 	
-	//~ if (totalStates[agents] > MAXSTATES) 
-	//~ {
-		//~ printf("Too many states ...\n");
-		//~ printf("The current limit is: %d\n", MAXSTATES);
-		//~ exit(1);
-	//~ }
-	
 	return newState->id;
+}
+
+
+
+void genChildren(int agents, state* parent) 
+{
+	int i, j, possCalls;
+		
+	graph newSecrets[MAXN*MAXM];
+					
+	for (i=0; i<agents; i++)
+	  for (j=i+1; j<agents; j++) 
+	  {
+	    possCalls = possibleCalls(parent->secrets, i, j);
+	    if (possCalls)
+		{
+		  copyGraph(newSecrets, parent->secrets, agents);
+		  makeCall(newSecrets, i ,j);
+		  child = addChildToHash(newSecrets, agents);
+		  addChildToParent(parent, child, possCalls);		  
+	    }
+	  }	
 }
 
 /* if the given state appears in the sList the function returns
@@ -93,47 +98,6 @@ void freeStates (stateList sList)
 	}
 	
 	sList->first = sList->last = NULL;
-}
-
-void genChildren(int agents, state* currState) 
-{
-	int i, j, newStateID, possCalls, avCalls, absorbState = 1;
-	
-	float transProb;
-	
-	graph newSecrets[MAXN*MAXM];
-	
-	stateList newSList;
-				
-	for (i=0; i<agents; i++)
-	  for (j=i+1; j<agents; j++) 
-	  {
-	    possCalls = possibleCalls(currState->secrets, i, j);
-	    if ( possCalls > 0 )
-		{
-		  absorbState = 0;	
-		  copyGraph(newSecrets, currState->secrets, agents);
-		  makeCall(newSecrets, i ,j);
-		  
-		  newSList = hashedStates[edgesOf(newSecrets, agents)];
-		  
-		  newStateID = findStateInList(newSecrets, agents, newSList);
-		  
-		  if (newStateID == -1)
-		    newStateID = addNewStateInList(newSecrets, newSList, agents);
-		  
-		  avCalls = availCalls(currState->secrets, agents);
-		  
-		  transProb = ((float) possCalls) /  ( (float) avCalls);
-		  trMat[currState->id][newStateID] =
-			  trMat[currState->id][newStateID] + transProb;
-	    }
-	  };
-	
-	if (absorbState) {
-		absorbStateID = currState->id;
-		trMat[currState->id][currState->id] = 1.0;
-	}
 }
 
 void initHash()
