@@ -46,7 +46,7 @@ void printResults() {
 	
 	for (agents=agentsMin; agents<=agentsMax; agents++) {
 		fprintf(fp,"%d agents:\n", agents);
-		fprintf(fp,"Number of states = %d\n", totalStates[agents]+1);
+		//~ fprintf(fp,"Number of states = %d\n", totalStates[agents]+1);
 		fprintf(fp,"Expected length = %f\n", expectation[agents]);
 		fprintf(fp,"Time: %f s\n", elpsTime[agents]);
 		fprintf(fp,"==========================================\n");
@@ -77,20 +77,20 @@ int main (int argc, char * argv[]){
 	clock_t start, end;
 	int agents;
 													
-	for (agents=agentsMin; agents<=agentsMax; agents++) {
-		start = clock();		
-		expectation[agents] = findExpectation(agents);								
-		end = clock();
-		elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
-	}
+	//~ for (agents=agentsMin; agents<=agentsMax; agents++) {
+		//~ start = clock();		
+		//~ expectation[agents] = findExpectation(agents);								
+		//~ end = clock();
+		//~ elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
+	//~ }
 			
-	printResults(agentsMin, agentsMax, elpsTime);
+	//~ printResults(agentsMin, agentsMax, elpsTime);
 	
-	//~ graphTest(agentsMin);
-	//~ 
-	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
-	//~ 
-	//~ printf("MAXM = %d\n", MAXM);
+	graphTest(agentsMin);
+	
+	printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
+	
+	printf("MAXM = %d\n", MAXM);
 	
 	return 0;
 }

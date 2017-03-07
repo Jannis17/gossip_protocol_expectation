@@ -10,6 +10,8 @@ typedef struct state_tag {
 	graph secrets[MAXN*MAXM];
 	int availCalls;
 	int id;
+	int agents;
+	struct state_tag* children[MAXN * (MAXN - 1)];
 } LNSstate;
 
 typedef struct queue_t LNSstateList;
@@ -19,22 +21,66 @@ typedef struct queue_t LNSstateList;
  * the total number of edges in the secrets graph */
 LNSstateList hashedStates[MAXN*MAXN];
 
+LNSstate* createLNSstate(graph g[MAXN*MAXM], int agents)
+{
+	LNSstate* s = (LNSstate*) malloc(sizeof(LNSstate));
+	exitIfNULL(s);
+		
+	int lab[MAXN], ptn[MAXN], orbits[MAXN];
+	
+	/* this is a function for vertex invariants. If it is set to NULL
+	 * we loose some optimizations. I am not sure if there are other
+	 * side-effects */
+	void* adjacencies = NULL;
+	
+	DEFAULTOPTIONS_DIGRAPH(options);
+	statsblk stats;
+			
+	/* select option for canonical labelling */
+    options.getcanon = TRUE;
+    
+    /* create the cannonicaly labeled graphs */        		
+	densenauty(g,lab,ptn,orbits,&options,&stats, MAXM,n, s->secrets);
+    	
+	s->id = 0;
+	s->availCalls = availCalls(g,agents);
+	s->agents=agents;
+	
+	int i;
+	
+	for(i=0; i< MAXN * (MAXN - 1); i++)
+		s->children[i] = NULL;
+		
+}
+
+int findStateInList 
+	(graph secr[MAXN*MAXM], int agents, stateList sList) 
+{
+	state* statePtr = sList->first;
+	
+	while (statePtr) 
+	{
+		if ( areIsomorphic (secr, statePtr->secrets, agents) )
+			return statePtr-> id; /* state found */
+		statePtr = statePtr->next;
+	}
+	
+	return -1;/* state not found */
+}
+
 
 /* adds a new state to the list sList 
  * return value = the id of the state of the just added state */
-int addChildToHash (graph secrets[MAXN*MAXM], int agents) 
+LNSstate* addChildToHash (graph secrets[MAXN*MAXM], int agents) 
 {
-	int hashEntry = edgesOf(secrets, agents);
+	LNSstateList childsList = hashedStates[edgesOf(newSecrets, agents)];
 	
-	stateList newSList;
 	
-	newSList = hashedStates[edgesOf(newSecrets, agents)];
 		  
 	newStateID = findStateInList(newSecrets, agents, newSList);
 		  
 	if (newStateID == -1)
 	   newStateID = addNewStateInList(newSecrets, newSList, agents);
-	
 	
 	copyGraph(newState->secrets, secrets, agents);
 	newState->id = totalStates[agents];
@@ -67,22 +113,6 @@ void genChildren(int agents, state* parent)
 	  }	
 }
 
-/* if the given state appears in the sList the function returns
- * the id of the state, otherwise -1 */
-int findStateInList 
-	(graph secr[MAXN*MAXM], int agents, stateList sList) 
-{
-	state* statePtr = sList->first;
-	
-	while (statePtr) 
-	{
-		if ( areIsomorphic (secr, statePtr->secrets, agents) )
-			return statePtr-> id; /* state found */
-		statePtr = statePtr->next;
-	}
-	
-	return -1;/* state not found */
-}
 
 /* frees all the states in the sList */
 void freeStates (stateList sList) 
@@ -119,21 +149,6 @@ void initTrMat()
 	for (i = 0; i < MAXSTATES; i ++)
 		for (j = 0; j < MAXSTATES; j ++)
 			trMat[i][j] = 0.0;
-}
-
-void removeAbsorbState(int agents)
-{
-	int i, j;
-	
-	/* remove the column that corresponds to the absorption state */
-	for(j=absorbStateID; j<totalStates[agents]; j++)
-		for(i=0; i<totalStates[agents]; i++)
-			trMat[i][j]=trMat[i][j+1];
-	
-	/* remove the row that corresponds to the absorption state */
-	for(i=absorbStateID; i<totalStates[agents]-1; i++)
-		for(j=0; j<=totalStates[agents]; j++)
-			trMat[i][j]=trMat[i+1][j];
 }
 
 float findExpectation (int agents)
@@ -178,8 +193,6 @@ float findExpectation (int agents)
 	
 	for(i=0; i < totalStates[agents]; i++)
 		trMat[i][totalStates[agents]] = 1.0;
-	
-	removeAbsorbState(agents);
 	
 	return calcExpectation(trMat, totalStates[agents]-1) + 1.0;	
 }

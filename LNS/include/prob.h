@@ -1,3 +1,3 @@
-#include "state.h"
+//~ #include "state.h"
 
-extern float calcExpectation (float[MAXSTATES][MAXSTATES+1], int);
+//~ extern float calcExpectation (float[MAXSTATES][MAXSTATES+1], int);

@@ -18,3 +18,5 @@ extern int availCalls(graph*, int);
 
 extern int possibleCalls (graph*, int, int);
 
+extern int compGraphs (graph *, graph *, int);
+
