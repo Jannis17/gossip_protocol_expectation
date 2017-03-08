@@ -1,22 +1,20 @@
 #include "../../nauty26r7/nauty.h"
 
-extern int edgesOf(graph*, int);
+int edgesOf(graph*, int);
 
-extern void addOnlySelfLoops(graph*, int);
+void addOnlySelfLoops(graph*, int);
 
-extern void copyGraph(graph*, graph*, int);
+void copyGraph(graph*, graph*, int);
 
-extern int areIsomorphic(graph*, graph*, int);
+int areIsomorphic(graph*, graph*, int);
 
-extern void makeCall(graph*, int, int);
+void makeCall(graph*, int, int);
 
-extern void printGraph(graph*, int);
+void printGraph(graph*, int);
 
-extern void graphTest(int);
+void graphTest(int);
 
-extern int availCalls(graph*, int);
+int possibleCalls(graph*, int, int);
 
-extern int possibleCalls (graph*, int, int);
-
-extern int compGraphs (graph *, graph *, int);
+int compGraphs(graph *, graph *, int);
 

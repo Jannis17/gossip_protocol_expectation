@@ -5,21 +5,19 @@
 #include "state.h"
 #include "queue.h"
 
-typedef struct queue_t LNSstateList;
-
 /* state structure */
 typedef struct state_tag {
 	graph secrets[MAXN*MAXM];
 	int edges;
 	int id;
 	int agents;
-	LNSstateList children;
+	struct queue_t children;
 } LNSstate;
 
 /* hash table that contains all the possible states
  * each dimension corresponds to the total number of secrets, i.e.
  * the total number of edges in the secrets graph */
-LNSstateList lnsHash[MAXN*MAXN];
+struct queue_t* lnsHash[MAXN*MAXN];
 
 /* compares the secrets of s1 and s2 lexicographically
  * return value: 
@@ -65,27 +63,30 @@ LNSstate* newLNSstate(graph g[MAXN*MAXM], int agents)
 				s->secrets);
     	
 	s->id = 0;
-	s->edges = edgesOf(s->secrets,agents);
 	s->agents=agents;
 	
-	new_queue(agents * (agents-1) ,NULL, NULL);
+	s->children=new_queue(agents * (agents-1) ,NULL, NULL);
 		
 	return s;		
 }
 
 /* adds state to the list sList 
  * returns a pointer to the state just added */
-LNSstate* addToHash (graph secrets[MAXN*MAXM], int agents) 
+struct queue_node_t* addToHash (graph secrets[MAXN*MAXM], int agents) 
 {
-	LNSstate* child = newLNSstate (secrets, agents);
+	LNSstate* child = newLNSstate(secrets, agents);
 	
-	LNSstateList childsList = hashedStates[child->edges];
+	struct queue_t* childsList = hashedStates[edgesOf(secrets)];
 	
+	struct queue_node_t* childPtr;
 	
-				
-	totalStates[agents] = totalStates[agents]+1;
-	
-	return ;
+	if ( !enqueue_unique_to_sorted_queue(childsList, &childPtr, child) )
+	{
+		DELETE_QUEUE(child->children);
+		free(child);
+	}	
+		
+	return childPtr;
 }
 
 
@@ -95,6 +96,8 @@ void genChildren(int agents, state* parent)
 	int i, j, possCalls;
 		
 	graph newSecrets[MAXN*MAXM];
+	
+	struct queue_node_t* childPtr;
 					
 	for (i=0; i<agents; i++)
 	  for (j=i+1; j<agents; j++) 
@@ -106,29 +109,12 @@ void genChildren(int agents, state* parent)
 		  
 		  makeCall(newSecrets, i ,j);
 		  		  
-		  child = addToHash(newSecrets, agents);
+		  childPtr = addToHash(newSecrets, agents);
 		  
-		  addChildToParent(parent, child, possCalls);		  
+		  addChildToParent(parent, childPtr, possCalls);		  
 	    }
 	  }	
 }
-
-
-/* frees all the states in the sList */
-//~ void freeStates (stateList sList) 
-//~ {
-	//~ state* currState = sList->first;
-	//~ state* prevState;
-	
-	//~ while (currState) 
-	//~ {
-		//~ prevState=currState;
-		//~ currState=currState->next;
-		//~ free(prevState);
-	//~ }
-	
-	//~ sList->first = sList->last = NULL;
-//~ }
 
 void initHash(int agents)
 {
@@ -144,7 +130,7 @@ void destroyHash(int agents)
 	int i;
 	
 	for(i=agents-1; i < agents * agents; i++)
-		delete_queue(hashedStates[i]);
+		DELETE_QUEUE(hashedStates[i]);
 }
 
 void initTrMat()
@@ -161,18 +147,13 @@ float findExpectation (int agents)
 	initHash();
 	
 	initTrMat();
-				
-	totalStates[agents] = 0;
-				
+					
 	addOnlySelfLoops(initSecrets, agents);
 	
 	makeCall(initSecrets, 0, 1);					
-		
-		
+			
 	state* statePtr;
 		
 		
-		
-	
-	return calcExpectation(trMat, totalStates[agents]-1) + 1.0;	
+	return 0.0;	
 }

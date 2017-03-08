@@ -1,7 +1,7 @@
 /* queue.c */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+//~ #include <stdio.h>
+//~ #include <stdlib.h>
+//~ #include <string.h>
 #include "queue.h"
 
 /*
@@ -62,124 +62,27 @@ delete_queue(struct queue_t *hd)
 	FREE(hd);
 }
 
-
-/*
- * search_queue: search data in queue
- *   hd: queue (this)
- *   found: data's queue node (optional)
- *   prev: data's previous queue node (optional)
- *   all: all queue nodes with this data (optional)
- *   where: data queue node's offset in queue (optional)
- *   data: data to lookup
- *
- * returns 1 if found, 0 otherwise
- */
-int
-search_queue(struct queue_t *hd,
-	struct queue_node_t **found, struct queue_node_t **prev,
-	struct queue_t **all, int *where,
-	const void *data)
-{
-	struct queue_t *q;
-	struct queue_node_t *p, *pp;
-	int px;
-
-	if(QUEUE_IS_EMPTY(hd)) {
-		if(all)
-			*all=NULL;
-
-		return 0;
-	}
-
-	px=0;
-	p=hd->head;
-	if(!hd->compar(p->data, data)) {
-		if(prev)
-			*prev=NULL;
-		if(where)
-			*where=px;
-		if(found)
-			*found=p;
-
-		if(!all)
-			return 1;
-		else
-			goto sunexeia;
-	}
-	QUEUE_FOREACH(p, hd) {
-		px++;
-		if(p->next)
-			if(!hd->compar(p->next->data, data)) {
-				if(prev)
-					*prev=p;
-				if(where)
-					*where=px;
-				p=p->next;
-				if(found)
-					*found=p;
-
-				if(!all)
-					return 1;
-				else
-					goto sunexeia;
-			}
-	}
-
-	return 0;
-
-sunexeia:
-	q=new_queue(hd->max, hd->compar, hd->print_data_fun);
-	QUEUE_FOREACH_START(pp, p)
-		if(pp->next)
-			if(!hd->compar(data, pp->next->data))
-				enqueue_to_queue(q, pp->next->data);
-	*all=q;
-
-	return 1;
-}
-
-
-/*
- * enqueue_to_queue: enqueues an item to queue
- *   hd: queue (this)
- *   data: item to enqueue
- *
- * returns 1
- */
-int
-enqueue_to_queue(struct queue_t *hd, void *data)
+/* inserts data to the correct place in a sorted queue, if data did
+ * not exist before in the queue
+ *  hd : the queue
+ *  dataPtr : a pointer to the node of the queue that contains the data
+ * returns 1 if data is not in queue and 0 if data is already
+ * in the queue */
+int enqueue_unique_to_sorted_queue(struct queue_t *hd,
+	struct queue_node_t **dataPtr, const void *data)
 {
 	struct queue_node_t *p;
-
-	if(QUEUE_IS_FULL(hd))
-		return 0;
-
-	MALLOC_SAFE(p, sizeof(struct queue_node_t));
-
-	p->data=data;
-	p->next=NULL;
-	if(!hd->head)
-		hd->head=hd->tail=p;
-	else {
-		hd->tail->next=p;
-		hd->tail=p;
-	}
-
-	hd->count++;
-
-	return 1;
-}
-
-
-int enqueue_to_sorted_queue(struct queue_t *hd,
-	struct queue_node_t **found, const void *data)
-{
-	struct queue_t *q;
-	struct queue_node_t *p, *pp;
 	struct queue_node_t *newNode;
 	
-	if(QUEUE_IS_EMPTY(hd))
-		return 0;
+	if(QUEUE_IS_EMPTY(hd)) {
+		MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
+		newNode->data=data;
+		newNode->next=NULL;
+		hd->head=hd->tail=newNode;
+		*dataPtr=newNode;
+							
+		return 1;
+	}
 
 	p=hd->head;
 	
@@ -187,44 +90,44 @@ int enqueue_to_sorted_queue(struct queue_t *hd,
 		case -1:
 			break;
 		case 0:
-			if(found)
-				*found=p;
-			return 1;
+			*dataPtr=p;
+			return 0;
 		case 1:
 			MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
 			newNode->data=data;
-			newNode->next=hd->head->next;
-			hd->tail->next=newNode;
-			hd->tail=newNode;
-			if(found)
-				*found=p;
-				
+			newNode->next=p;
+			hd->head=newNode;
+			*dataPtr=newNode;
+							
 			return 1;					
 	}
 	
 	QUEUE_FOREACH(p, hd) {
-		px++;
 		if(p->next)
 			switch(hd->compar(p->next->data, data))
 			{
 				case -1:
 					break;
 				case 0:
-					p=p->next;
-					if(found)
-						*found=p;
-					return 1;
+					*dataPtr=p->next;
+					return 0;
 				case 1:
-				MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
-				newNode->data=data;
-				newNode->next=p->next;
-				p->next=newNode;
-				if(found)
-					*found=p;
-				
-				return 1;					
+					MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
+					newNode->data=data;
+					newNode->next=p->next;
+					p->next=newNode;
+					*dataPtr=newNode;
+									
+					return 1;					
 			}
 	}
+	
+	MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
+	newNode->data=data;
+	newNode->next=NULL;
+	hd->tail->next=newNode;
+	hd->tail = newNode;
+	*dataPtr=newNode;
 
-	return 0;
+	return 1;
 }
