@@ -105,10 +105,10 @@ void printGraph(graph g[MAXN*MAXM], int n)
 	printf("\n");
 }
 
-int availCalls(graph g[MAXN * MAXM], int n)
-{
-	return n * n - edgesOf(g, n);
-}
+//~ int availCalls(graph g[MAXN * MAXM], int n)
+//~ {
+	//~ return n * n - edgesOf(g, n);
+//~ }
 
 /* returns the number of possible BIDIRECTIONAL calls between i and j
  * in g. The size of g is n */

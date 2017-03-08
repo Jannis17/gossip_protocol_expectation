@@ -5,22 +5,43 @@
 #include "state.h"
 #include "queue.h"
 
+typedef struct queue_t LNSstateList;
+
 /* state structure */
 typedef struct state_tag {
 	graph secrets[MAXN*MAXM];
 	int edges;
 	int id;
 	int agents;
-	struct state_tag* children[MAXN * (MAXN - 1)];
+	LNSstateList children;
 } LNSstate;
-
-typedef struct queue_t LNSstateList;
 
 /* hash table that contains all the possible states
  * each dimension corresponds to the total number of secrets, i.e.
  * the total number of edges in the secrets graph */
-LNSstateList hashedStates[MAXN*MAXN];
+LNSstateList lnsHash[MAXN*MAXN];
 
+/* compares the secrets of s1 and s2 lexicographically
+ * return value: 
+ * -1 iff s1 -> secrets < s2 -> secrets
+ * 0 iff s1 -> secrets = s2 -> secrets
+ * 1 iff s1 -> secrets > s2 -> secrets */
+int compStates(LNSstate s1, LNSstate s2)
+{
+	size_t k;
+	
+	for (k = 0; k < MAXM*(size_t)n; ++k) {
+		 if ( (s1 -> secrets)[k] < (s2 -> secrets)[k] )
+			return -1;
+		 if ( (s1 -> secrets)[k] > (s2 -> secrets)[k] )
+			return 1;
+	}
+	
+	return 0;
+}
+
+/* gets a graph g and returns an LNSstate with the graph in
+ * canonical form */
 LNSstate* newLNSstate(graph g[MAXN*MAXM], int agents)
 {
 	LNSstate* s = (LNSstate*) malloc(sizeof(LNSstate));
@@ -29,8 +50,8 @@ LNSstate* newLNSstate(graph g[MAXN*MAXM], int agents)
 	int lab[MAXN], ptn[MAXN], orbits[MAXN];
 	
 	/* this is a function for vertex invariants. If it is set to NULL
-	 * we loose some optimizations. I am not sure if there are other
-	 * side-effects */
+	 * we loose some optimizations. I am not sure if there are any
+	 * other side-effects */
 	void* adjacencies = NULL;
 	
 	DEFAULTOPTIONS_DIGRAPH(options);
@@ -40,54 +61,31 @@ LNSstate* newLNSstate(graph g[MAXN*MAXM], int agents)
     options.getcanon = TRUE;
     
     /* create the cannonicaly labeled graph */        		
-	densenauty(g,lab,ptn,orbits,&options,&stats, MAXM, agents, s->secrets);
+	densenauty(g,lab,ptn,orbits,&options,&stats, MAXM, agents, 
+				s->secrets);
     	
 	s->id = 0;
 	s->edges = edgesOf(s->secrets,agents);
 	s->agents=agents;
 	
-	int i;
-	
-	for(i=0; i< MAXN * (MAXN - 1); i++)
-		s->children[i] = NULL;
+	new_queue(agents * (agents-1) ,NULL, NULL);
 		
 	return s;		
 }
 
-int findStateInList 
-	(graph secr[MAXN*MAXM], int agents, stateList sList) 
+/* adds state to the list sList 
+ * returns a pointer to the state just added */
+LNSstate* addToHash (graph secrets[MAXN*MAXM], int agents) 
 {
-	state* statePtr = sList->first;
+	LNSstate* child = newLNSstate (secrets, agents);
 	
-	while (statePtr) 
-	{
-		if ( areIsomorphic (secr, statePtr->secrets, agents) )
-			return statePtr-> id; /* state found */
-		statePtr = statePtr->next;
-	}
-	
-	return -1;/* state not found */
-}
-
-
-/* adds a new state to the list sList 
- * return value = the id of the state of the just added state */
-LNSstate* addChildToHash (graph secrets[MAXN*MAXM]) 
-{
 	LNSstateList childsList = hashedStates[child->edges];
-			  
-	newStateID = findStateInList(newSecrets, agents, newSList);
-		  
-	if (newStateID == -1)
-	   newStateID = addNewStateInList(newSecrets, newSList, agents);
 	
-	copyGraph(newState->secrets, secrets, agents);
-	newState->id = totalStates[agents];
-	newState->next = NULL;
-			
+	
+				
 	totalStates[agents] = totalStates[agents]+1;
 	
-	return newState->id;
+	return ;
 }
 
 
@@ -105,11 +103,10 @@ void genChildren(int agents, state* parent)
 	    if (possCalls)
 		{
 		  copyGraph(newSecrets, parent->secrets, agents);
+		  
 		  makeCall(newSecrets, i ,j);
-		  
-		  child = newLNSstate(newSecrets, agents);
-		  
-		  addChildToHash(child);
+		  		  
+		  child = addToHash(newSecrets, agents);
 		  
 		  addChildToParent(parent, child, possCalls);		  
 	    }
@@ -118,40 +115,41 @@ void genChildren(int agents, state* parent)
 
 
 /* frees all the states in the sList */
-void freeStates (stateList sList) 
-{
-	state* currState = sList->first;
-	state* prevState;
+//~ void freeStates (stateList sList) 
+//~ {
+	//~ state* currState = sList->first;
+	//~ state* prevState;
 	
-	while (currState) 
-	{
-		prevState=currState;
-		currState=currState->next;
-		free(prevState);
-	}
+	//~ while (currState) 
+	//~ {
+		//~ prevState=currState;
+		//~ currState=currState->next;
+		//~ free(prevState);
+	//~ }
 	
-	sList->first = sList->last = NULL;
-}
+	//~ sList->first = sList->last = NULL;
+//~ }
 
-void initHash()
+void initHash(int agents)
 {
 	int i;
 	
-	for(i=0; i < MAXN * MAXN; i++)
-	{
-		hashedStates[i] = (stateList) malloc(sizeof(stateList *));
-		exitIfNULL(hashedStates[i]);
-		hashedStates[i]->first=hashedStates[i]->last=NULL;
-	}
+	for(i=agents-1; i < agents * agents; i++)
+		hashedStates[i] = new_queue(MAXSTATES, compStates, NULL);
+}
+
+
+void destroyHash(int agents)
+{
+	int i;
+	
+	for(i=agents-1; i < agents * agents; i++)
+		delete_queue(hashedStates[i]);
 }
 
 void initTrMat()
 {
-	int i,j;
 	
-	for (i = 0; i < MAXSTATES; i ++)
-		for (j = 0; j < MAXSTATES; j ++)
-			trMat[i][j] = 0.0;
 }
 
 float findExpectation (int agents)
@@ -159,43 +157,22 @@ float findExpectation (int agents)
 	int i;
 	
 	graph initSecrets[MAXN*MAXM];
-	
-	stateList initSList;
-			
+				
 	initHash();
 	
 	initTrMat();
 				
-	/* set the state counter to 0 */
 	totalStates[agents] = 0;
 				
-	/* create the initial state */
 	addOnlySelfLoops(initSecrets, agents);
 	
-	/* we choose an arbitrary first call
-	 * this choice does not affect the expectated time */
 	makeCall(initSecrets, 0, 1);					
 		
-	initSList = hashedStates[edgesOf(initSecrets, agents)];
-	
-	/* we add the initial state in the hash */
-	addNewStateInList(initSecrets, initSList, agents);
-	
+		
 	state* statePtr;
 		
-	for(i=0; i <= agents* agents; i++)
-	{
-		statePtr = hashedStates[i]->first;
-		while (statePtr) 
-		{
-			genChildren(agents, statePtr);
-			statePtr = statePtr->next;
-		}
-		freeStates(hashedStates[i]);
-	}
-	
-	for(i=0; i < totalStates[agents]; i++)
-		trMat[i][totalStates[agents]] = 1.0;
+		
+		
 	
 	return calcExpectation(trMat, totalStates[agents]-1) + 1.0;	
 }
