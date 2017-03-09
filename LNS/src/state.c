@@ -8,16 +8,14 @@
 /* state structure */
 typedef struct state_tag {
 	graph secrets[MAXN*MAXM];
-	int edges;
 	int id;
-	int agents;
 	struct queue_t children;
 } LNSstate;
 
 /* hash table that contains all the possible states
  * each dimension corresponds to the total number of secrets, i.e.
  * the total number of edges in the secrets graph */
-struct queue_t* lnsHash[MAXN*MAXN];
+struct queue_t* hash[MAXN*MAXN];
 
 /* compares the secrets of s1 and s2 lexicographically
  * return value: 
@@ -45,23 +43,7 @@ LNSstate* newLNSstate(graph g[MAXN*MAXM], int agents)
 	LNSstate* s = (LNSstate*) malloc(sizeof(LNSstate));
 	exitIfNULL(s);
 		
-	int lab[MAXN], ptn[MAXN], orbits[MAXN];
-	
-	/* this is a function for vertex invariants. If it is set to NULL
-	 * we loose some optimizations. I am not sure if there are any
-	 * other side-effects */
-	void* adjacencies = NULL;
-	
-	DEFAULTOPTIONS_DIGRAPH(options);
-	statsblk stats;
-			
-	/* select option for canonical labelling */
-    options.getcanon = TRUE;
-    
-    /* create the cannonicaly labeled graph */        		
-	densenauty(g,lab,ptn,orbits,&options,&stats, MAXM, agents, 
-				s->secrets);
-    	
+	findCanonicalLabeling(g, s->secrets, agents);    	
 	s->id = 0;
 	s->agents=agents;
 	
@@ -76,7 +58,7 @@ struct queue_node_t* addToHash (graph secrets[MAXN*MAXM], int agents)
 {
 	LNSstate* child = newLNSstate(secrets, agents);
 	
-	struct queue_t* childsList = hashedStates[edgesOf(secrets)];
+	struct queue_t* childsList = hash[edgesOf(secrets)];
 	
 	struct queue_node_t* childPtr;
 	
@@ -121,7 +103,7 @@ void initHash(int agents)
 	int i;
 	
 	for(i=agents-1; i < agents * agents; i++)
-		hashedStates[i] = new_queue(MAXSTATES, compStates, NULL);
+		hash[i] = new_queue(MAXSTATES, compStates, NULL);
 }
 
 
@@ -142,18 +124,23 @@ float findExpectation (int agents)
 {
 	int i;
 	
-	graph initSecrets[MAXN*MAXM];
-				
-	initHash();
-	
-	initTrMat();
+	graph initial[MAXN*MAXM];
 					
-	addOnlySelfLoops(initSecrets, agents);
+	initHash();
+	initTrMat();
 	
-	makeCall(initSecrets, 0, 1);					
-			
-	state* statePtr;
-		
+	/* we add the first state into the hash */				
+	addOnlySelfLoops(initial, agents);
+	addToHash(initial, agents);
+	
+	struct queue_node_t * p;
+	
+	for(i=agents-1; i < agents * agents; i++)
+		QUEUE_FOREACH(p, hash[i])
+			genChildren(agents, p);
+					
+	for(i=agents-1; i < agents * agents; i++)
+		no_states[agents] = no_states[agents] + QUEUE_COUNT(hash[i]);
 		
 	return 0.0;	
 }

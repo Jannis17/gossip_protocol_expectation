@@ -1,4 +1,4 @@
-#include "mainHeader.h"
+#include "main.h"
 #include "graph.h"
 
 /* counts the directed edges (including loops) in g */
@@ -52,18 +52,14 @@ int compGraphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) {
 	return 0;
 }
 
-/* returns 1 iff g1 and g2 are isomorphic */
-int areIsomorphic (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
+void findCanonicalLabeling 
+	(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
 {
-	/* this two graphs will store the cannonicaly labeled graphs */
-	graph cg1[MAXN*MAXM];
-	graph cg2[MAXN*MAXM];
-	
-	int lab1[MAXN], lab2[MAXN], ptn[MAXN], orbits[MAXN];
+	int lab[MAXN], ptn[MAXN], orbits[MAXN];
 	
 	/* this is a function for vertex invariants. If it is set to NULL
-	 * we loose some optimizations. I am not sure if there are other
-	 * side-effects */
+	 * we loose some optimizations. I am not sure if there are any
+	 * other side-effects */
 	void* adjacencies = NULL;
 	
 	DEFAULTOPTIONS_DIGRAPH(options);
@@ -72,13 +68,8 @@ int areIsomorphic (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
 	/* select option for canonical labelling */
     options.getcanon = TRUE;
     
-    /* create the cannonicaly labeled graphs */        		
-	densenauty(g1,lab1,ptn,orbits,&options,&stats, MAXM,n,cg1);
-    densenauty(g2,lab2,ptn,orbits,&options,&stats, MAXM,n,cg2);
-	
-	/* g1 is iso to g2 iff cg1 is exactly the same as cg2 */
-	
-	return compGraphs (cg1, cg2, n);
+    /* create the cannonicaly labeled graph */        		
+	densenauty(g1,lab,ptn,orbits,&options,&stats, MAXM, n, g2);
 }
 
 /* makes the call from i to j in g */
@@ -131,31 +122,37 @@ void graphTest(int n)
 {
 	graph g1[MAXN*MAXM];
 	graph g2[MAXN*MAXM];
+	graph g3[MAXN*MAXM];
+	graph g4[MAXN*MAXM];
 	
-	int i = 0 , j = 1;
+	int i = 2 , j = 0;
 		
 	addOnlySelfLoops(g1, n);
 	addOnlySelfLoops(g2, n);
 		
-	//~ makeCall(g1, 0, 1);
-	//~ makeCall(g1, 2, 3);
+	makeCall(g1, 0, 1);
+	makeCall(g1, 2, 3);
 	//~ makeCall(g1, 0, 2);
 	//~ makeCall(g1, 1, 3);	
-	
 	printGraph(g1, n);
 	
-	//~ makeCall(g2, 2, 0);
-	//~ makeCall(g2, 2, 1);
-	//~ makeCall(g2, 2, 3);
-	//~ makeCall(g2, 1, 2);
-	//~ makeCall(g2, 0, 2);
+	findCanonicalLabeling(g1, g3, n);
+	
+	printGraph(g3, n);
+	
+	makeCall(g2, 2, 0);
+	makeCall(g2, 1, 3);
+	makeCall(g2, 2, 1);
+	makeCall(g2, 0, 3);
 		
 	printGraph(g2, n);
 	
-	printf ("equal = %d \n", compGraphs(g1, g2, n));
+	findCanonicalLabeling(g2, g4, n);
 	
-	printf ("iso = %d \n", areIsomorphic(g1, g2, n));
+	printGraph(g4, n);
 	
+	printf ("equal = %d \n", compGraphs(g4, g3, n));
+		
 	printf ("edges of g1 = %d \n", edgesOf(g1,n));
 	
 	printf ("edges of g2 = %d \n", edgesOf(g2,n));

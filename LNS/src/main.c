@@ -1,8 +1,11 @@
-#include "mainHeader.h"
+#include "main.h"
 #include "graph.h"
 #include "memory.h"
 #include "state.h"
-#include "prob.h"
+#include "gauss.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 /* expectation[i] = expected execution length for i agents */
 float expectation[MAXN];
@@ -88,9 +91,9 @@ int main (int argc, char * argv[]){
 	
 	graphTest(agentsMin);
 	
-	printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
+	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
 	
-	printf("MAXM = %d\n", MAXM);
+	//~ printf("MAXM = %d\n", MAXM);
 	
 	return 0;
 }

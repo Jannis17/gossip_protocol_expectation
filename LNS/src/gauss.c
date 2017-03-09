@@ -1,10 +1,10 @@
-//~ #include "mainHeader.h"
+//~ #include "main.h"
 //~ #include "state.h"
 //~ #include "../../nauty26r7/nauty.h"
-//~ #include "prob.h"
+//~ #include "gauss.h"
+//~ #include "queue.h"
 
-
-//~ float calcExpectation (float trMat[MAXSTATES][MAXSTATES+1], int states)
+//~ float gaussElimination (struct queue_t* trMat, int states)
 //~ {
 	//~ int i, j, k;
 	

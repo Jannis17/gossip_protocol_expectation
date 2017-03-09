@@ -1,8 +1,39 @@
-/* queue.c */
-//~ #include <stdio.h>
-//~ #include <stdlib.h>
-//~ #include <string.h>
+#include "memory.h"
 #include "queue.h"
+
+/*
+ * dequeue_from_queue: dequeues an item from queue
+ *   hd: queue (this)
+ *   data: dequeued item (optional)
+ *
+ * returns 1 if successful, 0 otherwise
+ */
+int
+dequeue_from_queue(struct queue_t *hd, void **data)
+{
+	struct queue_node_t *p;
+	void *n;
+
+	if(QUEUE_IS_EMPTY(hd)) {
+		if(data)
+			*data=NULL;
+
+		return 0;
+	}
+
+	n=hd->head->data;
+	p=hd->head;
+	hd->head=hd->head->next;
+	free(p);
+
+	hd->count--;
+
+	if(data)
+		*data=n;
+
+	return 1;
+}
+
 
 /*
  * reset_queue: resets a queue
@@ -36,17 +67,12 @@ reset_queue(struct queue_t *hd)
  *
  * returns the queue created, NULL on error
  */
-struct queue_t *
-new_queue(const unsigned long max,
-	int (*compar)(const void *, const void *),
-	void (*print_data_fun)(FILE *fp, const void *))
+struct queue_t * new_queue(int (*compar)(const void *, const void *))
 {
 	struct queue_t *hd;
-
-	MALLOC_ZERO(hd, sizeof(struct queue_t));
+	
+	MALLOC_1DARRAY(hd, 1, struct queue_t);
 	hd->compar=compar?compar:default_compar_fun;
-	hd->print_data_fun=print_data_fun;
-	QUEUE_SET_MAX(hd, max);
 
 	return hd;
 }
@@ -72,14 +98,15 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	struct queue_node_t **dataPtr, const void *data)
 {
 	struct queue_node_t *p;
-	struct queue_node_t *newNode;
+	struct queue_node_t *newItem;
 	
 	if(QUEUE_IS_EMPTY(hd)) {
-		MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
-		newNode->data=data;
-		newNode->next=NULL;
-		hd->head=hd->tail=newNode;
-		*dataPtr=newNode;
+		MALLOC_1DARRAY(newItem, 1, struct queue_node_t);
+		newItem->data=data;
+		newItem->next=NULL;
+		hd->count++;
+		hd->head=hd->tail=newItem;
+		*dataPtr=newItem;
 							
 		return 1;
 	}
@@ -93,11 +120,9 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 			*dataPtr=p;
 			return 0;
 		case 1:
-			MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
-			newNode->data=data;
-			newNode->next=p;
-			hd->head=newNode;
-			*dataPtr=newNode;
+			NEW_QUEUE_ITEM(newItem, data, hd, p);
+			hd->head=newItem;
+			*dataPtr=newItem;
 							
 			return 1;					
 	}
@@ -112,22 +137,17 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 					*dataPtr=p->next;
 					return 0;
 				case 1:
-					MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
-					newNode->data=data;
-					newNode->next=p->next;
-					p->next=newNode;
-					*dataPtr=newNode;
+					NEW_QUEUE_ITEM(newItem, data, hd, p->next);
+					p->next=newItem;
+					*dataPtr=newItem;
 									
 					return 1;					
 			}
 	}
-	
-	MALLOC_SAFE(newNode, sizeof(struct queue_node_t));
-	newNode->data=data;
-	newNode->next=NULL;
-	hd->tail->next=newNode;
-	hd->tail = newNode;
-	*dataPtr=newNode;
+	NEW_QUEUE_ITEM(newItem, data, hd, NULL);
+	hd->tail->next=newItem;
+	hd->tail = newItem;
+	*dataPtr=newItem;
 
 	return 1;
 }

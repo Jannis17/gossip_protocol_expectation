@@ -1,20 +1,10 @@
-/* queue.h */
-
 #ifndef H_QUEUE_H_
 #define H_QUEUE_H_
-
 
 #define QUEUE_FOREACH(var, hd)					\
 	for((var)=(hd)->head; (var); (var)=(var)->next)
 
-#define QUEUE_FOREACH_START(var, node)				\
-	for((var)=(node); (var); (var)=(var)->next)
-
-#define QUEUE_SET_MAX(hd, max)			\
-	do {					\
-		if((max)>0)			\
-			(hd)->max=(max);	\
-	} while(0)
+#define QUEUE_COUNT(hd)		((hd)->count)
 	
 #define QUEUE_IS_EMPTY(hd)	(NULL==(hd)->head)
 
@@ -26,6 +16,17 @@
 		}				\
 	} while(0)
 
+
+#define NEW_QUEUE_ITEM(newItem, data, hd, p)			\
+	do {					\
+		MALLOC_ITEMS(newItem, 1, struct queue_node_t);	\
+		(newItem)->data= (data);	\
+		(newItem)->next= (p);	\
+		QUEUE_COUNT(hd)++;	\
+	} while(0)
+
+
+
 /* queue node */
 struct queue_node_t {
 	void *data;
@@ -36,6 +37,7 @@ struct queue_node_t {
 struct queue_t {
 	struct queue_node_t *head;
 	struct queue_node_t *tail;
+	unsigned long count;
 	int (*compar)(const void *, const void *);
 };
 
