@@ -6,4 +6,4 @@
 
 #include "../../nauty26r7/nauty.h"
 
-#endif
+#endif /* H_MAIN_H_ */

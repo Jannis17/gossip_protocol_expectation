@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "memory.h"
 #include "queue.h"
 
@@ -71,7 +73,7 @@ struct queue_t * new_queue(unsigned long max, int (*compar)(const void *, const 
 	struct queue_t *hd;
 	
 	MALLOC_1DARRAY(hd, 1, struct queue_t);
-	hd->compar=compar?compar:default_compar_fun;
+	hd->compar=compar;
 	QUEUE_SET_MAX(hd, max);
 	QUEUE_COUNT(hd)=0;
 	
@@ -86,7 +88,7 @@ void
 delete_queue(struct queue_t *hd)
 {
 	reset_queue(hd);
-	FREE(hd);
+	free(hd);
 }
 
 /* inserts data to the correct place in a sorted queue, if data did
@@ -120,7 +122,7 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 
 	p=hd->head;
 	
-	switch(hd->compar(p->data, data){
+	switch(hd->compar(p->data, data)){
 		case -1:
 			break;
 		case 0:

@@ -3,8 +3,11 @@
 
 #include "../../nauty26r7/nauty.h"
 
+#define FOR_ALL_EDGES(VAR, AGENTS)					\
+	for((VAR)= (AGENTS)-1; i < (AGENTS) * (AGENTS); (VAR)++)
+
 /* maximum nuber of isomorphic states */
-#define MAXSTATES 20000
+#define MAXSTATES 50000
 
 /* totalStates[i] = number of different states for i agents */
 int no_states[MAXN];

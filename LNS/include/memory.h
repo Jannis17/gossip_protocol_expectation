@@ -17,10 +17,10 @@
 		}				\
 	} while(0)
 
-#define MALLOC_1DARRAY (array, dim, type)			\
-	do {					\
+#define MALLOC_1DARRAY(array, dim, type)	\
+	do {	\
 		(array) = (type *) malloc( (dim) * sizeof(type));	\
 		EXIT_IF_OUT_OF_MEMORY(array);	\
 	} while(0)
 
-#endif
+#endif /* H_MEMORY_H_ */

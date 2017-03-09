@@ -52,6 +52,7 @@ int compGraphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) {
 	return 0;
 }
 
+/* g2 will be equal to the canonical labeling of g1 */
 void findCanonicalLabeling 
 	(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
 {
@@ -96,13 +97,8 @@ void printGraph(graph g[MAXN*MAXM], int n)
 	printf("\n");
 }
 
-//~ int availCalls(graph g[MAXN * MAXM], int n)
-//~ {
-	//~ return n * n - edgesOf(g, n);
-//~ }
-
 /* returns the number of possible BIDIRECTIONAL calls between i and j
- * in g. The size of g is n */
+ * in g */
 int possibleCalls (graph g[MAXN * MAXM], int i, int j)
 {
 	int possCalls = 0;

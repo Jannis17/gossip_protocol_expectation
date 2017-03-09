@@ -1,7 +1,7 @@
-#include "mainHeader.h"
+#include "main.h"
 #include "graph.h"
 #include "memory.h"
-#include "prob.h"
+#include "gauss.h"
 #include "state.h"
 #include "queue.h"
 
@@ -25,16 +25,23 @@ struct queue_t* hash[MAXN*MAXN];
  * -1 iff s1 -> secrets < s2 -> secrets
  * 0 iff s1 -> secrets = s2 -> secrets
  * 1 iff s1 -> secrets > s2 -> secrets */
-int compStates(LNSstate s1, LNSstate s2)
+int compStates(const void* item1, const void* item2)
 {
-	return compGraphs(s1->secrets, s2-> secrets, agents);
+	LNSstate* state1, *state2;
+	
+	state1 = (LNSstate *) item1;
+	state2 = (LNSstate *) item2;
+	
+	return compGraphs(state1->secrets, state2->secrets, agents);
 }
 
 /* gets a graph g and returns an LNSstate with the graph in
  * canonical form */
 LNSstate* newLNSstate(graph g[MAXN*MAXM])
 {
-	LNSstate* s = MALLOC_1DARRAY(s, 1, LNSstate);
+	LNSstate* s;
+	
+	MALLOC_1DARRAY(s, 1, LNSstate);
 		
 	findCanonicalLabeling(g, s->secrets, agents);    	
 	s->id = 0;
@@ -44,25 +51,25 @@ LNSstate* newLNSstate(graph g[MAXN*MAXM])
 
 /* adds state to the list sList 
  * returns a pointer to the state just added */
-LNSstate* addToHash (graph secrets[MAXN*MAXM]) 
+LNSstate* addToHash(graph secrets[MAXN*MAXM]) 
 {
 	LNSstate* state = newLNSstate(secrets);
 	
-	struct queue_t* statesList = hash[edgesOf(secrets)];
+	struct queue_t* statesList = hash[edgesOf(secrets, agents)];
 	
 	struct queue_node_t* statePtr;
 	
 	if (!enqueue_unique_to_sorted_queue(statesList, &statePtr, state))
 		free(state);
 		
-	return childPtr->data;
+	return statePtr->data;
 }
 
 void addChildToParent(LNSstate* parent, LNSstate* child, int calls)
 {
 	int i;
 	
-	for (i=0; i < no_of_children; i++)
+	for (i=0; i < (parent -> no_of_children) ; i++)
 		if ((parent -> children)[i] == child) {
 			(parent -> callsToChild)[i] = 
 				(parent -> callsToChild)[i] + calls;
@@ -73,7 +80,7 @@ void addChildToParent(LNSstate* parent, LNSstate* child, int calls)
 	
 	(parent -> callsToChild)[i] = calls;
 	
-	no_of_children++;
+	(parent -> no_of_children)++;
 }
 
 void genChildren(LNSstate* parent) 
@@ -92,7 +99,7 @@ void genChildren(LNSstate* parent)
 		{
 		  copyGraph(childsSecrets, parent->secrets, agents);
 		  makeCall(childsSecrets, i ,j);  
-		  childPtr = addToHash(newSecrets);		  
+		  childPtr = addToHash(childsSecrets);		  
 		  addChildToParent(parent, childPtr, callsToChild);		  
 	    }
 	  }	
@@ -105,12 +112,12 @@ void initHash()
 	graph initial[MAXN*MAXM];
 	
 	/* create the queues */		
-	for(i=agents-1; i < agents * agents; i++)
-		hash[i] = new_queue(MAXSTATES, &compStates);
+	FOR_ALL_EDGES(i, agents)
+		hash[i] = new_queue(MAXSTATES, compStates);
 	
 	/* we add the first state into the hash */				
 	addOnlySelfLoops(initial, agents);
-	addToHash(initial, agents);
+	addToHash(initial);
 }
 
 void build_the_markov_chain()
@@ -119,7 +126,7 @@ void build_the_markov_chain()
 	
 	struct queue_node_t * p;
 	
-	for(i=agents-1; i < agents * agents; i++)
+	FOR_ALL_EDGES(i, agents)
 		QUEUE_FOREACH(p, hash[i])
 			genChildren(p->data);
 }
@@ -133,8 +140,10 @@ float findExpectation (int theAgents)
 	
 	build_the_markov_chain();
 	
+	int i;
+	
 	/* count the states */	
-	for(i=agents-1; i < agents * agents; i++)
+	FOR_ALL_EDGES(i, agents)
 		no_states[agents] = no_states[agents] + QUEUE_COUNT(hash[i]);
 	
 	/* label the states */	
@@ -142,8 +151,8 @@ float findExpectation (int theAgents)
 	/* create the upper triangular transition matrix */
 	
 	/* destroy the hash */		
-	for(i=agents-1; i < agents * agents; i++)
-		DELETE_QUEUE(hashedStates[i]);	
+	FOR_ALL_EDGES(i, agents)
+		DELETE_QUEUE(hash[i]);	
 	
 	/* compute the gaussian elimination */	
 	//return gaussElimination();

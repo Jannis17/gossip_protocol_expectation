@@ -1,11 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "main.h"
 #include "graph.h"
 #include "memory.h"
 #include "state.h"
 #include "gauss.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
 
 /* expectation[i] = expected execution length for i agents */
 float expectation[MAXN];
@@ -74,8 +74,8 @@ int main (int argc, char * argv[]){
 	 * to compatible versions of the nauty routines. */
 	nauty_check(WORDSIZE,MAXM,MAXN,NAUTYVERSIONID);
 	
-	clock_t start, end;
-	int agents;
+	//~ clock_t start, end;
+	//~ int agents;
 													
 	//~ for (agents=agentsMin; agents<=agentsMax; agents++) {
 		//~ start = clock();		
