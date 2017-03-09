@@ -63,17 +63,18 @@ reset_queue(struct queue_t *hd)
  * new_queue: create a queue (ctor)
  *   max: maximum number of nodes (optional)
  *   compar: comparison function for node data
- *   print_data_fun: node data pretty printing function (optional)
  *
  * returns the queue created, NULL on error
  */
-struct queue_t * new_queue(int (*compar)(const void *, const void *))
+struct queue_t * new_queue(unsigned long max, int (*compar)(const void *, const void *))
 {
 	struct queue_t *hd;
 	
 	MALLOC_1DARRAY(hd, 1, struct queue_t);
 	hd->compar=compar?compar:default_compar_fun;
-
+	QUEUE_SET_MAX(hd, max);
+	QUEUE_COUNT(hd)=0;
+	
 	return hd;
 }
 
@@ -99,6 +100,12 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 {
 	struct queue_node_t *p;
 	struct queue_node_t *newItem;
+	
+	if (QUEUE_IS_FULL(hd)) {
+		fprintf(stderr, "Internal error: Trying to insert data in\
+			a full queue\n");
+		exit(1);
+	}
 	
 	if(QUEUE_IS_EMPTY(hd)) {
 		MALLOC_1DARRAY(newItem, 1, struct queue_node_t);
@@ -144,6 +151,7 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 					return 1;					
 			}
 	}
+	
 	NEW_QUEUE_ITEM(newItem, data, hd, NULL);
 	hd->tail->next=newItem;
 	hd->tail = newItem;

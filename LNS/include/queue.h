@@ -8,6 +8,14 @@
 	
 #define QUEUE_IS_EMPTY(hd)	(NULL==(hd)->head)
 
+#define QUEUE_SET_MAX(hd, max)			\
+	do {					\
+		if((max)>0)			\
+			(hd)->max=(max);	\
+	} while(0)
+	
+#define QUEUE_IS_FULL(hd)	((hd)->max>0&&QUEUE_COUNT(hd)>=(hd)->max)
+
 #define DELETE_QUEUE(queue)			\
 	do {					\
 		if((queue)) {			\
@@ -38,12 +46,16 @@ struct queue_t {
 	struct queue_node_t *head;
 	struct queue_node_t *tail;
 	unsigned long count;
+	unsigned long max;
 	int (*compar)(const void *, const void *);
 };
 
 
 void delete_queue(struct queue_t *);
 unsigned long reset_queue(struct queue_t *);
+
+struct queue_t * new_queue
+	(unsigned long, int (*)(const void *, const void *));
 
 int enqueue_unique_to_sorted_queue
 	(struct queue_t *, struct queue_node_t **, const void *);

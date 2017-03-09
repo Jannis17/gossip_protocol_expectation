@@ -32,10 +32,7 @@ void printResults() {
 	
 	FILE * fp = fopen (filename, "w+");
     
-    if (fp == NULL) {
-      fprintf(stderr, "Error opening file: %s\n", filename);
-      exit(1);
-    }
+    EXIT_IF_ERROR_OPENING_FILE(fp, filename);
 	
 	/* print expectation time, number of states, elapsed time etc. */
 	fprintf(fp,"==========================================\n");
@@ -49,7 +46,7 @@ void printResults() {
 	
 	for (agents=agentsMin; agents<=agentsMax; agents++) {
 		fprintf(fp,"%d agents:\n", agents);
-		//~ fprintf(fp,"Number of states = %d\n", totalStates[agents]+1);
+		fprintf(fp,"Number of states = %d\n", no_states[agents]+1);
 		fprintf(fp,"Expected length = %f\n", expectation[agents]);
 		fprintf(fp,"Time: %f s\n", elpsTime[agents]);
 		fprintf(fp,"==========================================\n");
