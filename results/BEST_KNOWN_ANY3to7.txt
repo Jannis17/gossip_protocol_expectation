@@ -5,26 +5,26 @@
 ==========================================
 3 agents:
 Number of states = 4
-Expected length = 0.000000
+Expected length = ????
 Time: 0.000105 s
 ==========================================
 4 agents:
 Number of states = 16
-Expected length = 0.000000
+Expected length = ????
 Time: 0.000316 s
 ==========================================
 5 agents:
 Number of states = 111
-Expected length = 0.000000
+Expected length = ????
 Time: 0.014719 s
 ==========================================
 6 agents:
 Number of states = 1940
-Expected length = 0.000000
+Expected length = ????
 Time: 3.256851 s
 ==========================================
 7 agents:
 Number of states = 68300
-Expected length = 0.000000
+Expected length = ????
 Time: 4688.238281 s
 ==========================================
