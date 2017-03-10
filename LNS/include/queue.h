@@ -24,11 +24,11 @@
 		}				\
 	} while(0)
 
-#define NEW_QUEUE_ITEM(newItem, data, hd, p)			\
+#define NEW_QUEUE_ITEM(newItem, data, hd, next)			\
 	do {					\
 		MALLOC_1DARRAY(newItem, 1, struct queue_node_t);	\
 		(newItem)->data= (data);	\
-		(newItem)->next= (p);	\
+		(newItem)->next= (next);	\
 		QUEUE_COUNT(hd)++;	\
 	} while(0)
 

@@ -72,7 +72,7 @@ struct queue_t * new_queue(unsigned long max, int (*compar)(const void *, const 
 {
 	struct queue_t *hd;
 	
-	MALLOC_1DARRAY(hd, 1, struct queue_t);
+	MALLOC_ZERO(hd, sizeof(struct queue_t));
 	hd->compar=compar;
 	QUEUE_SET_MAX(hd, max);
 	QUEUE_COUNT(hd)=0;
@@ -110,10 +110,7 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	}
 	
 	if(QUEUE_IS_EMPTY(hd)) {
-		MALLOC_1DARRAY(newItem, 1, struct queue_node_t);
-		newItem->data=data;
-		newItem->next=NULL;
-		hd->count++;
+		NEW_QUEUE_ITEM(newItem, data, hd, NULL)
 		hd->head=hd->tail=newItem;
 		*dataPtr=newItem;
 							

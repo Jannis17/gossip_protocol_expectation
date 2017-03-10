@@ -17,10 +17,26 @@
 		}				\
 	} while(0)
 
-#define MALLOC_1DARRAY(array, dim, type)	\
-	do {	\
-		(array) = (type *) malloc( (dim) * sizeof(type));	\
-		EXIT_IF_OUT_OF_MEMORY(array);	\
-	} while(0)
+#define MALLOC_SAFE(p, siz) \
+do {					\
+	void *p	\
+	(p)= malloc( (siz) ); \
+	EXIT_IF_OUT_OF_MEMORY(p); \
+} while(0)
+
+#define MALLOC_ZERO(p, siz)\
+do {					\
+  MALLOC_SAFE((p), (siz)); \
+  memset((p), 0x00, (siz)); \
+} while(0)
+
+#define FREE(p) \
+do {	\
+	if ((p)) {	\
+		free((p));		\
+		(p) = NULL;	\
+	}	\
+} while(0)
+	
 
 #endif /* H_MEMORY_H_ */
