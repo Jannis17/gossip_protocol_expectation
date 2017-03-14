@@ -24,12 +24,12 @@
 		}				\
 	} while(0)
 
-#define NEW_QUEUE_ITEM(newItem, data, hd, next)			\
+#define NEW_QUEUE_ITEM(newItem, theData, queue, theNext)			\
 	do {					\
-		MALLOC_1DARRAY(newItem, 1, struct queue_node_t);	\
-		(newItem)->data= (data);	\
-		(newItem)->next= (next);	\
-		QUEUE_COUNT(hd)++;	\
+		MALLOC_SAFE(newItem, sizeof(struct queue_node_t));	\
+		(newItem)-> data= (theData);	\
+		(newItem)-> next= (theNext);	\
+		QUEUE_COUNT(queue)++;	\
 	} while(0)
 
 /* queue node */
@@ -54,6 +54,6 @@ struct queue_t * new_queue
 	(unsigned long, int (*)(const void *, const void *));
 
 int enqueue_unique_to_sorted_queue
-	(struct queue_t *, struct queue_node_t **, const void *);
+	(struct queue_t *, struct queue_node_t **, void *);
 	
 #endif /* H_QUEUE_H_ */

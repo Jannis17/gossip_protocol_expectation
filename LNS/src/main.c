@@ -74,19 +74,19 @@ int main (int argc, char * argv[]){
 	 * to compatible versions of the nauty routines. */
 	nauty_check(WORDSIZE,MAXM,MAXN,NAUTYVERSIONID);
 	
-	//~ clock_t start, end;
-	//~ int agents;
+	clock_t start, end;
+	int agents;
 													
-	//~ for (agents=agentsMin; agents<=agentsMax; agents++) {
-		//~ start = clock();		
-		//~ expectation[agents] = findExpectation(agents);								
-		//~ end = clock();
-		//~ elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
-	//~ }
+	for (agents=agentsMin; agents<=agentsMax; agents++) {
+		start = clock();		
+		expectation[agents] = findExpectation(agents);								
+		end = clock();
+		elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
+	}
 			
-	//~ printResults(agentsMin, agentsMax, elpsTime);
+	printResults(agentsMin, agentsMax, elpsTime);
 	
-	graphTest(agentsMin);
+	//~ graphTest(agentsMin);
 	
 	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
 	

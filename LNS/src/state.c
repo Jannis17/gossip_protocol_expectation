@@ -41,7 +41,7 @@ LNSstate* newLNSstate(graph g[MAXN*MAXM])
 {
 	LNSstate* s;
 	
-	MALLOC_1DARRAY(s, 1, LNSstate);
+	MALLOC_SAFE(s, sizeof(LNSstate));
 		
 	findCanonicalLabeling(g, s->secrets, agents);    	
 	s->id = 0;
@@ -60,7 +60,7 @@ LNSstate* addToHash(graph secrets[MAXN*MAXM])
 	struct queue_node_t* statePtr;
 	
 	if (!enqueue_unique_to_sorted_queue(statesList, &statePtr, state))
-		free(state);
+		FREE_SAFE(state);
 		
 	return statePtr->data;
 }

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "memory.h"
 #include "queue.h"
 
@@ -26,7 +27,7 @@ dequeue_from_queue(struct queue_t *hd, void **data)
 	n=hd->head->data;
 	p=hd->head;
 	hd->head=hd->head->next;
-	free(p);
+	FREE_SAFE(p);
 
 	hd->count--;
 
@@ -76,7 +77,7 @@ struct queue_t * new_queue(unsigned long max, int (*compar)(const void *, const 
 	hd->compar=compar;
 	QUEUE_SET_MAX(hd, max);
 	QUEUE_COUNT(hd)=0;
-	
+		
 	return hd;
 }
 
@@ -88,7 +89,7 @@ void
 delete_queue(struct queue_t *hd)
 {
 	reset_queue(hd);
-	free(hd);
+	FREE_SAFE(hd);
 }
 
 /* inserts data to the correct place in a sorted queue, if data did
@@ -98,7 +99,7 @@ delete_queue(struct queue_t *hd)
  * returns 1 if data is not in queue and 0 if data is already
  * in the queue */
 int enqueue_unique_to_sorted_queue(struct queue_t *hd,
-	struct queue_node_t **dataPtr, const void *data)
+	struct queue_node_t **dataPtr, void *data)
 {
 	struct queue_node_t *p;
 	struct queue_node_t *newItem;
@@ -110,7 +111,7 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	}
 	
 	if(QUEUE_IS_EMPTY(hd)) {
-		NEW_QUEUE_ITEM(newItem, data, hd, NULL)
+		NEW_QUEUE_ITEM(newItem, data, hd, NULL);
 		hd->head=hd->tail=newItem;
 		*dataPtr=newItem;
 							

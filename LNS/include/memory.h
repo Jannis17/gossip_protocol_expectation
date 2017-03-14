@@ -19,7 +19,6 @@
 
 #define MALLOC_SAFE(p, siz) \
 do {					\
-	void *p	\
 	(p)= malloc( (siz) ); \
 	EXIT_IF_OUT_OF_MEMORY(p); \
 } while(0)
@@ -30,7 +29,7 @@ do {					\
   memset((p), 0x00, (siz)); \
 } while(0)
 
-#define FREE(p) \
+#define FREE_SAFE(p) \
 do {	\
 	if ((p)) {	\
 		free((p));		\
