@@ -17,7 +17,7 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-lns: $(OBJ)
+protocol: $(OBJ)
 	$(CC) -o $@ $^ ../../nauty26r7/nauty1.a $(CFLAGS) $(LIBS)
 
 .PHONY: clean

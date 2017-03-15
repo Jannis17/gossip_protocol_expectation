@@ -11,8 +11,8 @@
  *
  * returns 1 if successful, 0 otherwise
  */
-int
-dequeue_from_queue(struct queue_t *hd, void **data)
+ 
+int dequeue_from_queue(struct queue_t *hd, void **data)
 {
 	struct queue_node_t *p;
 	void *n;
@@ -43,8 +43,7 @@ dequeue_from_queue(struct queue_t *hd, void **data)
  *   hd: queue (this)
  * returns queue length
  */
-unsigned long
-reset_queue(struct queue_t *hd)
+unsigned long reset_queue(struct queue_t *hd)
 {
 	unsigned long i;
 
@@ -57,7 +56,7 @@ reset_queue(struct queue_t *hd)
 		i++;
 	}
 	hd->head=NULL;
-	hd->count=0;
+	QUEUE_COUNT(hd)=0;
 
 	return i;
 }
@@ -69,7 +68,8 @@ reset_queue(struct queue_t *hd)
  *
  * returns the queue created, NULL on error
  */
-struct queue_t * new_queue(unsigned long max, int (*compar)(const void *, const void *))
+struct queue_t * new_queue(unsigned long max, 
+	int (*compar)(const void *, const void *))
 {
 	struct queue_t *hd;
 	
@@ -85,18 +85,16 @@ struct queue_t * new_queue(unsigned long max, int (*compar)(const void *, const 
  * delete_queue: destroys a queue
  *   hd: queue (this)
  */
-void
-delete_queue(struct queue_t *hd)
+void delete_queue(struct queue_t *hd)
 {
 	reset_queue(hd);
 	FREE_SAFE(hd);
 }
 
-/* inserts data to the correct place in a sorted queue, if data did
- * not exist before in the queue
+/* inserts unique data in the correct place of a sorted queue
  *  hd : the queue
  *  dataPtr : a pointer to the node of the queue that contains the data
- * returns 1 if data is not in queue and 0 if data is already
+ * returns 1 if data is not in the queue and 0 if data is already
  * in the queue */
 int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	struct queue_node_t **dataPtr, void *data)
@@ -105,7 +103,7 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	struct queue_node_t *newItem;
 	
 	if (QUEUE_IS_FULL(hd)) {
-		fprintf(stderr, "Internal error: Trying to insert data in\
+		fprintf(stderr, "Internal error: Trying to insert data in \
 			a full queue\n");
 		exit(1);
 	}

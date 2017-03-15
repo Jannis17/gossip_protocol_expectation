@@ -19,7 +19,7 @@
 
 #define MALLOC_SAFE(p, siz) \
 do {					\
-	(p)= malloc( (siz) ); \
+	(p)= malloc((siz)); \
 	EXIT_IF_OUT_OF_MEMORY(p); \
 } while(0)
 

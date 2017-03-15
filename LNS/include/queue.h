@@ -8,10 +8,10 @@
 	
 #define QUEUE_IS_EMPTY(hd)	(NULL==(hd)->head)
 
-#define QUEUE_SET_MAX(hd, max)			\
+#define QUEUE_SET_MAX(hd, theMax)			\
 	do {					\
-		if((max)>0)			\
-			(hd)->max=(max);	\
+		if((theMax)>0)			\
+			(hd)->max=(theMax);	\
 	} while(0)
 	
 #define QUEUE_IS_FULL(hd)	((hd)->max>0&&QUEUE_COUNT(hd)>=(hd)->max)
@@ -27,8 +27,8 @@
 #define NEW_QUEUE_ITEM(newItem, theData, queue, theNext)			\
 	do {					\
 		MALLOC_SAFE(newItem, sizeof(struct queue_node_t));	\
-		(newItem)-> data= (theData);	\
-		(newItem)-> next= (theNext);	\
+		(newItem)->data=(theData);	\
+		(newItem)->next=(theNext);	\
 		QUEUE_COUNT(queue)++;	\
 	} while(0)
 

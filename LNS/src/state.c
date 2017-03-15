@@ -11,7 +11,7 @@ int agents;
 typedef struct LNSstate_tag {
 	graph secrets[MAXN*MAXM];
 	int id;
-	int no_of_children;
+	int children_no;
 	int callsToChild[MAXN*(MAXN-1)];
 	struct LNSstate_tag* children[MAXN*(MAXN-1)];
 } LNSstate;
@@ -35,17 +35,24 @@ int compStates(const void* item1, const void* item2)
 	return compGraphs(state1->secrets, state2->secrets, agents);
 }
 
-/* gets a graph g and returns an LNSstate with the graph in
- * canonical form */
+/* returns an LNSstate with g in canonical form */
 LNSstate* newLNSstate(graph g[MAXN*MAXM])
 {
 	LNSstate* s;
 	
 	MALLOC_SAFE(s, sizeof(LNSstate));
 		
-	findCanonicalLabeling(g, s->secrets, agents);    	
+	findCanonicalLabeling(g, s->secrets, agents); 
+	s->children_no = 0;   	
 	s->id = 0;
-			
+	
+	int i;
+	
+	for(i=0; i < MAXN*(MAXN-1); i++) {
+		s->callsToChild[i] = 0;
+		s->children[i]=NULL;
+	}
+					
 	return s;		
 }
 
@@ -55,7 +62,7 @@ LNSstate* addToHash(graph secrets[MAXN*MAXM])
 {
 	LNSstate* state = newLNSstate(secrets);
 	
-	struct queue_t* statesList = hash[edgesOf(secrets, agents)];
+	struct queue_t* statesList = hash[edgesOf(secrets, agents)-1];
 	
 	struct queue_node_t* statePtr;
 	
@@ -69,18 +76,18 @@ void addChildToParent(LNSstate* parent, LNSstate* child, int calls)
 {
 	int i;
 	
-	for (i=0; i < (parent -> no_of_children) ; i++)
-		if ((parent -> children)[i] == child) {
-			(parent -> callsToChild)[i] = 
-				(parent -> callsToChild)[i] + calls;
+	for (i=0; i < (parent -> children_no) ; i++)
+		if (parent -> children[i] == child) {
+			parent -> callsToChild[i] = 
+				parent -> callsToChild[i] + calls;
 			return;
 		}
 	
-	(parent -> children)[i] = child;
+	parent -> children[i] = child;
 	
-	(parent -> callsToChild)[i] = calls;
+	parent -> callsToChild[i] = calls;
 	
-	(parent -> no_of_children)++;
+	(parent -> children_no)++;
 }
 
 void genChildren(LNSstate* parent) 
@@ -126,9 +133,13 @@ void build_the_markov_chain()
 	
 	struct queue_node_t * p;
 	
-	FOR_ALL_EDGES(i, agents)
+	printf("Agents = %d\n", agents);
+	
+	FOR_ALL_EDGES(i, agents) {
+		printf("Total number of secrets  = %d \n", i+1);
 		QUEUE_FOREACH(p, hash[i])
 			genChildren(p->data);
+	}
 }
 
 
