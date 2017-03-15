@@ -1,6 +1,9 @@
 #ifndef H_QUEUE_H_
 #define H_QUEUE_H_
 
+#define NEW_ITEM 1
+#define DUPLICATE_ITEM 0
+
 #define QUEUE_FOREACH(var, hd)					\
 	for((var)=(hd)->head; (var); (var)=(var)->next)
 

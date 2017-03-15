@@ -3,6 +3,10 @@
 
 #include "../../nauty26r7/nauty.h"
 
+#define LESS -1
+#define EQUAL 0
+#define GREATER 1
+
 int edgesOf(graph*, int);
 
 void addOnlySelfLoops(graph*, int);

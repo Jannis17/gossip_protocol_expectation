@@ -4,6 +4,7 @@
 #include "gauss.h"
 #include "state.h"
 #include "queue.h"
+#include <time.h>
 
 int agents;
 
@@ -22,9 +23,9 @@ struct queue_t* hash[MAXN*MAXN];
 
 /* compares the secrets of s1 and s2 lexicographically
  * return value: 
- * -1 iff s1 -> secrets < s2 -> secrets
- * 0 iff s1 -> secrets = s2 -> secrets
- * 1 iff s1 -> secrets > s2 -> secrets */
+ * LESS iff s1 -> secrets < s2 -> secrets
+ * EQUAL iff s1 -> secrets == s2 -> secrets
+ * GREATER iff s1 -> secrets > s2 -> secrets */
 int compStates(const void* item1, const void* item2)
 {
 	LNSstate* state1, *state2;
@@ -33,6 +34,22 @@ int compStates(const void* item1, const void* item2)
 	state2 = (LNSstate *) item2;
 	
 	return compGraphs(state1->secrets, state2->secrets, agents);
+}
+
+int compStateIds(const void* item1, const void* item2)
+{
+	LNSstate* state1, *state2;
+	
+	state1 = (LNSstate *) item1;
+	state2 = (LNSstate *) item2;
+	
+	if (state1->id < state2->id)
+		return LESS;
+	
+	if (state1->id > state2->id)
+		return GREATER;
+	
+	return EQUAL;
 }
 
 /* returns an LNSstate with g in canonical form */
@@ -66,8 +83,9 @@ LNSstate* addToHash(graph secrets[MAXN*MAXM])
 	
 	struct queue_node_t* statePtr;
 	
-	if (!enqueue_unique_to_sorted_queue(statesList, &statePtr, state))
-		FREE_SAFE(state);
+	if ( enqueue_unique_to_sorted_queue(statesList, &statePtr, state) ==
+		 DUPLICATE_ITEM )
+		 FREE_SAFE(state);
 		
 	return statePtr->data;
 }
@@ -135,10 +153,15 @@ void build_the_markov_chain()
 	
 	printf("Agents = %d\n", agents);
 	
+	clock_t start, end;
+	
 	FOR_ALL_EDGES(i, agents) {
-		printf("Total number of secrets  = %d \n", i+1);
+		start = clock();
 		QUEUE_FOREACH(p, hash[i])
 			genChildren(p->data);
+		end = clock();
+		printf("%d secrets in %f seconds\n", i+1 , 
+				( (float) end - start )/CLOCKS_PER_SEC);	
 	}
 }
 
@@ -153,14 +176,33 @@ float findExpectation (int theAgents)
 	
 	int i;
 	
+	no_states[agents]=0;
+	
 	/* count the states */	
 	FOR_ALL_EDGES(i, agents)
 		no_states[agents] = no_states[agents] + QUEUE_COUNT(hash[i]);
 	
+	struct queue_node_t * p;
+	
+	LNSstate *s;
+	
 	/* label the states */	
+	int label = 0;
+	FOR_ALL_EDGES(i, agents)
+		QUEUE_FOREACH(p, hash[i]) {
+			s = (LNSstate *) (p->data);
+			s->id = label++;
+		}
+
 	
 	/* create the upper triangular transition matrix */
+	struct queue_t** transMatrix;
 	
+	MALLOC_SAFE(transMatrix, no_states[agents] * sizeof(struct queue_t *));
+	
+	//~ for(i=0;i<no_states[agents];i++)
+		//~ transMatrix[i]=new_queue(MAXN*(MAXN-1), );
+		
 	/* destroy the hash */		
 	FOR_ALL_EDGES(i, agents)
 		DELETE_QUEUE(hash[i]);	

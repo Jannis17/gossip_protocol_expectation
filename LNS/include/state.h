@@ -7,7 +7,7 @@
 	for((VAR)= (AGENTS)-1; i < (AGENTS) * (AGENTS); (VAR)++)
 
 /* maximum nuber of isomorphic states */
-#define MAXSTATES 50000
+#define MAXSTATES 10000000
 
 /* totalStates[i] = number of different states for i agents */
 int no_states[MAXN];

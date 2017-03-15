@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "graph.h"
 #include "memory.h"
 #include "queue.h"
 
@@ -94,8 +95,10 @@ void delete_queue(struct queue_t *hd)
 /* inserts unique data in the correct place of a sorted queue
  *  hd : the queue
  *  dataPtr : a pointer to the node of the queue that contains the data
- * returns 1 if data is not in the queue and 0 if data is already
- * in the queue */
+ * return value:
+ *  NEW_ITEM : if data is not in the queue
+ *  DUPLICATE_ITEM: if data is already in the queue */
+
 int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	struct queue_node_t **dataPtr, void *data)
 {
@@ -113,40 +116,40 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 		hd->head=hd->tail=newItem;
 		*dataPtr=newItem;
 							
-		return 1;
+		return NEW_ITEM;
 	}
 
 	p=hd->head;
 	
 	switch(hd->compar(p->data, data)){
-		case -1:
+		case LESS:
 			break;
-		case 0:
+		case EQUAL:
 			*dataPtr=p;
-			return 0;
-		case 1:
+			return DUPLICATE_ITEM;
+		case GREATER:
 			NEW_QUEUE_ITEM(newItem, data, hd, p);
 			hd->head=newItem;
 			*dataPtr=newItem;
 							
-			return 1;					
+			return NEW_ITEM;					
 	}
 	
 	QUEUE_FOREACH(p, hd) {
 		if(p->next)
 			switch(hd->compar(p->next->data, data))
 			{
-				case -1:
+				case LESS:
 					break;
-				case 0:
+				case EQUAL:
 					*dataPtr=p->next;
-					return 0;
-				case 1:
+					return DUPLICATE_ITEM;
+				case GREATER:
 					NEW_QUEUE_ITEM(newItem, data, hd, p->next);
 					p->next=newItem;
 					*dataPtr=newItem;
 									
-					return 1;					
+					return NEW_ITEM;					
 			}
 	}
 	
@@ -155,5 +158,5 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	hd->tail = newItem;
 	*dataPtr=newItem;
 
-	return 1;
+	return NEW_ITEM;
 }

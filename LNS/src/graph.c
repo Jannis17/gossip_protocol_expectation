@@ -36,20 +36,20 @@ void copyGraph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n)
 
 /* compares g1 and g2 lexicographically
  * return value: 
- * -1 iff g1 < g2
- * 0 iff g1 < g2 
- * 1 iff g1 > g2 */
+ * LESS iff g1 < g2
+ * EQUAL iff g1 == g2 
+ * GREATER iff g1 > g2 */
 int compGraphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) {
 	size_t k;
 	
 	for (k = 0; k < MAXM*(size_t)n; ++k) {
 		 if (g1[k] < g2[k])
-			return -1;
+			return LESS;
 		 if (g1[k] > g2[k])
-			return 1;
+			return GREATER;
 	}
 	
-	return 0;
+	return EQUAL;
 }
 
 /* g2 will be equal to the canonical labeling of g1 */
