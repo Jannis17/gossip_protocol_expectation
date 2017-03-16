@@ -4,7 +4,7 @@
 #include "graph.h"
 #include "memory.h"
 #include "queue.h"
-#include "compar.h"
+#include "compare.h"
 
 /*
  * dequeue_from_queue: dequeues an item from queue
@@ -114,10 +114,12 @@ int search_in_sorted_queue
 			case LESS:
 				break;
 			case EQUAL:
-				*found=p;
+				if (found)
+					*found=p;
 				return 1;
 			case GREATER:
-				*found = NULL;
+				if (found)
+					*found = NULL;
 				return 0;					
 	}
 
@@ -148,7 +150,8 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	if(QUEUE_IS_EMPTY(hd)) {
 		NEW_QUEUE_ITEM(newItem, data, hd, NULL);
 		hd->head=hd->tail=newItem;
-		*dataPtr=newItem;
+		if (dataPtr)
+			*dataPtr=newItem;
 							
 		return NEW_ITEM;
 	}
@@ -159,12 +162,14 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 		case LESS:
 			break;
 		case EQUAL:
-			*dataPtr=p;
+			if (dataPtr)
+				*dataPtr=p;
 			return DUPLICATE_ITEM;
 		case GREATER:
 			NEW_QUEUE_ITEM(newItem, data, hd, p);
 			hd->head=newItem;
-			*dataPtr=newItem;
+			if (dataPtr)
+				*dataPtr=newItem;
 							
 			return NEW_ITEM;					
 	}
@@ -176,12 +181,14 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 				case LESS:
 					break;
 				case EQUAL:
-					*dataPtr=p->next;
+					if (dataPtr)
+						*dataPtr=p->next;
 					return DUPLICATE_ITEM;
 				case GREATER:
 					NEW_QUEUE_ITEM(newItem, data, hd, p->next);
 					p->next=newItem;
-					*dataPtr=newItem;
+					if (dataPtr)
+						*dataPtr=newItem;
 									
 					return NEW_ITEM;					
 			}
@@ -190,7 +197,8 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	NEW_QUEUE_ITEM(newItem, data, hd, NULL);
 	hd->tail->next=newItem;
 	hd->tail = newItem;
-	*dataPtr=newItem;
+	if (dataPtr)
+		*dataPtr=newItem;
 
 	return NEW_ITEM;
 }

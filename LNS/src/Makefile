@@ -10,7 +10,7 @@ LIBS=-lm
 _DEPS = *.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o graph.o gauss.o state.o queue.o compar.o
+_OBJ = main.o graph.o gauss.o state.o queue.o compare.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 

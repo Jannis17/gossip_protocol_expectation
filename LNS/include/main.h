@@ -4,6 +4,4 @@
 /* MAXN = ULTIMATELY MAXIMUM number of agents */
 #define MAXN 10
 
-#include "../../nauty26r7/nauty.h"
-
 #endif /* H_MAIN_H_ */

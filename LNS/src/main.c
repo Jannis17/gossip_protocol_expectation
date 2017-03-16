@@ -10,6 +10,9 @@
 /* expectation[i] = expected execution length for i agents */
 float expectation[MAXN];
 
+/* totalStates[i] = number of different states for i agents */
+int no_states[MAXN];
+
 int agentsMin; 
 
 int agentsMax; 
@@ -79,7 +82,8 @@ int main (int argc, char * argv[]){
 													
 	for (agents=agentsMin; agents<=agentsMax; agents++) {
 		start = clock();		
-		expectation[agents] = findExpectation(agents);								
+		expectation[agents] = 
+			findExpectation(agents, &no_states[agents]);								
 		end = clock();
 		elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
 	}
