@@ -7,20 +7,9 @@
 #include "state.h"
 #include "gauss.h"
 
-/* expectation[i] = expected execution length for i agents */
-float expectation[MAXN];
-
-/* totalStates[i] = number of different states for i agents */
-int no_states[MAXN];
-
-int agentsMin; 
-
-int agentsMax; 
-
-float elpsTime[MAXN];
-
 /* generates a file with timestamp and prints results */
-void printResults() {
+void printResults(int agentsMin, int agentsMax, int no_states[MAXN],
+	float expectation[MAXN], float elpsTime[MAXN]) {
 	time_t timeNow = time(NULL);
 	struct tm localTime = *localtime(&timeNow);
 	char filename[300];
@@ -69,6 +58,19 @@ int main (int argc, char * argv[]){
 		return 1;
 	}
 	
+	
+	/* expectation[i] = expected execution length for i agents */
+	float expectation[MAXN];
+
+	/* totalStates[i] = number of different states for i agents */
+	int no_states[MAXN];
+
+	int agentsMin; 
+
+	int agentsMax; 
+
+	float elpsTime[MAXN];
+	
 	agentsMin = atoi(argv[1]);
 	
 	agentsMax = atoi(argv[2]);
@@ -88,7 +90,7 @@ int main (int argc, char * argv[]){
 		elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
 	}
 			
-	printResults(agentsMin, agentsMax, elpsTime);
+	printResults(agentsMin, agentsMax, no_states, expectation, elpsTime);
 	
 	//~ graphTest(agentsMin);
 	

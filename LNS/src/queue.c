@@ -4,7 +4,7 @@
 #include "graph.h"
 #include "memory.h"
 #include "queue.h"
-#include "compare.h"
+#include "hash.h"
 
 /*
  * dequeue_from_queue: dequeues an item from queue

@@ -1,6 +1,6 @@
 #include "main.h"
 #include "graph.h"
-#include "compare.h"
+#include "hash.h"
 
 /* counts the directed edges (including loops) in g */
 int edgesOf (graph g[MAXN*MAXM], int n) 

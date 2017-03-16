@@ -5,29 +5,7 @@
 #include "gauss.h"
 #include "state.h"
 #include "queue.h"
-#include "compare.h"
-
-#define FOR_ALL_EDGES(VAR, AGENTS)					\
-	for((VAR)= (AGENTS)-1; i < (AGENTS) * (AGENTS); (VAR)++)
-
-/* maximum nuber of isomorphic states */
-#define MAXSTATES 10000000
-
-/* hash[i] contains all the states with i+1 secrets */
-struct queue_t* hash[MAXN*MAXN];
-
-typedef struct LNSstate_tag {
-	graph secrets[MAXN*MAXM];
-	int id;
-	int agents;
-	struct queue_t* children;
-} LNSstate_t;
-
-typedef struct child_tag {
-	int callsToChild;
-	struct queue_node_t* childPtr;
-} child_t;
-
+#include "hash.h"
 
 /* compares the ids of the args lexicographically */
 int compStateIds(const void* item1, const void* item2)
@@ -112,7 +90,7 @@ LNSstate_t* newLNSstate(graph g[MAXN*MAXM], int agents)
 /* adds state to the list sList 
  * returns a pointer to the state just added */
 void addToHash(graph secrets[MAXN*MAXM], int agents, 
-	struct queue_node_t** found) 
+	struct queue_node_t** found, struct queue_t* hash[MAXN*MAXN]) 
 {
 	if (agents < 0) {
 		printf("Negative agents (%dd)!\n", agents);
@@ -142,6 +120,23 @@ void addToHash(graph secrets[MAXN*MAXM], int agents,
 
 }
 
+void initHash(struct queue_t* hash[MAXN*MAXN], int agents)
+{
+	int i;
+	
+	graph initial[MAXN*MAXM];
+	
+	/* create the queues */		
+	FOR_ALL_EDGES(i, agents)
+		hash[i] = new_queue(MAXSTATES, compStates);
+	
+	/* we add the first state into the hash */				
+	addOnlySelfLoops(initial, agents);
+		
+	addToHash(initial, agents, NULL, hash);
+}
+
+
 void addChildToParent
 	(LNSstate_t* parent, struct queue_node_t* child, int calls)
 {
@@ -164,7 +159,7 @@ void addChildToParent
 		newChild->callsToChild = calls;
 }
 
-void genChildren(LNSstate_t* parent, int agents) 
+void genChildren(LNSstate_t* parent, int agents, struct queue_t* hash[MAXN*MAXN]) 
 {
 	int i, j, callsToChild;
 		
@@ -180,65 +175,49 @@ void genChildren(LNSstate_t* parent, int agents)
 		{
 		  copyGraph(childsSecrets, parent->secrets, agents);
 		  makeCall(childsSecrets, i ,j);  
-		  addToHash(childsSecrets, agents, &childPtr);		  
+		  addToHash(childsSecrets, agents, &childPtr, hash);		  
 		  addChildToParent(parent, childPtr, callsToChild);		  
 	    }
 	  }	
 }
 
-void initHash(int agents)
-{
-	int i;
-	
-	graph initial[MAXN*MAXM];
-	
-	/* create the queues */		
-	FOR_ALL_EDGES(i, agents)
-		hash[i] = new_queue(MAXSTATES, compStates);
-	
-	/* we add the first state into the hash */				
-	addOnlySelfLoops(initial, agents);
-		
-	addToHash(initial, agents, NULL);
-}
-
-void build_the_markov_chain(int agents)
+void build_the_markov_chain(struct queue_t* hash[MAXN*MAXN], int agents)
 {
 	int i;
 	
 	struct queue_node_t * p;
 	
-	//~ printf("Agents = %d\n", agents);
+	printf("Agents = %d\n", agents);
 	
-	//~ clock_t start, end;
+	clock_t start, end;
 	
 	FOR_ALL_EDGES(i, agents) {
-		//~ start = clock();
+		start = clock();
 		QUEUE_FOREACH(p, hash[i])
-			genChildren(p->data, agents);
-		//~ end = clock();
-		//~ printf("%d secrets in %f seconds\n", i+1 , 
-				//~ ( (float) end - start )/CLOCKS_PER_SEC);	
+			genChildren(p->data, agents, hash);
+		end = clock();
+		printf("%d secrets in %f seconds\n", i+1 , 
+				( (float) end - start )/CLOCKS_PER_SEC);	
 	}
 }
 
 
 float findExpectation (int agents, int* no_states)
 {		
-	initHash(agents);
+	struct queue_t* hash[MAXN*MAXN];
 	
-	build_the_markov_chain(agents);
+	initHash(hash, agents);
+	
+	build_the_markov_chain(hash, agents);
 	
 	int i;
 	
-	int states_count = 0;
+	*no_states = 0;
 	
 	/* count the states */	
 	FOR_ALL_EDGES(i, agents)
-		states_count = states_count + QUEUE_COUNT(hash[i]);
-	
-	*no_states = states_count;
-	
+		*no_states += QUEUE_COUNT(hash[i]);
+		 	
 	struct queue_node_t * p;
 	
 	LNSstate_t *s;
