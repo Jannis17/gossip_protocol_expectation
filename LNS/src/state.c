@@ -5,7 +5,19 @@
 #include "gauss.h"
 #include "state.h"
 #include "queue.h"
-#include "hash.h"
+
+typedef struct LNSstate_tag {
+	graph secrets[MAXN*MAXM];
+	int id;
+	int agents;
+	struct queue_t* children;
+} LNSstate_t;
+
+typedef struct child_tag {
+	int callsToChild;
+	LNSstate_t* childPtr;
+} child_t;
+
 
 /* compares the ids of the args lexicographically */
 int compStateIds(const void* item1, const void* item2)
@@ -32,12 +44,8 @@ int compChildren(const void* item1, const void* item2)
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
 	
-	LNSstate_t* state1, * state2;
-	
-	state1 = (LNSstate_t *) child1->childPtr->data;
-	state2 = (LNSstate_t *) child2->childPtr->data;
-	
-	return compGraphs(state1->secrets, state2->secrets, state1->agents);
+	return compGraphs(child1->childPtr->secrets, 
+			child2->childPtr->secrets, child1->childPtr->agents);
 }
 
 /* compares the secrets of the args lexicographically */
@@ -48,33 +56,13 @@ int compStates(const void* item1, const void* item2)
 	state1 = (LNSstate_t *) item1;
 	state2 = (LNSstate_t *) item2;
 	
-	//~ if (state1->agents != state2->agents) {
-		//~ printf("Internal error: Trying to compare graphs
-				//~ of different size\n");
-		//~ exit(0);
-	//~ }
-	
-	//~ if (state1->agents < 0) {
-		//~ printf("Negative agents (%dd)!\n", state1->agents);
-		//~ printGraph(state1->secrets,4);
-		//~ exit(1);
-	//~ }
-		
-	//~ printf("Compared graphs with %d agents\n", state2->agents);
-	
 	return compGraphs(state1->secrets, state2->secrets, state1->agents);
 }
-
 
 /* returns an LNSstate_t with g in canonical form */
 LNSstate_t* newLNSstate(graph g[MAXN*MAXM], int agents)
 {
 	LNSstate_t* s;
-	
-	if (agents < 0) {
-		printf("Negative agents (%dd)!\n", agents);
-		exit(1);
-	}
 	
 	MALLOC_SAFE(s, sizeof(LNSstate_t));
 		
@@ -87,58 +75,28 @@ LNSstate_t* newLNSstate(graph g[MAXN*MAXM], int agents)
 	return s;		
 }
 
-/* adds state to the list sList 
- * returns a pointer to the state just added */
-void addToHash(graph secrets[MAXN*MAXM], int agents, 
-	struct queue_node_t** found, struct queue_t* hash[MAXN*MAXN]) 
-{
-	if (agents < 0) {
-		printf("Negative agents (%dd)!\n", agents);
-		exit(1);
-	}
-
-	LNSstate_t* state = newLNSstate(secrets, agents);
-	
-	struct queue_t* statesList = hash[edgesOf(secrets, agents)-1];
-		
-	if ( enqueue_unique_to_sorted_queue(statesList, found, state) 
-		 == DUPLICATE_ITEM )
-		FREE_SAFE(state);
-		
-	//~ LNSstate_t* s;
-	
-	//~ if (found) {
-		//~ s = (LNSstate_t *) ((*found) -> data); 
-	
-		//~ printf("hans\n");
-		
-		//~ if (s -> agents < 0) {
-			//~ printf("Negative agents (%d) inserted to list !\n", agents);
-			//~ exit(1);
-		//~ }
-	//~ }
-
-}
-
 void initHash(struct queue_t* hash[MAXN*MAXN], int agents)
 {
 	int i;
 	
-	graph initial[MAXN*MAXM];
+	graph initG [MAXN*MAXM];
 	
 	/* create the queues */		
 	FOR_ALL_EDGES(i, agents)
 		hash[i] = new_queue(MAXSTATES, compStates);
 	
 	/* we add the first state into the hash */				
-	addOnlySelfLoops(initial, agents);
+	addOnlySelfLoops(initG, agents);
+	
+	LNSstate_t* initState = newLNSstate(initG, agents);
+	
+	struct queue_t* initQueue = hash[edgesOf(initG, agents)-1];
 		
-	addToHash(initial, agents, NULL, hash);
+	enqueue_unique_to_sorted_queue(initQueue, NULL, initState);
 }
 
-
 void addChildToParent
-	(LNSstate_t* parent, struct queue_node_t* child, int calls)
+	(LNSstate_t* parent, LNSstate_t* child, int calls)
 {
 	child_t* newChild;
 	
@@ -159,13 +117,24 @@ void addChildToParent
 		newChild->callsToChild = calls;
 }
 
-void genChildren(LNSstate_t* parent, int agents, struct queue_t* hash[MAXN*MAXN]) 
+void genChildren
+	(LNSstate_t* parent, int agents, struct queue_t* hash[MAXN*MAXN]) 
 {
 	int i, j, callsToChild;
 		
-	graph childsSecrets[MAXN*MAXM];
-
-	struct queue_node_t* childPtr;
+	graph temp[MAXN*MAXM];
+	
+	child_t* childsStruct;
+	
+	child_t* foundChild;
+	
+	struct queue_node_t* childsQueueNode;
+	
+	struct queue_node_t* childsStructPtr;
+	
+	LNSstate_t* childsState;
+	
+	struct queue_t* childsList;
 					
 	for (i=0; i<agents; i++)
 	  for (j=i+1; j<agents; j++) 
@@ -173,10 +142,33 @@ void genChildren(LNSstate_t* parent, int agents, struct queue_t* hash[MAXN*MAXN]
 	    callsToChild = possibleCalls(parent->secrets, i, j);
 	    if (callsToChild)
 		{
-		  copyGraph(childsSecrets, parent->secrets, agents);
-		  makeCall(childsSecrets, i ,j);  
-		  addToHash(childsSecrets, agents, &childPtr, hash);		  
-		  addChildToParent(parent, childPtr, callsToChild);		  
+		  copyGraph(temp, parent->secrets, agents);
+		  makeCall(temp, i ,j); 
+		  childsState = newLNSstate(temp, agents);
+		  MALLOC_SAFE(childsStruct, sizeof(child_t));
+		  childsStruct->callsToChild=callsToChild;
+		  childsStruct->childPtr=childsState;
+		  		  
+		  if (search_in_sorted_queue( parent->children, &childsStructPtr, 
+									   childsStruct ) )
+		  {
+			 printf("found the same child!\n");
+			 
+			 FREE_SAFE(childsStruct); 
+			 foundChild = (child_t *) childsStructPtr->data;
+			 
+			 (foundChild->callsToChild) += callsToChild;
+		  }
+		  else {
+		  	childsList = hash[edgesOf(temp, agents)-1];
+		
+			if ( enqueue_unique_to_sorted_queue(childsList, &childsQueueNode, childsState) 
+				== DUPLICATE_ITEM )
+			 FREE_SAFE(childsState);
+ 		  
+			addChildToParent(parent, childsQueueNode->data, callsToChild);
+		  }
+		  
 	    }
 	  }	
 }
@@ -200,7 +192,6 @@ void build_the_markov_chain(struct queue_t* hash[MAXN*MAXN], int agents)
 				( (float) end - start )/CLOCKS_PER_SEC);	
 	}
 }
-
 
 float findExpectation (int agents, int* no_states)
 {		

@@ -4,7 +4,7 @@
 #include "graph.h"
 #include "memory.h"
 #include "queue.h"
-#include "hash.h"
+#include "state.h"
 
 /*
  * dequeue_from_queue: dequeues an item from queue
@@ -94,7 +94,7 @@ void delete_queue(struct queue_t *hd)
 }
 
 /*
- * search_queue: search data in queue
+ * search_in_sorted_queue: search data in queue
  *   hd: queue (this)
  *   found: data's queue node (optional)
  *   prev: data's previous queue node (optional)

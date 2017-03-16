@@ -49,6 +49,9 @@ struct queue_t {
 
 void delete_queue(struct queue_t *hd);
 
+int search_in_sorted_queue
+	(struct queue_t *hd, struct queue_node_t **found, const void *data);
+
 struct queue_t * new_queue(unsigned long max, 
 	int (*compar)(const void *, const void *));
 
