@@ -1,9 +1,6 @@
 #ifndef H_QUEUE_H_
 #define H_QUEUE_H_
 
-#define NEW_ITEM 1
-#define DUPLICATE_ITEM 0
-
 #define QUEUE_FOREACH(var, hd)					\
 	for((var)=(hd)->head; (var); (var)=(var)->next)
 
@@ -50,13 +47,12 @@ struct queue_t {
 	int (*compar)(const void *, const void *);
 };
 
-void delete_queue(struct queue_t *);
-unsigned long reset_queue(struct queue_t *);
+void delete_queue(struct queue_t *hd);
 
-struct queue_t * new_queue
-	(unsigned long, int (*)(const void *, const void *));
+struct queue_t * new_queue(unsigned long max, 
+	int (*compar)(const void *, const void *));
 
-int enqueue_unique_to_sorted_queue
-	(struct queue_t *, struct queue_node_t **, void *);
+int enqueue_unique_to_sorted_queue(struct queue_t *hd,
+	struct queue_node_t **dataPtr, void *data);
 	
 #endif /* H_QUEUE_H_ */

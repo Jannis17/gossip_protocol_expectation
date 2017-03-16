@@ -4,6 +4,7 @@
 #include "graph.h"
 #include "memory.h"
 #include "queue.h"
+#include "compar.h"
 
 /*
  * dequeue_from_queue: dequeues an item from queue
@@ -91,6 +92,39 @@ void delete_queue(struct queue_t *hd)
 	reset_queue(hd);
 	FREE_SAFE(hd);
 }
+
+/*
+ * search_queue: search data in queue
+ *   hd: queue (this)
+ *   found: data's queue node (optional)
+ *   prev: data's previous queue node (optional)
+ *   all: all queue nodes with this data (optional)
+ *   where: data queue node's offset in queue (optional)
+ *   data: data to lookup
+ *
+ * returns 1 if found, 0 otherwise
+ */
+int search_in_sorted_queue
+	(struct queue_t *hd, struct queue_node_t **found, const void *data)
+{
+	struct queue_node_t *p;
+	
+	QUEUE_FOREACH(p, hd)
+		switch(hd->compar(p->data, data)){
+			case LESS:
+				break;
+			case EQUAL:
+				*found=p;
+				return 1;
+			case GREATER:
+				*found = NULL;
+				return 0;					
+	}
+
+	return 0;
+}
+
+
 
 /* inserts unique data in the correct place of a sorted queue
  *  hd : the queue

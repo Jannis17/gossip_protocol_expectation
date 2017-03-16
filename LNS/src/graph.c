@@ -34,25 +34,8 @@ void copyGraph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n)
 		to[i] = from[i];
 }
 
-/* compares g1 and g2 lexicographically
- * return value: 
- * LESS iff g1 < g2
- * EQUAL iff g1 == g2 
- * GREATER iff g1 > g2 */
-int compGraphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) {
-	size_t k;
-	
-	for (k = 0; k < MAXM*(size_t)n; ++k) {
-		 if (g1[k] < g2[k])
-			return LESS;
-		 if (g1[k] > g2[k])
-			return GREATER;
-	}
-	
-	return EQUAL;
-}
-
-/* g2 will be equal to the canonical labeling of g1 */
+/* g2 will be equal to the canonical labeling of g1
+ * n : size of g1 and g2 */
 void findCanonicalLabeling 
 	(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
 {
