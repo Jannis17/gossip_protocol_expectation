@@ -46,17 +46,15 @@ and type make.
 ### Run:
 Navigate to the folder
 
-gossip_protocol_expectation/LNS/src
+gossip_protocol_expectation/protocl/src
 
-and type ./lns [aMin] [aMax]
+and type ./protocol [protocol_name] [aMin] [aMax]
 
 where aMin and aMax are the minimum and maximum number
-of agents respectively. The current version of our
-program will give results in reasonable time
-(approx. 15 minutes) for aMax <= 7.
+of agents respectively. Protocol_name should be ANY or LNS. The current version of our
+program will give results in reasonable time (approx. 5 minutes) for aMax <= 7.
 
-The results will be generated in a file with timestamp
-in the folder gossip_protocol_expectation/results.
+The results will be generated in a file with timestamp in the folder gossip_protocol_expectation/results.
 
 ---
 
