@@ -152,8 +152,6 @@ void genChildren
 		  if (search_in_sorted_queue( parent->children, &childsStructPtr, 
 									   childsStruct ) )
 		  {
-			 printf("found the same child!\n");
-			 
 			 FREE_SAFE(childsStruct); 
 			 foundChild = (child_t *) childsStructPtr->data;
 			 
@@ -193,6 +191,27 @@ void build_the_markov_chain(struct queue_t* hash[MAXN*MAXN], int agents)
 	}
 }
 
+float getProb(struct queue_t* hash[MAXN*MAXN], LNSstate_t ** transMatrix, 
+	int from, int to) 
+{
+	LNSstate_t * s = transMatrix[from];
+	
+	struct queue_node_t *p;
+	
+	child_t* child;
+	
+	float prob;
+	
+	QUEUE_FOREACH(p, s->children)
+		child = (child_t*) (p-> data);
+		if (child->ChildPtr->id == to) {
+			prob = 
+		}
+			
+		
+	return 0.0;	
+}
+
 float findExpectation (int agents, int* no_states)
 {		
 	struct queue_t* hash[MAXN*MAXN];
@@ -201,50 +220,61 @@ float findExpectation (int agents, int* no_states)
 	
 	build_the_markov_chain(hash, agents);
 	
-	int i;
+	int i, j;
 	
 	*no_states = 0;
 	
 	/* count the states */	
 	FOR_ALL_EDGES(i, agents)
 		*no_states += QUEUE_COUNT(hash[i]);
+	
+	LNSstate_t ** transMatrix;
+	
+	MALLOC_SAFE(transMatrix, (* no_states) * sizeof(LNSstate_t *));
 		 	
 	struct queue_node_t * p;
 	
 	LNSstate_t *s;
 	
 	/* label the states */	
-	//~ int label = 0;
-	//~ FOR_ALL_EDGES(i, agents)
-		//~ QUEUE_FOREACH(p, hash[i]) {
-			//~ s = (LNSstate_t *) (p->data);
-			//~ s->id = label++;
-		//~ }
+	int label = 0;
+	FOR_ALL_EDGES(i, agents)
+		QUEUE_FOREACH(p, hash[i]) {
+			s = (LNSstate_t *) (p->data);
+			transMatrix[label]=s;
+			s->id = label++;
+		}
 
+	float* expectVec;
+		
+	MALLOC_SAFE(expectVec, *no_states * sizeof(float));
 	
-	/* create the upper triangular transition matrix */
-	//~ struct queue_t** transMatrix;
+	expectVec[*no_states-1]= 0;
+					
+    /* this loop is for backward substitution*/
+    for(i= (* no_states)-2; i>=0; i--)
+    {
+        expectVec[i] = 0;
+                        
+        for(j=i+1; j< (* no_states); j++)
+            expectVec[i] = 
+            1 +	getProb(hash, transMatrix, i, j) * expectationVec[j];                        
+    }
+
+	float result = expectVec[0];
 	
-	//~ MALLOC_SAFE(transMatrix, no_states[agents] * sizeof(struct queue_t *));
+	FREE_SAFE(expectVec);
 	
-	//~ for(i=0;i<no_states[agents];i++)
-		//~ transMatrix[i]=new_queue(MAXN*(MAXN-1), );
+	FREE_SAFE(transMatrix);
 		
 	/* destroy the hash */		
 	FOR_ALL_EDGES(i, agents) {
 		QUEUE_FOREACH(p, hash[i]) {
 			s = (LNSstate_t *) (p->data);
-			
-			//~ printf("Agents = %d!\n", s->agents);
-			//~ printGraph(s->secrets, agents);
 			DELETE_QUEUE(s->children);
 		}
 		DELETE_QUEUE(hash[i]);
 	}	
-	
-	/* compute the gaussian elimination */	
-	//return gaussElimination();
-	
-	return 0.0;	
+		
+	return result;	
 }
-

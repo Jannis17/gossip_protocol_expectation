@@ -1,20 +1,25 @@
 ==========================================
 ||        The LNS protocol              ||
 ==========================================
-   Timestamp = 2017-3-16-18h-26m-58s   
+   Timestamp = 2017-3-23-10h-54m-39s   
 ==========================================
 3 agents:
 Number of states = 4
 Expected length = 0.000000
-Time: 0.000111 s
+Time: 0.000161 s
 ==========================================
 4 agents:
 Number of states = 15
 Expected length = 0.000000
-Time: 0.000102 s
+Time: 0.000173 s
 ==========================================
 5 agents:
 Number of states = 97
 Expected length = 0.000000
-Time: 0.000780 s
+Time: 0.001161 s
+==========================================
+6 agents:
+Number of states = 1551
+Expected length = 0.000000
+Time: 0.027755 s
 ==========================================
