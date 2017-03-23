@@ -6,10 +6,10 @@ Ioannis Kokkinis, ykokkinis@gmail.com
 
 The aim of this project is to compute the expected duration
 of some sequential gossip protocols. The current version of
-this project computes the expected duration of the protocol
-"Learn New Secrets" (LNS) that is defined in the paper
-https://arxiv.org/abs/1511.00867. The expected duration
-is computed by constructing the
+this project computes the expected duration for the protocols
+"Learn New Secrets" (LNS) and "Any Call" (ANY) that are
+defined in the paper https://arxiv.org/abs/1511.00867. 
+The expected duration is computed by constructing the
 Markov chain that corresponds to the LNS protocol and then
 by computing the average time that this Markov chain needs
 in order to hit the absorption state (i.e. the state where
