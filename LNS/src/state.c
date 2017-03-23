@@ -71,7 +71,7 @@ LNSstate_t* newLNSstate(graph g[MAXN*MAXM], int agents)
 	s->children = new_queue(MAXN*(MAXN-1), compChildren);
 	s->id = 0;
 	s->agents=agents;
-						
+							
 	return s;		
 }
 
@@ -177,17 +177,17 @@ void build_the_markov_chain(struct queue_t* hash[MAXN*MAXN], int agents)
 	
 	struct queue_node_t * p;
 	
-	printf("Agents = %d\n", agents);
+	//~ printf("Agents = %d\n", agents);
 	
-	clock_t start, end;
+	//~ clock_t start, end;
 	
 	FOR_ALL_EDGES(i, agents) {
-		start = clock();
+		//~ start = clock();
 		QUEUE_FOREACH(p, hash[i])
 			genChildren(p->data, agents, hash);
-		end = clock();
-		printf("%d secrets in %f seconds\n", i+1 , 
-				( (float) end - start )/CLOCKS_PER_SEC);	
+		//~ end = clock();
+		//~ printf("%d secrets in %f seconds\n", i+1 , 
+				//~ ( (float) end - start )/CLOCKS_PER_SEC);	
 	}
 }
 
@@ -200,15 +200,18 @@ float getProb(struct queue_t* hash[MAXN*MAXN], LNSstate_t ** transMatrix,
 	
 	child_t* child;
 	
-	float prob;
+	float enumer, denom;
 	
-	QUEUE_FOREACH(p, s->children)
+	QUEUE_FOREACH(p, s->children) {
 		child = (child_t*) (p-> data);
-		if (child->ChildPtr->id == to) {
-			prob = 
+		if (child->childPtr->id == to) {
+			enumer = child->callsToChild;
+			denom = (s->agents) * (s->agents) - 
+				edgesOf(s->secrets, s->agents);
+			return enumer / denom; 
 		}
-			
-		
+	}		
+	
 	return 0.0;	
 }
 
@@ -250,15 +253,16 @@ float findExpectation (int agents, int* no_states)
 	MALLOC_SAFE(expectVec, *no_states * sizeof(float));
 	
 	expectVec[*no_states-1]= 0;
-					
+							
     /* this loop is for backward substitution*/
-    for(i= (* no_states)-2; i>=0; i--)
+    for(i=(* no_states)-2; i>=0; i--)
     {
         expectVec[i] = 0;
-                        
-        for(j=i+1; j< (* no_states); j++)
-            expectVec[i] = 
-            1 +	getProb(hash, transMatrix, i, j) * expectationVec[j];                        
+                                        
+        for(j=i+1; j<(* no_states); j++)
+            expectVec[i] += getProb(hash, transMatrix, i, j) * expectVec[j];
+        
+        expectVec[i] += 1;
     }
 
 	float result = expectVec[0];
