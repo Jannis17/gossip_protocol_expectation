@@ -1,9 +1,18 @@
-#include "../../nauty26r7/nauty.h"
+#ifndef H_STATE_H_
+#define H_STATE_H_
 
-/* maximum nuber of isomorphic states */
-#define MAXSTATES 10000
+#define NEW_ITEM 1
+#define DUPLICATE_ITEM 0
 
-/* totalStates[i] = number of different states for i agents */
-int totalStates[MAXN];
+#define LESS -1
+#define EQUAL 0
+#define GREATER 1
 
-extern float findExpectation (int);
+#define MAXSTATES 10000000
+
+#define FOR_ALL_EDGES(VAR, AGENTS)					\
+	for((VAR)= (AGENTS)-1; i < (AGENTS) * (AGENTS); (VAR)++)
+
+float findExpectation (int agents, int* no_states);
+
+#endif /* H_STATE_H_ */

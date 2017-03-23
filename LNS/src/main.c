@@ -1,20 +1,15 @@
-#include "mainHeader.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "main.h"
 #include "graph.h"
 #include "memory.h"
 #include "state.h"
-#include "prob.h"
-
-/* expectation[i] = expected execution length for i agents */
-float expectation[MAXN];
-
-int agentsMin; 
-
-int agentsMax; 
-
-float elpsTime[MAXN];
+#include "gauss.h"
 
 /* generates a file with timestamp and prints results */
-void printResults() {
+void printResults(int agentsMin, int agentsMax, int no_states[MAXN],
+	float expectation[MAXN], float elpsTime[MAXN]) {
 	time_t timeNow = time(NULL);
 	struct tm localTime = *localtime(&timeNow);
 	char filename[300];
@@ -29,10 +24,7 @@ void printResults() {
 	
 	FILE * fp = fopen (filename, "w+");
     
-    if (fp == NULL) {
-      fprintf(stderr, "Error opening file: %s\n", filename);
-      exit(1);
-    }
+    EXIT_IF_ERROR_OPENING_FILE(fp, filename);
 	
 	/* print expectation time, number of states, elapsed time etc. */
 	fprintf(fp,"==========================================\n");
@@ -46,7 +38,7 @@ void printResults() {
 	
 	for (agents=agentsMin; agents<=agentsMax; agents++) {
 		fprintf(fp,"%d agents:\n", agents);
-		fprintf(fp,"Number of states = %d\n", totalStates[agents]+1);
+		fprintf(fp,"Number of states = %d\n", no_states[agents]);
 		fprintf(fp,"Expected length = %f\n", expectation[agents]);
 		fprintf(fp,"Time: %f s\n", elpsTime[agents]);
 		fprintf(fp,"==========================================\n");
@@ -66,6 +58,19 @@ int main (int argc, char * argv[]){
 		return 1;
 	}
 	
+	
+	/* expectation[i] = expected execution length for i agents */
+	float expectation[MAXN];
+
+	/* totalStates[i] = number of different states for i agents */
+	int no_states[MAXN];
+
+	int agentsMin; 
+
+	int agentsMax; 
+
+	float elpsTime[MAXN];
+	
 	agentsMin = atoi(argv[1]);
 	
 	agentsMax = atoi(argv[2]);
@@ -79,17 +84,18 @@ int main (int argc, char * argv[]){
 													
 	for (agents=agentsMin; agents<=agentsMax; agents++) {
 		start = clock();		
-		expectation[agents] = findExpectation(agents);								
+		expectation[agents] = 
+			findExpectation(agents, &no_states[agents]);								
 		end = clock();
 		elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
 	}
 			
-	printResults(agentsMin, agentsMax, elpsTime);
+	printResults(agentsMin, agentsMax, no_states, expectation, elpsTime);
 	
 	//~ graphTest(agentsMin);
-	//~ 
+	
 	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
-	//~ 
+	
 	//~ printf("MAXM = %d\n", MAXM);
 	
 	return 0;

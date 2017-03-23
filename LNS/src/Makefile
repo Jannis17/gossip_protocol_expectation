@@ -10,14 +10,14 @@ LIBS=-lm
 _DEPS = *.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o graph.o memory.o prob.o state.o
+_OBJ = main.o graph.o gauss.o state.o queue.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-lns: $(OBJ)
+protocol: $(OBJ)
 	$(CC) -o $@ $^ ../../nauty26r7/nauty1.a $(CFLAGS) $(LIBS)
 
 .PHONY: clean

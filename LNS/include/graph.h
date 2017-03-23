@@ -1,20 +1,24 @@
+#ifndef H_GRAPH_H_
+#define H_GRAPH_H_
+
 #include "../../nauty26r7/nauty.h"
 
-extern int edgesOf(graph*, int);
+int edgesOf(graph*, int);
 
-extern void addOnlySelfLoops(graph*, int);
+void addOnlySelfLoops(graph*, int);
 
-extern void copyGraph(graph*, graph*, int);
+void copyGraph(graph*, graph*, int);
 
-extern int areIsomorphic(graph*, graph*, int);
+void makeCall(graph*, int, int);
 
-extern void makeCall(graph*, int, int);
+void printGraph(graph*, int);
 
-extern void printGraph(graph*, int);
+void graphTest(int);
 
-extern void graphTest(int);
+int possibleCalls(graph*, int, int);
 
-extern int availCalls(graph*, int);
+int compGraphs(graph*, graph*, int);
 
-extern int possibleCalls (graph*, int, int);
+void findCanonicalLabeling (graph* , graph* , int);
 
+#endif /* H_GRAPH_H_ */

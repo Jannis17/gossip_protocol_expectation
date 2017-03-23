@@ -1,221 +1,284 @@
-#include "mainHeader.h"
+#include <time.h>
+#include "main.h"
 #include "graph.h"
 #include "memory.h"
-#include "prob.h"
+#include "gauss.h"
 #include "state.h"
+#include "queue.h"
 
-/* state structure
- * next = pointer to the next state 
- * id = unique identifier */
-typedef struct state_tag {
+typedef struct LNSstate_tag {
 	graph secrets[MAXN*MAXM];
 	int id;
-	struct state_tag* next;
-} state;
+	int agents;
+	struct queue_t* children;
+} LNSstate_t;
 
-/* list of states structure
- * first = pointer to the first state
- * last = pointer to the last state */
-typedef struct stateList_tag {
-	state* first;
-	state* last;
-}* stateList;
+typedef struct child_tag {
+	int callsToChild;
+	LNSstate_t* childPtr;
+} child_t;
 
-/* hash table that contains all the possible states
-	 * each dimension corresponds to the total number of secrets */
-stateList hashedStates[MAXN*MAXN];
 
-/* the transition probability matrix */
-float trMat[MAXSTATES][MAXSTATES+1];
-
-int absorbStateID = -1;
-
-/* adds a new state to the list sList 
- * return value = the id of the state of the just added state */
-int addNewStateInList 
-	(graph secrets[MAXN*MAXM], stateList sList, int agents) 
+/* compares the ids of the args lexicographically */
+int compStateIds(const void* item1, const void* item2)
 {
-	state* newState = (state *) malloc(sizeof(state));
-	exitIfNULL(newState);
+	LNSstate_t* state1, *state2;
+	
+	state1 = (LNSstate_t *) item1;
+	state2 = (LNSstate_t *) item2;
+	
+	if (state1->id < state2->id)
+		return LESS;
+	
+	if (state1->id > state2->id)
+		return GREATER;
+	
+	return EQUAL;
+}
+
+/* compares the secrets of the args lexicographically */
+int compChildren(const void* item1, const void* item2)
+{
+	child_t* child1, *child2;
+	
+	child1 = (child_t *) item1;
+	child2 = (child_t *) item2;
+	
+	return compGraphs(child1->childPtr->secrets, 
+			child2->childPtr->secrets, child1->childPtr->agents);
+}
+
+/* compares the secrets of the args lexicographically */
+int compStates(const void* item1, const void* item2)
+{
+	LNSstate_t* state1, *state2;
+			
+	state1 = (LNSstate_t *) item1;
+	state2 = (LNSstate_t *) item2;
+	
+	return compGraphs(state1->secrets, state2->secrets, state1->agents);
+}
+
+/* returns an LNSstate_t with g in canonical form */
+LNSstate_t* newLNSstate(graph g[MAXN*MAXM], int agents)
+{
+	LNSstate_t* s;
+	
+	MALLOC_SAFE(s, sizeof(LNSstate_t));
 		
-	copyGraph(newState->secrets, secrets, agents);
-	newState->id = totalStates[agents];
-	newState->next = NULL;
+	findCanonicalLabeling(g, s->secrets, agents); 
 		
-	if (sList->first == NULL)
-		sList->first = sList->last = newState;
-	else 
-	{	
-		sList->last->next = newState;			
-		sList->last = newState;	
-	}
-	
-	totalStates[agents] = totalStates[agents]+1;
-	
-	//~ if (totalStates[agents] > MAXSTATES) 
-	//~ {
-		//~ printf("Too many states ...\n");
-		//~ printf("The current limit is: %d\n", MAXSTATES);
-		//~ exit(1);
-	//~ }
-	
-	return newState->id;
+	s->children = new_queue(MAXN*(MAXN-1), compChildren);
+	s->id = 0;
+	s->agents=agents;
+							
+	return s;		
 }
 
-/* if the given state appears in the sList the function returns
- * the id of the state, otherwise -1 */
-int findStateInList 
-	(graph secr[MAXN*MAXM], int agents, stateList sList) 
+void initHash(struct queue_t* hash[MAXN*MAXN], int agents)
 {
-	state* statePtr = sList->first;
+	int i;
 	
-	while (statePtr) 
-	{
-		if ( areIsomorphic (secr, statePtr->secrets, agents) )
-			return statePtr-> id; /* state found */
-		statePtr = statePtr->next;
-	}
+	graph initG [MAXN*MAXM];
 	
-	return -1;/* state not found */
+	/* create the queues */		
+	FOR_ALL_EDGES(i, agents)
+		hash[i] = new_queue(MAXSTATES, compStates);
+	
+	/* we add the first state into the hash */				
+	addOnlySelfLoops(initG, agents);
+	
+	LNSstate_t* initState = newLNSstate(initG, agents);
+	
+	struct queue_t* initQueue = hash[edgesOf(initG, agents)-1];
+		
+	enqueue_unique_to_sorted_queue(initQueue, NULL, initState);
 }
 
-/* frees all the states in the sList */
-void freeStates (stateList sList) 
+void addChildToParent
+	(LNSstate_t* parent, LNSstate_t* child, int calls)
 {
-	state* currState = sList->first;
-	state* prevState;
+	child_t* newChild;
 	
-	while (currState) 
-	{
-		prevState=currState;
-		currState=currState->next;
-		free(prevState);
-	}
+	MALLOC_SAFE(newChild, sizeof(child_t));
 	
-	sList->first = sList->last = NULL;
-}
-
-void genChildren(int agents, state* currState) 
-{
-	int i, j, newStateID, possCalls, avCalls, absorbState = 1;
+	newChild->childPtr = child;
 	
-	float transProb;
+	struct queue_node_t* p;
 	
-	graph newSecrets[MAXN*MAXM];
-	
-	stateList newSList;
+	child_t * oldChild;
 				
+	if( enqueue_unique_to_sorted_queue(parent->children, &p, newChild)
+		== DUPLICATE_ITEM) {
+		FREE_SAFE(newChild);
+		oldChild = (child_t *) p->data;
+		(oldChild->callsToChild)+=calls;
+	} else
+		newChild->callsToChild = calls;
+}
+
+void genChildren
+	(LNSstate_t* parent, int agents, struct queue_t* hash[MAXN*MAXN]) 
+{
+	int i, j, callsToChild;
+		
+	graph temp[MAXN*MAXM];
+	
+	child_t* childsStruct;
+	
+	child_t* foundChild;
+	
+	struct queue_node_t* childsQueueNode;
+	
+	struct queue_node_t* childsStructPtr;
+	
+	LNSstate_t* childsState;
+	
+	struct queue_t* childsList;
+					
 	for (i=0; i<agents; i++)
 	  for (j=i+1; j<agents; j++) 
 	  {
-	    possCalls = possibleCalls(currState->secrets, i, j);
-	    if ( possCalls > 0 )
+	    callsToChild = possibleCalls(parent->secrets, i, j);
+	    if (callsToChild)
 		{
-		  absorbState = 0;	
-		  copyGraph(newSecrets, currState->secrets, agents);
-		  makeCall(newSecrets, i ,j);
+		  copyGraph(temp, parent->secrets, agents);
+		  makeCall(temp, i ,j); 
+		  childsState = newLNSstate(temp, agents);
+		  MALLOC_SAFE(childsStruct, sizeof(child_t));
+		  childsStruct->callsToChild=callsToChild;
+		  childsStruct->childPtr=childsState;
+		  		  
+		  if (search_in_sorted_queue( parent->children, &childsStructPtr, 
+									   childsStruct ) )
+		  {
+			 FREE_SAFE(childsStruct); 
+			 foundChild = (child_t *) childsStructPtr->data;
+			 
+			 (foundChild->callsToChild) += callsToChild;
+		  }
+		  else {
+		  	childsList = hash[edgesOf(temp, agents)-1];
+		
+			if ( enqueue_unique_to_sorted_queue(childsList, &childsQueueNode, childsState) 
+				== DUPLICATE_ITEM )
+			 FREE_SAFE(childsState);
+ 		  
+			addChildToParent(parent, childsQueueNode->data, callsToChild);
+		  }
 		  
-		  newSList = hashedStates[edgesOf(newSecrets, agents)];
-		  
-		  newStateID = findStateInList(newSecrets, agents, newSList);
-		  
-		  if (newStateID == -1)
-		    newStateID = addNewStateInList(newSecrets, newSList, agents);
-		  
-		  avCalls = availCalls(currState->secrets, agents);
-		  
-		  transProb = ((float) possCalls) /  ( (float) avCalls);
-		  trMat[currState->id][newStateID] =
-			  trMat[currState->id][newStateID] + transProb;
 	    }
-	  };
-	
-	if (absorbState) {
-		absorbStateID = currState->id;
-		trMat[currState->id][currState->id] = 1.0;
-	}
+	  }	
 }
 
-void initHash()
+void build_the_markov_chain(struct queue_t* hash[MAXN*MAXN], int agents)
 {
 	int i;
 	
-	for(i=0; i < MAXN * MAXN; i++)
-	{
-		hashedStates[i] = (stateList) malloc(sizeof(stateList *));
-		exitIfNULL(hashedStates[i]);
-		hashedStates[i]->first=hashedStates[i]->last=NULL;
+	struct queue_node_t * p;
+	
+	//~ printf("Agents = %d\n", agents);
+	
+	//~ clock_t start, end;
+	
+	FOR_ALL_EDGES(i, agents) {
+		//~ start = clock();
+		QUEUE_FOREACH(p, hash[i])
+			genChildren(p->data, agents, hash);
+		//~ end = clock();
+		//~ printf("%d secrets in %f seconds\n", i+1 , 
+				//~ ( (float) end - start )/CLOCKS_PER_SEC);	
 	}
 }
 
-void initTrMat()
+float getProb(struct queue_t* hash[MAXN*MAXN], LNSstate_t ** transMatrix, 
+	int from, int to) 
 {
-	int i,j;
+	LNSstate_t * s = transMatrix[from];
 	
-	for (i = 0; i < MAXSTATES; i ++)
-		for (j = 0; j < MAXSTATES; j ++)
-			trMat[i][j] = 0.0;
+	struct queue_node_t *p;
+	
+	child_t* child;
+	
+	float enumer, denom;
+	
+	QUEUE_FOREACH(p, s->children) {
+		child = (child_t*) (p-> data);
+		if (child->childPtr->id == to) {
+			enumer = child->callsToChild;
+			denom = (s->agents) * (s->agents) - 
+				edgesOf(s->secrets, s->agents);
+			return enumer / denom; 
+		}
+	}		
+	
+	return 0.0;	
 }
 
-void removeAbsorbState(int agents)
-{
+float findExpectation (int agents, int* no_states)
+{		
+	struct queue_t* hash[MAXN*MAXN];
+	
+	initHash(hash, agents);
+	
+	build_the_markov_chain(hash, agents);
+	
 	int i, j;
 	
-	/* remove the column that corresponds to the absorption state */
-	for(j=absorbStateID; j<totalStates[agents]; j++)
-		for(i=0; i<totalStates[agents]; i++)
-			trMat[i][j]=trMat[i][j+1];
+	*no_states = 0;
 	
-	/* remove the row that corresponds to the absorption state */
-	for(i=absorbStateID; i<totalStates[agents]-1; i++)
-		for(j=0; j<=totalStates[agents]; j++)
-			trMat[i][j]=trMat[i+1][j];
-}
-
-float findExpectation (int agents)
-{
-	int i;
+	/* count the states */	
+	FOR_ALL_EDGES(i, agents)
+		*no_states += QUEUE_COUNT(hash[i]);
 	
-	graph initSecrets[MAXN*MAXM];
+	LNSstate_t ** transMatrix;
 	
-	stateList initSList;
-			
-	initHash();
+	MALLOC_SAFE(transMatrix, (* no_states) * sizeof(LNSstate_t *));
+		 	
+	struct queue_node_t * p;
 	
-	initTrMat();
-				
-	/* set the state counter to 0 */
-	totalStates[agents] = 0;
-				
-	/* create the initial state */
-	addOnlySelfLoops(initSecrets, agents);
+	LNSstate_t *s;
 	
-	/* we choose an arbitrary first call
-	 * this choice does not affect the expectated time */
-	makeCall(initSecrets, 0, 1);					
-		
-	initSList = hashedStates[edgesOf(initSecrets, agents)];
-	
-	/* we add the initial state in the hash */
-	addNewStateInList(initSecrets, initSList, agents);
-	
-	state* statePtr;
-		
-	for(i=0; i <= agents* agents; i++)
-	{
-		statePtr = hashedStates[i]->first;
-		while (statePtr) 
-		{
-			genChildren(agents, statePtr);
-			statePtr = statePtr->next;
+	/* label the states */	
+	int label = 0;
+	FOR_ALL_EDGES(i, agents)
+		QUEUE_FOREACH(p, hash[i]) {
+			s = (LNSstate_t *) (p->data);
+			transMatrix[label]=s;
+			s->id = label++;
 		}
-		freeStates(hashedStates[i]);
-	}
+
+	float* expectVec;
+		
+	MALLOC_SAFE(expectVec, *no_states * sizeof(float));
 	
-	for(i=0; i < totalStates[agents]; i++)
-		trMat[i][totalStates[agents]] = 1.0;
+	expectVec[*no_states-1]= 0;
+							
+    /* this loop is for backward substitution*/
+    for(i=(* no_states)-2; i>=0; i--)
+    {
+        expectVec[i] = 0;
+                                        
+        for(j=i+1; j<(* no_states); j++)
+            expectVec[i] += getProb(hash, transMatrix, i, j) * expectVec[j];
+        
+        expectVec[i] += 1;
+    }
+
+	float result = expectVec[0];
 	
-	removeAbsorbState(agents);
+	FREE_SAFE(expectVec);
 	
-	return calcExpectation(trMat, totalStates[agents]-1) + 1.0;	
+	FREE_SAFE(transMatrix);
+		
+	/* destroy the hash */		
+	FOR_ALL_EDGES(i, agents) {
+		QUEUE_FOREACH(p, hash[i]) {
+			s = (LNSstate_t *) (p->data);
+			DELETE_QUEUE(s->children);
+		}
+		DELETE_QUEUE(hash[i]);
+	}	
+		
+	return result;	
 }
