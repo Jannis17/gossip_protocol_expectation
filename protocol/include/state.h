@@ -28,7 +28,6 @@
 			}	\
 	} while(0)
 
-
 float findExpectation (int agents, int* no_states, int protocol_name);
 
 #endif /* H_STATE_H_ */
