@@ -37,7 +37,7 @@ the page http://pallini.di.uniroma1.it/.
 
 In order to build our program navigate to the folder
 
-gossip_protocol_expectation/LNS/src
+gossip_protocol_expectation/protocol/src
 
 and type make.
 
