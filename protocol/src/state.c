@@ -16,7 +16,7 @@ typedef struct LNSstate_tag {
 
 typedef struct child_tag {
 	int callsToChild;
-	struct queue_node_t* childPtr;
+	LNSstate_t* childPtr;
 } child_t;
 
 int comp_nodes (const void *p, const void *q) {
@@ -52,7 +52,19 @@ int compStateIds(const void* item1, const void* item2)
 }
 
 /* compares the secrets of the args lexicographically */
-int comp_LNS_states(const void* item1, const void* item2)
+int compChildren(const void* item1, const void* item2)
+{
+	child_t* child1, *child2;
+	
+	child1 = (child_t *) item1;
+	child2 = (child_t *) item2;
+	
+	return compGraphs(child1->childPtr->secrets, 
+			child2->childPtr->secrets, child1->childPtr->agents);
+}
+
+/* compares the secrets of the args lexicographically */
+int compStates(const void* item1, const void* item2)
 {
 	LNSstate_t* state1, *state2;
 			
@@ -61,44 +73,6 @@ int comp_LNS_states(const void* item1, const void* item2)
 	
 	return compGraphs(state1->secrets, state2->secrets, state1->agents);
 }
-
-
-/* compares the secrets of the args lexicographically */
-int compChildren(const void* item1, const void* item2)
-{
-	child_t* child1, *child2;
-	
-	child1 = (child_t *) item1;
-	child2 = (child_t *) item2;
-	
-	return comp_LNS_states(child1->childPtr, child2->childPtr);
-}
-
-/* compares the secrets of the args lexicographically */
-//~ int comp_ANY_states(const void* item1, const void* item2)
-//~ {
-	//~ LNSstate_t* state1, *state2;
-				
-	//~ state1 = (LNSstate_t *) item1;
-	//~ state2 = (LNSstate_t *) item2;
-		
-	//~ graph temp1[MAXN*MAXM];
-	
-	//~ graph temp2[MAXN*MAXM];
-	
-	//~ copyGraph(temp1, state1->secrets, state1->agents);
-	//~ copyGraph(temp2, state2->secrets, state2->agents);
-	
-	//~ qsort(temp1, state1-> agents * MAXM, sizeof(graph), &comp_nodes);
-	
-	//~ qsort(temp2, state2-> agents * MAXM, sizeof(graph), &comp_nodes);
-	
-	//~ if (compGraphs(temp1, temp2, state1->agents) == EQUAL)	
-		//~ return EQUAL;
-	
-	//~ return compGraphs(state1->secrets, state2->secrets, state1->agents);
-//~ }
-
 
 /* returns an LNSstate_t with g in canonical form */
 LNSstate_t* newLNSstate(graph g[MAXN*MAXM], int agents, 
@@ -109,6 +83,12 @@ LNSstate_t* newLNSstate(graph g[MAXN*MAXM], int agents,
 	MALLOC_SAFE(s, sizeof(LNSstate_t));
 		
 	findCanonicalLabeling(g, s->secrets, agents); 
+	//~ printGraph(s->secrets, agents);	
+	
+	//~ if (protocol_name == ANY) 
+		//~ qsort(s->secrets, agents*MAXM, sizeof(graph), comp_nodes);
+		
+	//~ printGraph(s->secrets, agents);	
 			
 	s->children = new_queue(MAXN*(MAXN-1), compChildren);
 	s->id = 0;
@@ -126,9 +106,7 @@ void initHash(struct queue_t* hash[MAXN*MAXN], int agents,
 	
 	/* create the queues */		
 	FOR_ALL_EDGES(i, agents)
-		SWITCH_PROT_NAME(protocol_name,		
-				hash[i] = new_queue(MAXSTATES, comp_LNS_states),
-				hash[i] = new_queue(MAXSTATES, comp_LNS_states));		
+		hash[i] = new_queue(MAXSTATES, compStates);
 	
 	/* we add the first state into the hash */				
 	addOnlySelfLoops(initG, agents);
@@ -141,7 +119,7 @@ void initHash(struct queue_t* hash[MAXN*MAXN], int agents,
 }
 
 void addChildToParent
-	(LNSstate_t* parent, struct queue_node_t* child, int calls)
+	(LNSstate_t* parent, LNSstate_t* child, int calls)
 {
 	child_t* newChild;
 	
@@ -174,7 +152,7 @@ void genChildren
 	
 	child_t* foundChild;
 	
-	struct queue_node_t* childsQueueNode, *childsNode;
+	struct queue_node_t* childsQueueNode;
 	
 	struct queue_node_t* childsStructPtr;
 	
@@ -193,18 +171,13 @@ void genChildren
 		  copyGraph(temp, parent->secrets, agents);
 		  makeCall(temp, i ,j); 
 		  childsState = newLNSstate(temp, agents, protocol_name);
-		  MALLOC_SAFE(childsNode, sizeof(struct queue_node_t));
-		  childsNode -> data = childsState;
-		  
 		  MALLOC_SAFE(childsStruct, sizeof(child_t));
 		  childsStruct->callsToChild=callsToChild;
-		  childsStruct->childPtr= childsNode;
+		  childsStruct->childPtr=childsState;
 		  		  
 		  if (search_in_sorted_queue( parent->children, &childsStructPtr, 
 									   childsStruct ) )
 		  {
-			 FREE_SAFE(childsState); 
-			 FREE_SAFE(childsNode); 
 			 FREE_SAFE(childsStruct); 
 			 foundChild = (child_t *) childsStructPtr->data;
 			 
@@ -217,7 +190,7 @@ void genChildren
 				== DUPLICATE_ITEM )
 			 FREE_SAFE(childsState);
  		  
-			addChildToParent(parent, childsQueueNode, callsToChild);
+			addChildToParent(parent, childsQueueNode->data, callsToChild);
 		  }
 		  
 	    }
@@ -256,20 +229,21 @@ float getProb(struct queue_t* hash[MAXN*MAXN], LNSstate_t ** transMatrix,
 	
 	float enumer, denom;
 	
-	LNSstate_t* t;
-	
 	QUEUE_FOREACH(p, s->children) {
 		child = (child_t*) (p-> data);
-		
-		t = (LNSstate_t*) (child->childPtr->data);
-		
-		if (t->id == to) {
+		if (child->childPtr->id == to) {
 			enumer = child->callsToChild;
-			SWITCH_PROT_NAME(protocol_name, 
+			
+			denom =  (s->agents) * (s->agents - 1);
+			
+			//~ printf("%f\n", denom);
+			
+			if (protocol_name == LNS)
 				denom = (s->agents) * (s->agents) - 
-							edgesOf(s->secrets, s->agents),
-				denom = (s->agents) * (s->agents - 1));
-												
+					edgesOf(s->secrets, s->agents);
+			
+			//~ printf("%f\n", enumer);
+								
 			return enumer / denom; 
 		}
 	}		
@@ -343,6 +317,7 @@ float findExpectation (int agents, int* no_states, int protocol_name)
 	FOR_ALL_EDGES(i, agents) {
 		QUEUE_FOREACH(p, hash[i]) {
 			s = (LNSstate_t *) (p->data);
+			//~ printf("agents = %d\n", agents);
 			//~ printGraph(s->secrets, s->agents);
 			
 			DELETE_QUEUE(s->children);
