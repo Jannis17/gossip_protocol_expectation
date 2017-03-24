@@ -203,6 +203,7 @@ void genChildren
 		  if (search_in_sorted_queue( parent->children, &childsStructPtr, 
 									   childsStruct ) )
 		  {
+			 FREE_SAFE(childsState); 
 			 FREE_SAFE(childsNode); 
 			 FREE_SAFE(childsStruct); 
 			 foundChild = (child_t *) childsStructPtr->data;
