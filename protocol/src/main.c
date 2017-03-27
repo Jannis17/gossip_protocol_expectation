@@ -13,12 +13,8 @@ void printResults(int agentsMin, int agentsMax, int no_states[MAXN],
 	char filename[300];
 	int agents;
 	char *prot_name;
-	
-	if (protocol_name == LNS)			
-		prot_name = "LNS";
-	
-	if (protocol_name == ANY)			
-		prot_name = "ANY";	
+		
+	SWITCH_PROT_NAME(protocol_name, prot_name = "LNS", prot_name = "ANY");
 		
 	/* create the name of the file with timestamp */
 	sprintf(filename, 
@@ -63,12 +59,6 @@ int main (int argc, char * argv[]){
 		return 1;
 	}
 		
-	/* expectation[i] = expected execution length for i agents */
-	float expectation[MAXN];
-
-	/* totalStates[i] = number of different states for i agents */
-	int no_states[MAXN];
-
 	int agentsMin = atoi(argv[2]), agentsMax = atoi(argv[3]);
 
 	if ( agentsMin > agentsMax ) 
@@ -98,11 +88,17 @@ int main (int argc, char * argv[]){
 		
 			return 1;
 		}
-		
+	
 	/* The following optional call verifies that we are linking
 	 * to compatible versions of the nauty routines. */
 	nauty_check(WORDSIZE,MAXM,MAXN,NAUTYVERSIONID);
-	
+
+	/* expectation[i] = expected execution length for i agents */
+	float expectation[MAXN];
+
+	/* totalStates[i] = number of different states for i agents */
+	int no_states[MAXN];
+		
 	clock_t start, end;
 	int agents;
 	float elpsTime[MAXN];
@@ -112,7 +108,7 @@ int main (int argc, char * argv[]){
 	for (agents=agentsMin; agents<=agentsMax; agents++) {
 		start = clock();		
 		expectation[agents] = 
-			findExpectation(agents, &no_states[agents], protocol_name);								
+			find_expectation(agents, &no_states[agents], protocol_name);								
 		end = clock();
 		elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
 	}
@@ -120,7 +116,7 @@ int main (int argc, char * argv[]){
 	printResults(agentsMin, agentsMax, no_states, expectation, 
 		elpsTime, protocol_name);
 	
-	//~ graphTest(agentsMin);
+	//~ graph_test(agentsMin);
 	
 	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
 	

@@ -7,198 +7,193 @@
 #include "state.h"
 #include "queue.h"
 
-typedef struct LNSstate_tag {
+/* State of the protocol. The graph secrets contains the
+ * distribution of secrets */
+typedef struct protocol_state_tag {
 	graph secrets[MAXN*MAXM];
 	int id;
 	int agents;
 	struct queue_t* children;
-} LNSstate_t;
+} protocol_state_t;
 
+/* child of a given state */
 typedef struct child_tag {
-	int callsToChild;
-	LNSstate_t* childPtr;
+	int calls_to_child;
+	protocol_state_t* childs_state_ptr;
 } child_t;
 
-int comp_nodes (const void *p, const void *q) {
-    graph x = *(const graph *)p;
-    graph y = *(const graph *)q;
-
-    /* Avoid return x - y, which can cause undefined behaviour
-       because of signed integer overflow. */
-    if (x < y)
-        return -1;  // Return -1 if you want ascending, 1 if you want descending order. 
-    else if (x > y)
-        return 1;   // Return 1 if you want ascending, -1 if you want descending order. 
-
-    return 0;
-}
-
-
-/* compares the ids of the args lexicographically */
-int compStateIds(const void* item1, const void* item2)
+/* compares the secrets of the args lexicographically */
+int comp_protocol_states(const void* item1, const void* item2)
 {
-	LNSstate_t* state1, *state2;
+	protocol_state_t* state1, *state2;
+			
+	state1 = (protocol_state_t *) item1;
+	state2 = (protocol_state_t *) item2;
 	
-	state1 = (LNSstate_t *) item1;
-	state2 = (LNSstate_t *) item2;
-	
-	if (state1->id < state2->id)
-		return LESS;
-	
-	if (state1->id > state2->id)
-		return GREATER;
-	
-	return EQUAL;
+	return comp_graphs(state1->secrets, 
+			state2->secrets, 
+			state1->agents);
 }
 
 /* compares the secrets of the args lexicographically */
-int compChildren(const void* item1, const void* item2)
+int comp_children(const void* item1, const void* item2)
 {
 	child_t* child1, *child2;
 	
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
 	
-	return compGraphs(child1->childPtr->secrets, 
-			child2->childPtr->secrets, child1->childPtr->agents);
+	return comp_graphs(child1->childs_state_ptr->secrets, 
+			child2->childs_state_ptr->secrets, 
+			child1->childs_state_ptr->agents);
 }
 
-/* compares the secrets of the args lexicographically */
-int compStates(const void* item1, const void* item2)
+/* returns a pointer to a protocol_state_t with g in canonical form */
+protocol_state_t* new_protocol_state
+(graph g[MAXN*MAXM], int agents, int protocol_name)
 {
-	LNSstate_t* state1, *state2;
-			
-	state1 = (LNSstate_t *) item1;
-	state2 = (LNSstate_t *) item2;
+	protocol_state_t* s;
 	
-	return compGraphs(state1->secrets, state2->secrets, state1->agents);
-}
-
-/* returns an LNSstate_t with g in canonical form */
-LNSstate_t* newLNSstate(graph g[MAXN*MAXM], int agents, 
-	int protocol_name)
-{
-	LNSstate_t* s;
-	
-	MALLOC_SAFE(s, sizeof(LNSstate_t));
+	MALLOC_SAFE(s, sizeof(protocol_state_t));
 		
-	findCanonicalLabeling(g, s->secrets, agents); 
-	//~ printGraph(s->secrets, agents);	
+	find_can_label(g, s->secrets, agents); 
+	//~ print_graph(s->secrets, agents);	
 	
 	//~ if (protocol_name == ANY) 
 		//~ qsort(s->secrets, agents*MAXM, sizeof(graph), comp_nodes);
 		
-	//~ printGraph(s->secrets, agents);	
+	//~ print_graph(s->secrets, agents);	
 			
-	s->children = new_queue(MAXN*(MAXN-1), compChildren);
+	s->children = new_queue(MAXN*(MAXN-1), comp_children);
 	s->id = 0;
-	s->agents=agents;
+	s->agents = agents;
 							
 	return s;		
 }
 
-void initHash(struct queue_t* hash[MAXN*MAXN], int agents, 
-	int protocol_name)
+void init_hash
+(struct queue_t* hash[MAXN*MAXN], int agents, int protocol_name)
 {
 	int i;
 	
-	graph initG [MAXN*MAXM];
+	graph init_secrets [MAXN*MAXM];
 	
 	/* create the queues */		
 	FOR_ALL_EDGES(i, agents)
-		hash[i] = new_queue(MAXSTATES, compStates);
+		hash[i] = new_queue(MAXSTATES, comp_protocol_states);
 	
 	/* we add the first state into the hash */				
-	addOnlySelfLoops(initG, agents);
+	init_secrets_graph(init_secrets, agents);
 	
-	LNSstate_t* initState = newLNSstate(initG, agents, protocol_name);
+	protocol_state_t* init_state = 
+		new_protocol_state(init_secrets, agents, protocol_name);
 	
-	struct queue_t* initQueue = hash[edgesOf(initG, agents)-1];
+	struct queue_t* init_queue = hash[edges_of(init_secrets, agents)-1];
 		
-	enqueue_unique_to_sorted_queue(initQueue, NULL, initState);
+	enqueue_unique_to_sorted_queue(init_queue, NULL, init_state);
 }
 
-void addChildToParent
-	(LNSstate_t* parent, LNSstate_t* child, int calls)
+void add_new_child_to_parent
+	(protocol_state_t* parent, protocol_state_t* childs_state, int calls)
 {
-	child_t* newChild;
+	child_t* new_child;
 	
-	MALLOC_SAFE(newChild, sizeof(child_t));
-	
-	newChild->childPtr = child;
-	
-	struct queue_node_t* p;
-	
-	child_t * oldChild;
-				
-	if( enqueue_unique_to_sorted_queue(parent->children, &p, newChild)
-		== DUPLICATE_ITEM) {
-		FREE_SAFE(newChild);
-		oldChild = (child_t *) p->data;
-		(oldChild->callsToChild)+=calls;
+	MALLOC_SAFE(new_child, sizeof(child_t));
+	new_child->childs_state_ptr = childs_state;
+					
+	if( enqueue_unique_to_sorted_queue
+		(parent->children, NULL, new_child)
+		== DUPLICATE_ITEM ) 
+	{
+		printf("Internal Error: Find duplicate\
+		child where I shouldn't!\n");
+		exit(1);
 	} else
-		newChild->callsToChild = calls;
+		new_child->calls_to_child = calls;
 }
 
-void genChildren
-	(LNSstate_t* parent, int agents, struct queue_t* hash[MAXN*MAXN],
-		int protocol_name) 
+child_t *new_child(graph secrets[MAXN*MAXM], int agents, 
+		int protocol_name, int calls_to_child)
 {
-	int i, j, callsToChild;
+	protocol_state_t* childs_state = 
+		new_protocol_state(secrets, agents, protocol_name);
+	
+	child_t* result;
+		
+	MALLOC_SAFE(result, sizeof(child_t));
+	result->calls_to_child=calls_to_child;
+	result->childs_state_ptr=childs_state;
+	
+	return result;
+}
+
+void destroy_child(child_t *child)
+{
+	DELETE_QUEUE(child->childs_state_ptr->children);
+	FREE_SAFE(child->childs_state_ptr);
+	FREE_SAFE(child);
+}
+
+void generate_children
+( protocol_state_t* parent, int agents, struct queue_t* hash[MAXN*MAXN],
+  int protocol_name ) 
+{
+	int i, j, calls_to_child;
 		
 	graph temp[MAXN*MAXM];
-	
-	child_t* childsStruct;
-	
+			
 	child_t* foundChild;
 	
 	struct queue_node_t* childsQueueNode;
 	
 	struct queue_node_t* childsStructPtr;
-	
-	LNSstate_t* childsState;
-	
+		
 	struct queue_t* childsList;
+	
+	child_t * potential_child;
 					
 	for (i=0; i<agents; i++)
 	  for (j=i+1; j<agents; j++) 
 	  {
-	    callsToChild = 2;
-	    if (protocol_name == LNS)
-			callsToChild = possibleCalls(parent->secrets, i, j);
-	    if ( (protocol_name == ANY) || (callsToChild > 0) )
+	    SWITCH_PROT_NAME(protocol_name, 
+	    	calls_to_child = poss_calls(parent->secrets, i, j),
+	    	calls_to_child = 1);
+	    	
+	    if ( calls_to_child > 0 )
 		{
-		  copyGraph(temp, parent->secrets, agents);
-		  makeCall(temp, i ,j); 
-		  childsState = newLNSstate(temp, agents, protocol_name);
-		  MALLOC_SAFE(childsStruct, sizeof(child_t));
-		  childsStruct->callsToChild=callsToChild;
-		  childsStruct->childPtr=childsState;
+		  copy_graph(temp, parent->secrets, agents);
+		  make_call(temp, i ,j); 
+		  
+		  potential_child = 
+			new_child(temp, agents, protocol_name, calls_to_child);
 		  		  
-		  if (search_in_sorted_queue( parent->children, &childsStructPtr, 
-									   childsStruct ) )
+		  if (search_in_sorted_queue( parent->children, 
+									  &childsStructPtr, 
+									  potential_child) )
 		  {
-			 FREE_SAFE(childsStruct); 
+			 FREE_SAFE(potential_child); 
 			 foundChild = (child_t *) childsStructPtr->data;
 			 
-			 (foundChild->callsToChild) += callsToChild;
+			 (foundChild->calls_to_child) += calls_to_child;
 		  }
 		  else {
-		  	childsList = hash[edgesOf(temp, agents)-1];
+		  	childsList = hash[edges_of(temp, agents)-1];
 		
-			if ( enqueue_unique_to_sorted_queue(childsList, &childsQueueNode, childsState) 
-				== DUPLICATE_ITEM )
-			 FREE_SAFE(childsState);
+			if ( enqueue_unique_to_sorted_queue(childsList, 
+					&childsQueueNode, potential_child->childs_state_ptr) 
+					== DUPLICATE_ITEM )
+				 destroy_child(potential_child);
  		  
-			addChildToParent(parent, childsQueueNode->data, callsToChild);
+			add_new_child_to_parent(parent, childsQueueNode->data, 
+				calls_to_child);
 		  }
 		  
 	    }
 	  }	
 }
 
-void build_the_markov_chain(struct queue_t* hash[MAXN*MAXN], int agents,
-	int protocol_name)
+void build_the_markov_chain
+	(struct queue_t* hash[MAXN*MAXN], int agents, int protocol_name)
 {
 	int i;
 	
@@ -211,17 +206,19 @@ void build_the_markov_chain(struct queue_t* hash[MAXN*MAXN], int agents,
 	FOR_ALL_EDGES(i, agents) {
 		//~ start = clock();
 		QUEUE_FOREACH(p, hash[i])
-			genChildren(p->data, agents, hash, protocol_name);
+			generate_children(p->data, agents, hash, protocol_name);
 		//~ end = clock();
 		//~ printf("%d secrets in %f seconds\n", i+1 , 
 				//~ ( (float) end - start )/CLOCKS_PER_SEC);	
 	}
 }
 
-float getProb(struct queue_t* hash[MAXN*MAXN], LNSstate_t ** transMatrix, 
-	int from, int to, int protocol_name) 
+float get_prob
+( struct queue_t* hash[MAXN*MAXN], 
+  protocol_state_t ** trans_matrix, 
+  int from, int to, int protocol_name ) 
 {
-	LNSstate_t * s = transMatrix[from];
+	protocol_state_t * s = trans_matrix[from];
 	
 	struct queue_node_t *p;
 	
@@ -231,31 +228,26 @@ float getProb(struct queue_t* hash[MAXN*MAXN], LNSstate_t ** transMatrix,
 	
 	QUEUE_FOREACH(p, s->children) {
 		child = (child_t*) (p-> data);
-		if (child->childPtr->id == to) {
-			enumer = child->callsToChild;
+		if (child->childs_state_ptr->id == to) {
+			enumer = child->calls_to_child;
 			
-			denom =  (s->agents) * (s->agents - 1);
-			
-			//~ printf("%f\n", denom);
-			
-			if (protocol_name == LNS)
+			SWITCH_PROT_NAME(protocol_name, 
 				denom = (s->agents) * (s->agents) - 
-					edgesOf(s->secrets, s->agents);
+							edges_of(s->secrets, s->agents),
+				denom = ((float) (s->agents) * (s->agents - 1) ) / 2);
 			
-			//~ printf("%f\n", enumer);
-								
 			return enumer / denom; 
 		}
 	}		
 	
-	return 0.0;	
+	return 0;	
 }
 
-float findExpectation (int agents, int* no_states, int protocol_name)
+float find_expectation (int agents, int* no_states, int protocol_name)
 {		
 	struct queue_t* hash[MAXN*MAXN];
 	
-	initHash(hash, agents, protocol_name);
+	init_hash(hash, agents, protocol_name);
 	
 	build_the_markov_chain(hash, agents, protocol_name);
 	
@@ -267,58 +259,64 @@ float findExpectation (int agents, int* no_states, int protocol_name)
 	FOR_ALL_EDGES(i, agents)
 		*no_states += QUEUE_COUNT(hash[i]);
 	
-	LNSstate_t ** transMatrix;
+	protocol_state_t** trans_matrix;
 	
-	MALLOC_SAFE(transMatrix, (* no_states) * sizeof(LNSstate_t *));
+	MALLOC_SAFE( trans_matrix, 
+				 (* no_states) * sizeof(protocol_state_t *) );
 		 	
 	struct queue_node_t * p;
 	
-	LNSstate_t *s;
+	protocol_state_t *s;
 	
 	/* label the states */	
 	int label = 0;
 	
 	FOR_ALL_EDGES(i, agents)
 		QUEUE_FOREACH(p, hash[i]) {
-			s = (LNSstate_t *) (p->data);
-			transMatrix[label]=s;
+			s = (protocol_state_t *) (p->data);
+			trans_matrix[label] = s;
 			s->id = label++;
 		}
 
-	float* expectVec;
+	float* expect_vec;
 		
-	MALLOC_SAFE(expectVec, *no_states * sizeof(float));
+	MALLOC_SAFE(expect_vec, *no_states * sizeof(float));
 	
-	expectVec[*no_states-1]= 0;
+	expect_vec[*no_states-1]= 0;
 							
     /* this loop is for backward substitution*/
     for(i=(* no_states)-2; i>=0; i--)
     {
-        expectVec[i] = 0;
+        expect_vec[i] = 1;
                                         
         for(j=i+1; j<(* no_states); j++)
-            expectVec[i] += getProb(hash, transMatrix, i, j, protocol_name) * expectVec[j];
-        
-        expectVec[i] += 1;
-        
-        if (protocol_name == ANY)
-			expectVec[i] = 
-				expectVec[i] / 
-				(1-getProb(hash, transMatrix, i, i, protocol_name));
+            expect_vec[i] += 
+				get_prob(hash, trans_matrix, i, j, protocol_name) * 
+					expect_vec[j];
+					       
+        SWITCH_PROT_NAME(protocol_name, 
+			do {} while(0), 
+			expect_vec[i] = 
+				expect_vec[i] / 
+				(1-get_prob(hash, trans_matrix, i, i, protocol_name)));
     }
 
-	float result = expectVec[0];
+	float result = expect_vec[0];
 	
-	FREE_SAFE(expectVec);
+	//~ for (i=0; i < *no_states; i++)
+		//~ printf("expectation(%d) = %f\n", i, expect_vec[i]);
 	
-	FREE_SAFE(transMatrix);
+	FREE_SAFE(expect_vec);
+		
+	FREE_SAFE(trans_matrix);
 		
 	/* destroy the hash */		
 	FOR_ALL_EDGES(i, agents) {
+		//~ printf("%d secrets\n", i+1);
 		QUEUE_FOREACH(p, hash[i]) {
-			s = (LNSstate_t *) (p->data);
-			//~ printf("agents = %d\n", agents);
-			//~ printGraph(s->secrets, s->agents);
+			s = (protocol_state_t *) (p->data);
+						
+			//~ print_graph(s->secrets, s->agents);
 			
 			DELETE_QUEUE(s->children);
 		}

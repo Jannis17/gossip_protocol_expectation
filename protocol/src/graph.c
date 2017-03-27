@@ -3,7 +3,7 @@
 #include "state.h"
 
 /* counts the directed edges (including loops) in g */
-int edgesOf (graph g[MAXN*MAXM], int n) 
+int edges_of (graph g[MAXN*MAXM], int n) 
 {
 	size_t i;
 	
@@ -20,7 +20,8 @@ int edgesOf (graph g[MAXN*MAXM], int n)
  * LESS iff g1 < g2
  * EQUAL iff g1 == g2 
  * GREATER iff g1 > g2 */
-int compGraphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) {
+int comp_graphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) 
+{
 	size_t k;
 	
 	for (k = 0; k < MAXM*(size_t)n; ++k) {
@@ -35,7 +36,7 @@ int compGraphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) {
 
 
 /* adds only self loops and NO OTHER edge in g */
-void addOnlySelfLoops (graph g[MAXN*MAXM], int n) 
+void init_secrets_graph (graph g[MAXN*MAXM], int n) 
 {			
 	size_t i;
 	
@@ -46,7 +47,7 @@ void addOnlySelfLoops (graph g[MAXN*MAXM], int n)
 }
 
 /* copies graph "from" to graph "to" */
-void copyGraph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n) 
+void copy_graph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n) 
 {
 	size_t i;
 	
@@ -56,8 +57,8 @@ void copyGraph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n)
 
 /* g2 will be equal to the canonical labeling of g1
  * n : size of g1 and g2 */
-void findCanonicalLabeling 
-	(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
+void find_can_label 
+	(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n)
 {
 	int lab[MAXN], ptn[MAXN], orbits[MAXN];
 	
@@ -73,11 +74,11 @@ void findCanonicalLabeling
     options.getcanon = TRUE;
     
     /* create the cannonicaly labeled graph */        		
-	densenauty(g1,lab,ptn,orbits,&options,&stats, MAXM, n, g2);
+	densenauty(from,lab,ptn,orbits,&options,&stats, MAXM, n, to);
 }
 
 /* makes the call from i to j in g */
-void makeCall(graph g[MAXN*MAXM], int i, int j) 
+void make_call(graph g[MAXN*MAXM], int i, int j) 
 {	
 	size_t k;
 	
@@ -88,7 +89,7 @@ void makeCall(graph g[MAXN*MAXM], int i, int j)
 }
 
 /* prints the contexts of g in hex form */
-void printGraph(graph g[MAXN*MAXM], int n)
+void print_graph(graph g[MAXN*MAXM], int n)
 {
 	size_t i;
 	
@@ -102,7 +103,7 @@ void printGraph(graph g[MAXN*MAXM], int n)
 
 /* returns the number of possible BIDIRECTIONAL calls between i and j
  * in g */
-int possibleCalls (graph g[MAXN * MAXM], int i, int j)
+int poss_calls (graph g[MAXN * MAXM], int i, int j)
 {
 	int possCalls = 0;
 	
@@ -115,9 +116,31 @@ int possibleCalls (graph g[MAXN * MAXM], int i, int j)
 	return possCalls;
 }
 
+int comp_perm_graphs(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
+{
+	size_t k, l;
+	
+	int paired[MAXN*MAXM];		
+	
+	for (k = 0; k < MAXM*(size_t)n; ++k)
+		paired[k]=0;
+		
+	for (k = 0; k < MAXM*(size_t)n; ++k) {
+		for (l = 0; l < MAXM*(size_t)n; ++l)
+			if ( (g1[k] == g2[l]) && !paired[l] ) {
+				paired[k] = paired [l] = 1;
+				break;				
+			};
+		
+		if (!paired[k])
+			return comp_graphs(g1, g2, n);
+	}
+			
+	return EQUAL;
+}
 
 /* will be used for tests */
-void graphTest(int n)
+void graph_test(int n)
 {
 	graph g1[MAXN*MAXM];
 	graph g2[MAXN*MAXM];
@@ -126,35 +149,35 @@ void graphTest(int n)
 	
 	int i = 2 , j = 0;
 		
-	addOnlySelfLoops(g1, n);
-	addOnlySelfLoops(g2, n);
+	init_secrets_graph(g1, n);
+	init_secrets_graph(g2, n);
 		
-	makeCall(g1, 0, 1);
-	makeCall(g1, 2, 3);
-	//~ makeCall(g1, 0, 2);
-	//~ makeCall(g1, 1, 3);	
-	printGraph(g1, n);
+	make_call(g1, 0, 1);
+	//~ make_call(g1, 2, 3);
+	//~ make_call(g1, 0, 2);
+	//~ make_call(g1, 1, 3);	
+	print_graph(g1, n);
 	
-	findCanonicalLabeling(g1, g3, n);
+	find_can_label(g1, g3, n);
 	
-	printGraph(g3, n);
+	print_graph(g3, n);
 	
-	makeCall(g2, 2, 0);
-	makeCall(g2, 1, 3);
-	makeCall(g2, 2, 1);
-	makeCall(g2, 0, 3);
+	make_call(g2, 3, 0);
+	//~ make_call(g2, 1, 3);
+	//~ make_call(g2, 2, 1);
+	//~ make_call(g2, 0, 3);
 		
-	printGraph(g2, n);
+	print_graph(g2, n);
 	
-	findCanonicalLabeling(g2, g4, n);
+	find_can_label(g2, g4, n);
 	
-	printGraph(g4, n);
+	print_graph(g4, n);
 	
-	printf ("equal = %d \n", compGraphs(g4, g3, n));
+	printf ("equal = %d \n", comp_perm_graphs(g1, g2, n));
 		
-	printf ("edges of g1 = %d \n", edgesOf(g1,n));
+	printf ("edges of g1 = %d \n", edges_of(g1,n));
 	
-	printf ("edges of g2 = %d \n", edgesOf(g2,n));
+	printf ("edges of g2 = %d \n", edges_of(g2,n));
 	
-	printf ("poss Calls = %d \n", possibleCalls(g1,i,j) );
+	printf ("poss Calls = %d \n", poss_calls(g1,i,j) );
 }

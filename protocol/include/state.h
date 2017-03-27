@@ -13,21 +13,6 @@
 #define FOR_ALL_EDGES(VAR, AGENTS)					\
 	for((VAR)= (AGENTS)-1; i < (AGENTS) * (AGENTS); (VAR)++)
 
-#define SWITCH_PROT_NAME(protocol_name, LNS_COMM, ANY_COMM)			\
-	do {					\
-		switch (protocol_name) {	\
-				case LNS:	\
-					LNS_COMM;	\
-					break;	\
-				case ANY:	\
-					ANY_COMM;	\
-					break;	\
-				default:	\
-					printf("Internal Error: Unknown protocol name!");	\
-					exit(1);\
-			}	\
-	} while(0)
-
-float findExpectation (int agents, int* no_states, int protocol_name);
+float find_expectation (int agents, int* no_states, int protocol_name);
 
 #endif /* H_STATE_H_ */

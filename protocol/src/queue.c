@@ -131,7 +131,7 @@ int search_in_sorted_queue
 /* inserts unique data in the correct place of a sorted queue
  *  hd : the queue
  *  dataPtr : a pointer to the node of the queue that contains the data
- * return value:
+ *  return value:
  *  NEW_ITEM : if data is not in the queue
  *  DUPLICATE_ITEM: if data is already in the queue */
 

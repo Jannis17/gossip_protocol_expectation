@@ -3,22 +3,25 @@
 
 #include "../../nauty26r7/nauty.h"
 
-int edgesOf(graph*, int);
+int edges_of (graph g[MAXN*MAXM], int n);
 
-void addOnlySelfLoops(graph*, int);
+int comp_graphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n);
 
-void copyGraph(graph*, graph*, int);
+void init_secrets_graph (graph g[MAXN*MAXM], int n);
 
-void makeCall(graph*, int, int);
+void copy_graph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n);
 
-void printGraph(graph*, int);
+void find_can_label 
+	(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n);
+	
+void make_call(graph g[MAXN*MAXM], int i, int j);
 
-void graphTest(int);
+void print_graph(graph g[MAXN*MAXM], int n);
 
-int possibleCalls(graph*, int, int);
+int poss_calls (graph g[MAXN * MAXM], int i, int j);
 
-int compGraphs(graph*, graph*, int);
+void graph_test(int n);
 
-void findCanonicalLabeling (graph* , graph* , int);
+int comp_perm_graphs(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n);
 
 #endif /* H_GRAPH_H_ */
