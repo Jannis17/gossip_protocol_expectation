@@ -43,7 +43,7 @@ void printResults(int agentsMin, int agentsMax, int no_states[MAXN],
 		fprintf(fp,"%d agents:\n", agents);
 		fprintf(fp,"Number of states = %d\n", no_states[agents]);
 		fprintf(fp,"Expected length = %f\n", expectation[agents]);
-		fprintf(fp,"Time: %f s\n", elpsTime[agents]);
+		fprintf(fp,"Elapsed Time = %f s\n", elpsTime[agents]);
 		fprintf(fp,"==========================================\n");
 	}
 	

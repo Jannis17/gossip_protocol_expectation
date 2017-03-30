@@ -1,6 +1,7 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "main.h"
 #include "graph.h"
 #include "memory.h"
@@ -235,7 +236,8 @@ float get_prob
 				denom = (s->agents) * (s->agents) - 
 							edges_of(s->secrets, s->agents),
 				denom = ((float) (s->agents) * (s->agents - 1) ) / 2);
-			
+				//~ 1 );
+							
 			return enumer / denom; 
 		}
 	}		
@@ -306,16 +308,27 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	//~ for (i=0; i < *no_states; i++)
 		//~ printf("expectation(%d) = %f\n", i, expect_vec[i]);
 	
+	//~ printf("Transition Matrix (%d agents)\n", agents);
+	
+	//~ for (i=0; i < *no_states; i++) {
+		//~ for (j=0; j < *no_states; j++)
+			//~ printf("%.0f ", get_prob(hash, trans_matrix, i, j, protocol_name));
+		//~ printf("\n");
+	//~ }
+	
 	FREE_SAFE(expect_vec);
 		
 	FREE_SAFE(trans_matrix);
+	
+	//~ printf("\nMarkov chain (%d agents)\n", agents);
 		
 	/* destroy the hash */		
 	FOR_ALL_EDGES(i, agents) {
 		//~ printf("%d secrets\n", i+1);
 		QUEUE_FOREACH(p, hash[i]) {
 			s = (protocol_state_t *) (p->data);
-						
+			
+			//~ printf("state = %d\n", s->id+1);			
 			//~ print_graph(s->secrets, s->agents);
 			
 			DELETE_QUEUE(s->children);
