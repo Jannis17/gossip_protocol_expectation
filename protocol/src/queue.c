@@ -126,8 +126,6 @@ int search_in_sorted_queue
 	return 0;
 }
 
-
-
 /* inserts unique data in the correct place of a sorted queue
  *  hd : the queue
  *  dataPtr : a pointer to the node of the queue that contains the data

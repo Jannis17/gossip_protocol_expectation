@@ -7,11 +7,14 @@
 #include "memory.h"
 #include "state.h"
 #include "queue.h"
+#include "../../nauty26r7/nauty.h"
 
 /* State of the protocol. The graph secrets contains the
  * distribution of secrets */
 typedef struct protocol_state_tag {
-	graph secrets[MAXN*MAXM];
+	graph can_secrets[MAXN*MAXM];
+	graph init_secrets[MAXN*MAXM];
+	graph init_secrets_sorted[MAXN*MAXM];
 	int id;
 	int agents;
 	struct queue_t* children;
@@ -23,6 +26,21 @@ typedef struct child_tag {
 	protocol_state_t* childs_state_ptr;
 } child_t;
 
+/* needed for qsort*/
+int comp_nodes (const void *p, const void *q) {
+    graph x = *(const graph *)p;
+    graph y = *(const graph *)q;
+
+    /* Avoid return x - y, which can cause undefined behaviour
+       because of signed integer overflow. */
+    if (x < y)
+        return 1;  // Return -1 if you want ascending, 1 if you want descending order. 
+    else if (x > y)
+        return -1;   // Return 1 if you want ascending, -1 if you want descending order. 
+
+    return 0;
+}
+
 /* compares the secrets of the args lexicographically */
 int comp_protocol_states(const void* item1, const void* item2)
 {
@@ -31,8 +49,8 @@ int comp_protocol_states(const void* item1, const void* item2)
 	state1 = (protocol_state_t *) item1;
 	state2 = (protocol_state_t *) item2;
 	
-	return comp_graphs(state1->secrets, 
-			state2->secrets, 
+	return comp_graphs(state1->can_secrets, 
+			state2->can_secrets, 
 			state1->agents);
 }
 
@@ -44,8 +62,8 @@ int comp_children(const void* item1, const void* item2)
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
 	
-	return comp_graphs(child1->childs_state_ptr->secrets, 
-			child2->childs_state_ptr->secrets, 
+	return comp_graphs(child1->childs_state_ptr->can_secrets, 
+			child2->childs_state_ptr->can_secrets, 
 			child1->childs_state_ptr->agents);
 }
 
@@ -56,14 +74,22 @@ protocol_state_t* new_protocol_state
 	protocol_state_t* s;
 	
 	MALLOC_SAFE(s, sizeof(protocol_state_t));
-		
-	find_can_label(g, s->secrets, agents); 
-	//~ print_graph(s->secrets, agents);	
 	
-	//~ if (protocol_name == ANY) 
-		//~ qsort(s->secrets, agents*MAXM, sizeof(graph), comp_nodes);
-		
-	//~ print_graph(s->secrets, agents);	
+	copy_graph(s->init_secrets, g, agents);
+	
+	//~ print_graph(g, agents);
+	
+	if (protocol_name == ANY) {
+		copy_graph(s->init_secrets_sorted, g, agents);
+		qsort(s->init_secrets_sorted, agents*MAXM, 
+			sizeof(graph), comp_nodes);
+	}
+	
+	//~ print_graph(g, agents);
+			
+	find_can_label(g, s->can_secrets, agents); 
+	
+	//~ print_graph(s->can_secrets, agents);
 			
 	s->children = new_queue(MAXN*(MAXN-1), comp_children);
 	s->id = 0;
@@ -95,7 +121,7 @@ void init_hash
 }
 
 void add_new_child_to_parent
-	(protocol_state_t* parent, protocol_state_t* childs_state, int calls)
+(protocol_state_t* parent, protocol_state_t* childs_state, int calls)
 {
 	child_t* new_child;
 	
@@ -113,8 +139,9 @@ void add_new_child_to_parent
 		new_child->calls_to_child = calls;
 }
 
-child_t *new_child(graph secrets[MAXN*MAXM], int agents, 
-		int protocol_name, int calls_to_child)
+child_t *new_child
+( graph secrets[MAXN*MAXM], int agents, 
+  int protocol_name, int calls_to_child)
 {
 	protocol_state_t* childs_state = 
 		new_protocol_state(secrets, agents, protocol_name);
@@ -157,12 +184,12 @@ void generate_children
 	  for (j=i+1; j<agents; j++) 
 	  {
 	    SWITCH_PROT_NAME(protocol_name, 
-	    	calls_to_child = poss_calls(parent->secrets, i, j),
+	    	calls_to_child = poss_calls(parent->init_secrets, i, j),
 	    	calls_to_child = 1);
 	    	
 	    if ( calls_to_child > 0 )
 		{
-		  copy_graph(temp, parent->secrets, agents);
+		  copy_graph(temp, parent->init_secrets, agents);
 		  make_call(temp, i ,j); 
 		  
 		  potential_child = 
@@ -234,7 +261,7 @@ float get_prob
 			
 			SWITCH_PROT_NAME(protocol_name, 
 				denom = (s->agents) * (s->agents) - 
-							edges_of(s->secrets, s->agents),
+							edges_of(s->can_secrets, s->agents),
 				denom = ((float) (s->agents) * (s->agents - 1) ) / 2);
 				//~ 1 );
 							
@@ -329,7 +356,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 			s = (protocol_state_t *) (p->data);
 			
 			//~ printf("state = %d\n", s->id+1);			
-			//~ print_graph(s->secrets, s->agents);
+			//~ print_graph(s->can_secrets, s->agents);
 			
 			DELETE_QUEUE(s->children);
 		}

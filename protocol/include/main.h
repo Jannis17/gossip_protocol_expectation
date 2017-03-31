@@ -7,6 +7,8 @@
 /* MAXN = ULTIMATELY MAXIMUM number of agents */
 #define MAXN 10
 
+#include "../../nauty26r7/nauty.h"
+
 #define SWITCH_PROT_NAME(protocol_name, LNS_COMM, ANY_COMM)			\
 	do {					\
 		switch (protocol_name) {	\

@@ -122,5 +122,7 @@ int main (int argc, char * argv[]){
 	
 	//~ printf("MAXM = %d\n", MAXM);
 	
+	//~ printf("size of graph = %lu\n", sizeof(graph));
+	
 	return 0;
 }
