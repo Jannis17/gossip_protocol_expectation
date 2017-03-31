@@ -9,23 +9,6 @@
 #include "queue.h"
 #include "../../nauty26r7/nauty.h"
 
-/* State of the protocol. The graph secrets contains the
- * distribution of secrets */
-typedef struct protocol_state_tag {
-	graph can_secrets[MAXN*MAXM];
-	graph init_secrets[MAXN*MAXM];
-	graph init_secrets_sorted[MAXN*MAXM];
-	int id;
-	int agents;
-	struct queue_t* children;
-} protocol_state_t;
-
-/* child of a given state */
-typedef struct child_tag {
-	int calls_to_child;
-	protocol_state_t* childs_state_ptr;
-} child_t;
-
 /* needed for qsort*/
 int comp_nodes (const void *p, const void *q) {
     graph x = *(const graph *)p;
@@ -99,7 +82,7 @@ protocol_state_t* new_protocol_state
 }
 
 void init_hash
-(struct queue_t* hash[MAXN*MAXN], int agents, int protocol_name)
+(hash_t hash[MAXN*MAXN], int agents, int protocol_name)
 {
 	int i;
 	
@@ -107,7 +90,7 @@ void init_hash
 	
 	/* create the queues */		
 	FOR_ALL_EDGES(i, agents)
-		hash[i] = new_queue(MAXSTATES, comp_protocol_states);
+		hash[i].can_hash = new_queue(MAXSTATES, comp_protocol_states);
 	
 	/* we add the first state into the hash */				
 	init_secrets_graph(init_secrets, agents);
@@ -115,7 +98,8 @@ void init_hash
 	protocol_state_t* init_state = 
 		new_protocol_state(init_secrets, agents, protocol_name);
 	
-	struct queue_t* init_queue = hash[edges_of(init_secrets, agents)-1];
+	struct queue_t* init_queue = 
+		hash[edges_of(init_secrets, agents)-1].can_hash;
 		
 	enqueue_unique_to_sorted_queue(init_queue, NULL, init_state);
 }
@@ -163,7 +147,7 @@ void destroy_child(child_t *child)
 }
 
 void generate_children
-( protocol_state_t* parent, int agents, struct queue_t* hash[MAXN*MAXN],
+( protocol_state_t* parent, int agents, hash_t hash[MAXN*MAXN],
   int protocol_name ) 
 {
 	int i, j, calls_to_child;
@@ -205,7 +189,7 @@ void generate_children
 			 (foundChild->calls_to_child) += calls_to_child;
 		  }
 		  else {
-		  	childsList = hash[edges_of(temp, agents)-1];
+		  	childsList = hash[edges_of(temp, agents)-1].can_hash;
 		
 			if ( enqueue_unique_to_sorted_queue(childsList, 
 					&childsQueueNode, potential_child->childs_state_ptr) 
@@ -221,7 +205,7 @@ void generate_children
 }
 
 void build_the_markov_chain
-	(struct queue_t* hash[MAXN*MAXN], int agents, int protocol_name)
+	(hash_t hash[MAXN*MAXN], int agents, int protocol_name)
 {
 	int i;
 	
@@ -233,7 +217,7 @@ void build_the_markov_chain
 	
 	FOR_ALL_EDGES(i, agents) {
 		//~ start = clock();
-		QUEUE_FOREACH(p, hash[i])
+		QUEUE_FOREACH(p, hash[i].can_hash)
 			generate_children(p->data, agents, hash, protocol_name);
 		//~ end = clock();
 		//~ printf("%d secrets in %f seconds\n", i+1 , 
@@ -242,8 +226,7 @@ void build_the_markov_chain
 }
 
 float get_prob
-( struct queue_t* hash[MAXN*MAXN], 
-  protocol_state_t ** trans_matrix, 
+( protocol_state_t ** trans_matrix, 
   int from, int to, int protocol_name ) 
 {
 	protocol_state_t * s = trans_matrix[from];
@@ -274,7 +257,7 @@ float get_prob
 
 float find_expectation (int agents, int* no_states, int protocol_name)
 {		
-	struct queue_t* hash[MAXN*MAXN];
+	hash_t hash[MAXN*MAXN];
 	
 	init_hash(hash, agents, protocol_name);
 	
@@ -286,7 +269,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 		
 	/* count the states */	
 	FOR_ALL_EDGES(i, agents)
-		*no_states += QUEUE_COUNT(hash[i]);
+		*no_states += QUEUE_COUNT(hash[i].can_hash);
 	
 	protocol_state_t** trans_matrix;
 	
@@ -301,7 +284,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	int label = 0;
 	
 	FOR_ALL_EDGES(i, agents)
-		QUEUE_FOREACH(p, hash[i]) {
+		QUEUE_FOREACH(p, hash[i].can_hash) {
 			s = (protocol_state_t *) (p->data);
 			trans_matrix[label] = s;
 			s->id = label++;
@@ -320,14 +303,14 @@ float find_expectation (int agents, int* no_states, int protocol_name)
                                         
         for(j=i+1; j<(* no_states); j++)
             expect_vec[i] += 
-				get_prob(hash, trans_matrix, i, j, protocol_name) * 
+				get_prob(trans_matrix, i, j, protocol_name) * 
 					expect_vec[j];
 					       
         SWITCH_PROT_NAME(protocol_name, 
 			do {} while(0), 
 			expect_vec[i] = 
 				expect_vec[i] / 
-				(1-get_prob(hash, trans_matrix, i, i, protocol_name)));
+				(1-get_prob(trans_matrix, i, i, protocol_name)));
     }
 
 	float result = expect_vec[0];
@@ -339,7 +322,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	
 	//~ for (i=0; i < *no_states; i++) {
 		//~ for (j=0; j < *no_states; j++)
-			//~ printf("%.0f ", get_prob(hash, trans_matrix, i, j, protocol_name));
+			//~ printf("%.0f ", get_prob(trans_matrix, i, j, protocol_name));
 		//~ printf("\n");
 	//~ }
 	
@@ -352,15 +335,16 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	/* destroy the hash */		
 	FOR_ALL_EDGES(i, agents) {
 		//~ printf("%d secrets\n", i+1);
-		QUEUE_FOREACH(p, hash[i]) {
+		QUEUE_FOREACH(p, hash[i].can_hash) {
 			s = (protocol_state_t *) (p->data);
 			
 			//~ printf("state = %d\n", s->id+1);			
 			//~ print_graph(s->can_secrets, s->agents);
 			
 			DELETE_QUEUE(s->children);
+			FREE_SAFE(s);
 		}
-		DELETE_QUEUE(hash[i]);
+		DELETE_QUEUE(hash[i].can_hash);
 	}	
 		
 	return result;	
