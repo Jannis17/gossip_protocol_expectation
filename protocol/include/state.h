@@ -32,9 +32,9 @@ typedef struct child_tag {
 	protocol_state_t* childs_state_ptr;
 } child_t;
 
-typedef struct hash_tag {
-	struct queue_t* initial_hash;
-	struct queue_t* can_hash;
-} hash_t;
+typedef struct twin_queues_tag {
+	struct queue_t* fixed_name_queue;
+	struct queue_t* can_lab_queue;
+} twin_queues;
 
 #endif /* H_STATE_H_ */

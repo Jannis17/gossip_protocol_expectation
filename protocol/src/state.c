@@ -82,7 +82,7 @@ protocol_state_t* new_protocol_state
 }
 
 void init_hash
-(hash_t hash[MAXN*MAXN], int agents, int protocol_name)
+(twin_queues hash[MAXN*MAXN], int agents, int protocol_name)
 {
 	int i;
 	
@@ -90,7 +90,7 @@ void init_hash
 	
 	/* create the queues */		
 	FOR_ALL_EDGES(i, agents)
-		hash[i].can_hash = new_queue(MAXSTATES, comp_protocol_states);
+		hash[i].can_lab_queue = new_queue(MAXSTATES, comp_protocol_states);
 	
 	/* we add the first state into the hash */				
 	init_secrets_graph(init_secrets, agents);
@@ -99,7 +99,7 @@ void init_hash
 		new_protocol_state(init_secrets, agents, protocol_name);
 	
 	struct queue_t* init_queue = 
-		hash[edges_of(init_secrets, agents)-1].can_hash;
+		hash[edges_of(init_secrets, agents)-1].can_lab_queue;
 		
 	enqueue_unique_to_sorted_queue(init_queue, NULL, init_state);
 }
@@ -147,7 +147,7 @@ void destroy_child(child_t *child)
 }
 
 void generate_children
-( protocol_state_t* parent, int agents, hash_t hash[MAXN*MAXN],
+( protocol_state_t* parent, int agents, twin_queues hash[MAXN*MAXN],
   int protocol_name ) 
 {
 	int i, j, calls_to_child;
@@ -189,7 +189,7 @@ void generate_children
 			 (foundChild->calls_to_child) += calls_to_child;
 		  }
 		  else {
-		  	childsList = hash[edges_of(temp, agents)-1].can_hash;
+		  	childsList = hash[edges_of(temp, agents)-1].can_lab_queue;
 		
 			if ( enqueue_unique_to_sorted_queue(childsList, 
 					&childsQueueNode, potential_child->childs_state_ptr) 
@@ -205,7 +205,7 @@ void generate_children
 }
 
 void build_the_markov_chain
-	(hash_t hash[MAXN*MAXN], int agents, int protocol_name)
+	(twin_queues hash[MAXN*MAXN], int agents, int protocol_name)
 {
 	int i;
 	
@@ -217,7 +217,7 @@ void build_the_markov_chain
 	
 	FOR_ALL_EDGES(i, agents) {
 		//~ start = clock();
-		QUEUE_FOREACH(p, hash[i].can_hash)
+		QUEUE_FOREACH(p, hash[i].can_lab_queue)
 			generate_children(p->data, agents, hash, protocol_name);
 		//~ end = clock();
 		//~ printf("%d secrets in %f seconds\n", i+1 , 
@@ -257,7 +257,7 @@ float get_prob
 
 float find_expectation (int agents, int* no_states, int protocol_name)
 {		
-	hash_t hash[MAXN*MAXN];
+	twin_queues hash[MAXN*MAXN];
 	
 	init_hash(hash, agents, protocol_name);
 	
@@ -269,7 +269,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 		
 	/* count the states */	
 	FOR_ALL_EDGES(i, agents)
-		*no_states += QUEUE_COUNT(hash[i].can_hash);
+		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
 	
 	protocol_state_t** trans_matrix;
 	
@@ -284,7 +284,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	int label = 0;
 	
 	FOR_ALL_EDGES(i, agents)
-		QUEUE_FOREACH(p, hash[i].can_hash) {
+		QUEUE_FOREACH(p, hash[i].can_lab_queue) {
 			s = (protocol_state_t *) (p->data);
 			trans_matrix[label] = s;
 			s->id = label++;
@@ -335,7 +335,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	/* destroy the hash */		
 	FOR_ALL_EDGES(i, agents) {
 		//~ printf("%d secrets\n", i+1);
-		QUEUE_FOREACH(p, hash[i].can_hash) {
+		QUEUE_FOREACH(p, hash[i].can_lab_queue) {
 			s = (protocol_state_t *) (p->data);
 			
 			//~ printf("state = %d\n", s->id+1);			
@@ -344,7 +344,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 			DELETE_QUEUE(s->children);
 			FREE_SAFE(s);
 		}
-		DELETE_QUEUE(hash[i].can_hash);
+		DELETE_QUEUE(hash[i].can_lab_queue);
 	}	
 		
 	return result;	
