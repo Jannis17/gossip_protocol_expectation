@@ -5,6 +5,7 @@
 #include "memory.h"
 #include "queue.h"
 #include "state.h"
+#include "compar.h"
 
 /*
  * dequeue_from_queue: dequeues an item from queue
@@ -13,7 +14,6 @@
  *
  * returns 1 if successful, 0 otherwise
  */
- 
 int dequeue_from_queue(struct queue_t *hd, void **data)
 {
 	struct queue_node_t *p;
@@ -38,7 +38,6 @@ int dequeue_from_queue(struct queue_t *hd, void **data)
 
 	return 1;
 }
-
 
 /*
  * reset_queue: resets a queue
@@ -132,7 +131,6 @@ int search_in_sorted_queue
  *  return value:
  *  NEW_ITEM : if data is not in the queue
  *  DUPLICATE_ITEM: if data is already in the queue */
-
 int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	struct queue_node_t **dataPtr, void *data)
 {

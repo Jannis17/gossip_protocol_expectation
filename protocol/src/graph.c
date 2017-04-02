@@ -1,6 +1,7 @@
 #include "main.h"
 #include "graph.h"
 #include "state.h"
+#include "compar.h"
 
 /* counts the directed edges (including loops) in g */
 int edges_of (graph g[MAXN*MAXM], int n) 
@@ -14,26 +15,6 @@ int edges_of (graph g[MAXN*MAXM], int n)
 	
 	return edges;
 }
-
-/* compares g1 and g2 lexicographically
- * return value: 
- * LESS iff g1 < g2
- * EQUAL iff g1 == g2 
- * GREATER iff g1 > g2 */
-int comp_graphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) 
-{
-	size_t k;
-	
-	for (k = 0; k < MAXM*(size_t)n; ++k) {
-		 if (g1[k] < g2[k])
-			return LESS;
-		 if (g1[k] > g2[k])
-			return GREATER;
-	}
-	
-	return EQUAL;
-}
-
 
 /* adds only self loops and NO OTHER edge in g */
 void init_secrets_graph (graph g[MAXN*MAXM], int n) 

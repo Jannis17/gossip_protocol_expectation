@@ -1,6 +1,8 @@
 #ifndef H_MEMORY_H_
 #define H_MEMORY_H_
 
+#include "state.h"
+
 #define EXIT_IF_OUT_OF_MEMORY(ptr)			\
 	do {					\
 		if(!(ptr)) {			\
@@ -36,6 +38,28 @@ do {	\
 		(p) = NULL;	\
 	}	\
 } while(0)
-	
+
+extern protocol_state_t* new_protocol_state 
+(graph g[MAXN*MAXM], int agents, int protocol_name);
+
+extern child_t *new_child
+( graph secrets[MAXN*MAXM], int agents, 
+  int protocol_name, int calls_to_child);
+  
+extern void destroy_child(child_t *child);
+
+extern void destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
+
+void init_hash
+(twin_queues hash[MAXN*MAXN], int agents, int protocol_name);
+
+protocol_state_t* new_protocol_state 
+(graph g[MAXN*MAXM], int agents, int protocol_name);
+
+child_t *new_child
+( graph secrets[MAXN*MAXM], int agents, 
+  int protocol_name, int calls_to_child);
+
+
 
 #endif /* H_MEMORY_H_ */
