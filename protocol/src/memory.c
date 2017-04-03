@@ -5,17 +5,6 @@
 #include "compar.h"
 #include "graph.h"
 
-void init_hash
-(twin_queues hash[MAXN*MAXN], int agents, int protocol_name)
-{
-	int i;
-		
-	FOR_ALL_EDGES(i, agents){
-		hash[i].can_lab_queue = new_queue(MAXSTATES, comp_can_secrets);
-		hash[i].fixed_name_queue = new_queue(MAXSTATES, comp_fixed_name_secrets);
-	}
-}
-
 protocol_state_t* new_protocol_state 
 (graph g[MAXN*MAXM], int agents, int protocol_name)
 {
@@ -25,19 +14,14 @@ protocol_state_t* new_protocol_state
 	
 	copy_graph(s->fixed_name_secrets, g, agents);
 	
-	//~ print_graph(g, agents);
-	
 	if (protocol_name == ANY) {
 		copy_graph(s->fixed_name_secrets_sorted, g, agents);
-		qsort(s->fixed_name_secrets_sorted, agents*MAXM, 
-			sizeof(graph), comp_nodes);
+		qsort(s->fixed_name_secrets_sorted, 
+			agents*MAXM, 
+			sizeof(graph), cmp_graph_nodes);
 	}
-	
-	//~ print_graph(g, agents);
 			
 	find_can_label(g, s->can_secrets, agents); 
-	
-	//~ print_graph(s->can_secrets, agents);
 			
 	s->children = new_queue(MAXN*(MAXN-1), comp_children);
 	s->id = 0;
@@ -49,26 +33,21 @@ protocol_state_t* new_protocol_state
 
 /* creates a new child */
 child_t *new_child
-( graph secrets[MAXN*MAXM], int agents, 
-  int protocol_name, int calls_to_child)
+( graph secrets[MAXN*MAXM], protocol_state_t *s, int calls_to_child)
 {
-	protocol_state_t* childs_state = 
-		new_protocol_state(secrets, agents, protocol_name);
-	
 	child_t* result;
 		
 	MALLOC_SAFE(result, sizeof(child_t));
 	result->calls_to_child=calls_to_child;
-	result->childs_state_ptr=childs_state;
+	result->childs_state_ptr=s;
 	
 	return result;
 }
 
-void destroy_child(child_t *child)
+void destroy_protocol_state (protocol_state_t ** s)
 {
-	DELETE_QUEUE(child->childs_state_ptr->children);
-	FREE_SAFE(child->childs_state_ptr);
-	FREE_SAFE(child);
+	DELETE_QUEUE((*s)->children);
+	FREE_SAFE(*s);
 }
 
 

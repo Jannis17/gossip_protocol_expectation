@@ -23,7 +23,7 @@ int comp_graphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
 }
 
 /* needed for qsort*/
-int comp_nodes (const void *p, const void *q) {
+int cmp_graph_nodes (const void *p, const void *q) {
     graph x = *(const graph *)p;
     graph y = *(const graph *)q;
 

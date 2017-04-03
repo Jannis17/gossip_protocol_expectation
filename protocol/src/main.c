@@ -6,8 +6,8 @@
 #include "memory.h"
 #include "state.h"
 
-void printResults(int agentsMin, int agentsMax, int no_states[MAXN],
-	float expectation[MAXN], float elpsTime[MAXN], int protocol_name) {
+void printResults(int agents_min, int agents_max, int no_states[MAXN],
+	float expectation[MAXN], float elps_time[MAXN], int protocol_name) {
 	time_t timeNow = time(NULL);
 	struct tm localTime = *localtime(&timeNow);
 	char filename[300];
@@ -22,7 +22,7 @@ void printResults(int agentsMin, int agentsMax, int no_states[MAXN],
 	prot_name,
 	localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
 	localTime.tm_hour, localTime.tm_min, localTime.tm_sec,
-	agentsMin, agentsMax);
+	agents_min, agents_max);
 	
 	FILE * fp = fopen (filename, "w+");
     
@@ -39,56 +39,52 @@ void printResults(int agentsMin, int agentsMax, int no_states[MAXN],
 		localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
 	fprintf(fp,"==========================================\n");
 	
-	for (agents=agentsMin; agents<=agentsMax; agents++) {
+	for (agents=agents_min; agents<=agents_max; agents++) {
 		fprintf(fp,"%d agents:\n", agents);
 		fprintf(fp,"Number of states = %d\n", no_states[agents]);
 		fprintf(fp,"Expected length = %f\n", expectation[agents]);
-		fprintf(fp,"Elapsed Time = %f s\n", elpsTime[agents]);
+		fprintf(fp,"Elapsed Time = %f s\n", elps_time[agents]);
 		fprintf(fp,"==========================================\n");
 	}
 	
 	fclose(fp);
 }
 
-int main (int argc, char * argv[]){
-	if ( argc !=4 ) 
-	{
-		printf("Usage: %s [protocol_name] ", argv[0]);
-		printf("[agents_min] [agents_max]\n\n");
-				
-		return 1;
-	}
-		
-	int agentsMin = atoi(argv[2]), agentsMax = atoi(argv[3]);
-
-	if ( agentsMin > agentsMax ) 
-	{
-		printf("Usage: %s [protocol_name]\n", argv[0]);
-		printf("Agents_min should be at most agents_max");
-				
-		return 1;
-	}
+void print_usage_and_exit(int argc, char * argv[])
+{
+	printf("Usage: %s protocol_name ", argv[0]);
+	printf("agents_min agents_max [no_exp]\n\n");
+	printf("agents_min:  minimum number of agents\n");
+	printf("agents_max:  maximum number of agents (%d >= agents_max >= agents_min) \n", MAXN);
+	printf("protocol_name: ANY or LNS\n");
+	printf("no_exp: if present then the program will not calculate the expectation (optional)\n");
 	
-	if ( agentsMax > MAXN ) 
-	{
-		printf("Usage: %s [protocol_name]\n", argv[0]);
-		printf("Agents_max should be at most %d\n", MAXN);
-		return 1;
-	}
+	exit(1);
+}
 
+int main (int argc, char * argv[]){
+	if ( argc !=4 || argc!=5) 
+		print_usage_and_exit(argc, argv);		
+			
+	int agents_min = atoi(argv[2]), agents_max = atoi(argv[3]);
+
+	if ( agents_min > agents_max ) 
+		print_usage_and_exit(argc, argv);			
+	
+	if ( agents_max > MAXN ) 
+		print_usage_and_exit(argc, argv);			
+	
 	int protocol_name;
 	
 	if ( strcmp(argv[1], "LNS") == 0)
 		protocol_name = LNS;
 	else if ( strcmp(argv[1], "ANY") == 0 )
 			protocol_name = ANY;
-		else 	{
-			printf("Usage: %s [protocol_name]\n", argv[0]);
-			printf("protocol_name should be either ANY or LNS\n\n");
-		
-			return 1;
-		}
+		else 
+			print_usage_and_exit(argc, argv);			
 	
+	int calc_exp = (argc== 5 && strcmp(argv[4], "no_exp") == 0)? 0 : 1;
+		
 	/* The following optional call verifies that we are linking
 	 * to compatible versions of the nauty routines. */
 	nauty_check(WORDSIZE,MAXM,MAXN,NAUTYVERSIONID);
@@ -101,22 +97,22 @@ int main (int argc, char * argv[]){
 		
 	clock_t start, end;
 	int agents;
-	float elpsTime[MAXN];
+	float elps_time[MAXN];
 	
 	//~ printf("%d\n", protocol_name);
 													
-	for (agents=agentsMin; agents<=agentsMax; agents++) {
+	for (agents=agents_min; agents<=agents_max; agents++) {
 		start = clock();		
 		expectation[agents] = 
 			find_expectation(agents, &no_states[agents], protocol_name);								
 		end = clock();
-		elpsTime[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
+		elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
 	}
 			
-	printResults(agentsMin, agentsMax, no_states, expectation, 
-		elpsTime, protocol_name);
+	printResults(agents_min, agents_max, no_states, expectation, 
+		elps_time, protocol_name);
 	
-	//~ graph_test(agentsMin);
+	//~ graph_test(agents_min);
 	
 	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
 	

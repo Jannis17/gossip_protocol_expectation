@@ -14,36 +14,25 @@ int enqueue_to_twin_queues
 (twin_queues hash[MAXN*MAXN], protocol_state_t* s,
  struct queue_node_t** found, int protocol_name)
 {
-	struct queue_t* fixed_name_queue = 
-		hash[s-> edges -1].fixed_name_queue;
-	struct queue_t* can_queue = 
-		hash[s-> edges -1].can_lab_queue;
+	int result;
+	struct queue_t* fixed_name_queue, * can_queue;
 	
-	if (search_in_sorted_queue(fixed_name_queue, found, s))
+	if (protocol_name == ANY)
+		fixed_name_queue = 
+			hash[s-> edges -1].fixed_name_queue;
+	
+	can_queue = hash[s-> edges -1].can_lab_queue;
+	
+	if ( protocol_name == ANY &&
+		 search_in_sorted_queue(fixed_name_queue, found, s))
 		return DUPLICATE_ITEM;
 	
-	int result=enqueue_unique_to_sorted_queue(can_queue, found, s);
+	result = enqueue_unique_to_sorted_queue(can_queue, found, s);
 	
-	if (result == NEW_ITEM)
+	if (protocol_name == ANY && result == NEW_ITEM)
 		enqueue_unique_to_sorted_queue(fixed_name_queue, found, s);
 	
 	return result; 					
-}
-
-void add_new_child_to_parent
-(protocol_state_t* parent, protocol_state_t* childs_state, int calls)
-{
-	child_t* new_child;
-	
-	MALLOC_SAFE(new_child, sizeof(child_t));
-	new_child->childs_state_ptr = childs_state;
-					
-	if( enqueue_unique_to_sorted_queue
-		(parent->children, NULL, new_child)
-		== DUPLICATE_ITEM ) {
-		//INTERNAL_ERROR("Found duplicate child where I shouldn't!");
-	} else
-		new_child->calls_to_child = calls;
 }
 
 void generate_children
@@ -55,6 +44,7 @@ void generate_children
 	child_t* found_child;
 	struct queue_node_t* queue_node_of_found_child;
 	child_t * potential_child;
+	protocol_state_t* childs_state;
 					
 	for (i=0; i<agents; i++)
 	  for (j=i+1; j<agents; j++) 
@@ -62,38 +52,54 @@ void generate_children
 	    SWITCH_PROT_NAME(protocol_name, 
 	    	calls_to_child = 
 				poss_calls(parent->fixed_name_secrets, i, j),
-	    	calls_to_child = 1);
-	    	
+	    	calls_to_child = 1);	    	
 	    if ( calls_to_child > 0 )
 		{
 		  copy_graph(temp, parent->fixed_name_secrets, agents);
 		  make_call(temp, i ,j);
+		  		  
+		  childs_state = 
+			new_protocol_state(temp, agents, protocol_name);
 		  
 		  potential_child = 
-			new_child(temp, agents, protocol_name, calls_to_child);
+			new_child(temp, childs_state, calls_to_child);
 		  		  
 		  if ( search_in_sorted_queue( parent->children, 
 				 					   &queue_node_of_found_child, 
 									   potential_child) )
-		  {
-			 destroy_child(potential_child); 
-			 found_child = (child_t *) queue_node_of_found_child->data;
-			 (found_child->calls_to_child) += calls_to_child;
-		  }
-		  else {		  			
-			if ( enqueue_to_twin_queues
-				  (hash, potential_child->childs_state_ptr, 
-				   &queue_node_of_found_child, protocol_name) 
-					== DUPLICATE_ITEM )
-				 destroy_child(potential_child);
- 		  
-			add_new_child_to_parent(parent, 
-				queue_node_of_found_child->data, 
-				calls_to_child);
-		  }		  
-	    }
-	  }	
-}
+			{
+				FREE_SAFE(potential_child); 
+				destroy_protocol_state(& childs_state);
+				found_child = 
+					(child_t *) queue_node_of_found_child->data;
+				(found_child->calls_to_child) += calls_to_child;
+			}
+			else {		  			
+				if (enqueue_to_twin_queues
+					( hash, childs_state, 
+					  &queue_node_of_found_child, protocol_name)
+					  == DUPLICATE_ITEM ) 
+				{
+				   destroy_protocol_state(&childs_state);
+				   potential_child->childs_state_ptr =
+				     (protocol_state_t *)
+				      queue_node_of_found_child->data;
+				   enqueue_unique_to_sorted_queue(
+					parent->children,
+					NULL,
+					potential_child);
+				}
+				else {
+					enqueue_unique_to_sorted_queue(
+						parent->children,
+						&queue_node_of_found_child,
+						potential_child);					
+				} 		    					
+			}
+		  
+		}		  
+	   }
+}	
 
 void build_the_markov_chain
 (twin_queues hash[MAXN*MAXN], int agents, int protocol_name)
@@ -102,18 +108,22 @@ void build_the_markov_chain
 	
 	struct queue_node_t * p;
 	
+	printf("=========================================\n");
 	printf("Agents = %d\n", agents);
 	
 	clock_t start, end;
 	
 	FOR_ALL_EDGES(i, agents) {
 		start = clock();
-		QUEUE_FOREACH(p, hash[i].can_lab_queue)
+		printf("%d secrets:", i+1);
+		QUEUE_FOREACH(p, hash[i].can_lab_queue) 
 			generate_children(p->data, agents, hash, protocol_name);
 		end = clock();
-		printf("%d secrets in %f seconds\n", i+1 , 
-				( (float) end - start )/CLOCKS_PER_SEC);	
+		printf("%lu states in %f seconds\n", 
+				QUEUE_COUNT(hash[i].can_lab_queue),
+				( (float) end - start )/CLOCKS_PER_SEC );	
 	}
+	printf("\n");
 }
 
 float get_prob
@@ -146,22 +156,40 @@ float get_prob
 }
 
 
+void init_markov_chain
+(twin_queues hash[MAXN*MAXN], int agents, int protocol_name)
+{
+	int i;
+	graph init_secrets [MAXN*MAXM];
+	protocol_state_t *s;
+		
+	FOR_ALL_EDGES(i, agents){
+		SWITCH_PROT_NAME(protocol_name,
+			hash[i].can_lab_queue = 
+				new_queue(MAXSTATES, comp_can_secrets),
+			hash[i].can_lab_queue = 
+				new_queue(MAXSTATES, comp_can_secrets);
+			hash[i].fixed_name_queue = 
+				new_queue(MAXSTATES, comp_fixed_name_secrets));
+	}
+	
+	init_secrets_graph(init_secrets, agents);
+	s =	new_protocol_state(init_secrets, agents, protocol_name);
+	enqueue_to_twin_queues(hash, s, NULL, protocol_name);
+}
+
 float find_expectation (int agents, int* no_states, int protocol_name)
 {		
 	twin_queues hash[MAXN*MAXN];
-	graph init_secrets [MAXN*MAXM];
 	protocol_state_t *s;
 	int i, j, label;
 	protocol_state_t** trans_matrix;
 	struct queue_node_t * p;
 	float* expect_vec;
 	
-	/* add the initial state to the markov chain */	
-	init_hash(hash, agents, protocol_name);
-	init_secrets_graph(init_secrets, agents);
-	s =	new_protocol_state(init_secrets, agents, protocol_name);
-	enqueue_to_twin_queues(hash, s ,NULL, protocol_name);
-	
+	/* add the initial state to the markov chain */
+	init_markov_chain(hash, agents, protocol_name);
+			
 	/* build the markov chain */
 	build_the_markov_chain(hash, agents, protocol_name);
 		
@@ -169,7 +197,8 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	*no_states = 0;
 	
 	FOR_ALL_EDGES(i, agents) {
-		if ( QUEUE_COUNT(hash[i].can_lab_queue) != 
+		if ( protocol_name == ANY &&
+			 QUEUE_COUNT(hash[i].can_lab_queue) != 
 			 QUEUE_COUNT(hash[i].fixed_name_queue) )
 			INTERNAL_ERROR("Queues do not have the same number of elements\n");			 
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);

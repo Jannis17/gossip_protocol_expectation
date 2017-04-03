@@ -46,25 +46,17 @@ do {	\
 	}	\
 } while(0)
 
-extern protocol_state_t* new_protocol_state 
+protocol_state_t* new_protocol_state 
 (graph g[MAXN*MAXM], int agents, int protocol_name);
-
-extern child_t *new_child
-( graph secrets[MAXN*MAXM], int agents, 
-  int protocol_name, int calls_to_child);
   
-extern void destroy_child(child_t *child);
-
-extern void destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
-
-void init_hash
-(twin_queues hash[MAXN*MAXN], int agents, int protocol_name);
+void destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
 
 protocol_state_t* new_protocol_state 
 (graph g[MAXN*MAXM], int agents, int protocol_name);
 
 child_t *new_child
-( graph secrets[MAXN*MAXM], int agents, 
-  int protocol_name, int calls_to_child);
+( graph secrets[MAXN*MAXM], protocol_state_t *s, int calls_to_child);
+
+void destroy_protocol_state (protocol_state_t ** s);
 
 #endif /* H_MEMORY_H_ */

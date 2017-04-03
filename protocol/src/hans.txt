@@ -1,0 +1,235 @@
+Agents = 3
+3 secrets:
+1 states in 0.000007 seconds
+4 secrets:
+0 states in 0.000000 seconds
+5 secrets:
+1 states in 0.000005 seconds
+6 secrets:
+0 states in 0.000000 seconds
+7 secrets:
+0 states in 0.000000 seconds
+8 secrets:
+1 states in 0.000005 seconds
+9 secrets:
+1 states in 0.000004 seconds
+Agents = 4
+4 secrets:
+1 states in 0.000011 seconds
+5 secrets:
+0 states in 0.000001 seconds
+6 secrets:
+1 states in 0.000009 seconds
+7 secrets:
+0 states in 0.000001 seconds
+8 secrets:
+1 states in 0.000011 seconds
+9 secrets:
+1 states in 0.000009 seconds
+10 secrets:
+1 states in 0.000009 seconds
+11 secrets:
+0 states in 0.000000 seconds
+12 secrets:
+2 states in 0.000019 seconds
+13 secrets:
+1 states in 0.000008 seconds
+14 secrets:
+3 states in 0.000023 seconds
+15 secrets:
+1 states in 0.000009 seconds
+16 secrets:
+1 states in 0.000011 seconds
+Agents = 5
+5 secrets:
+1 states in 0.000021 seconds
+6 secrets:
+0 states in 0.000000 seconds
+7 secrets:
+1 states in 0.000017 seconds
+8 secrets:
+0 states in 0.000000 seconds
+9 secrets:
+1 states in 0.000016 seconds
+10 secrets:
+1 states in 0.000018 seconds
+11 secrets:
+1 states in 0.000018 seconds
+12 secrets:
+1 states in 0.000016 seconds
+13 secrets:
+3 states in 0.000050 seconds
+14 secrets:
+2 states in 0.000027 seconds
+15 secrets:
+3 states in 0.000046 seconds
+16 secrets:
+2 states in 0.000033 seconds
+17 secrets:
+4 states in 0.000064 seconds
+18 secrets:
+4 states in 0.000068 seconds
+19 secrets:
+7 states in 0.000121 seconds
+20 secrets:
+11 states in 0.000167 seconds
+21 secrets:
+11 states in 0.000157 seconds
+22 secrets:
+9 states in 0.000137 seconds
+23 secrets:
+4 states in 0.000064 seconds
+24 secrets:
+1 states in 0.000019 seconds
+25 secrets:
+1 states in 0.000024 seconds
+Agents = 6
+6 secrets:
+1 states in 0.000042 seconds
+7 secrets:
+0 states in 0.000000 seconds
+8 secrets:
+1 states in 0.000033 seconds
+9 secrets:
+0 states in 0.000000 seconds
+10 secrets:
+1 states in 0.000028 seconds
+11 secrets:
+1 states in 0.000029 seconds
+12 secrets:
+2 states in 0.000060 seconds
+13 secrets:
+1 states in 0.000024 seconds
+14 secrets:
+3 states in 0.000074 seconds
+15 secrets:
+2 states in 0.000043 seconds
+16 secrets:
+6 states in 0.000155 seconds
+17 secrets:
+5 states in 0.000136 seconds
+18 secrets:
+9 states in 0.000251 seconds
+19 secrets:
+5 states in 0.000135 seconds
+20 secrets:
+12 states in 0.000330 seconds
+21 secrets:
+18 states in 0.000500 seconds
+22 secrets:
+24 states in 0.000640 seconds
+23 secrets:
+24 states in 0.000637 seconds
+24 secrets:
+31 states in 0.000906 seconds
+25 secrets:
+36 states in 0.001039 seconds
+26 secrets:
+63 states in 0.001878 seconds
+27 secrets:
+74 states in 0.002351 seconds
+28 secrets:
+111 states in 0.003974 seconds
+29 secrets:
+108 states in 0.003402 seconds
+30 secrets:
+103 states in 0.003380 seconds
+31 secrets:
+70 states in 0.002122 seconds
+32 secrets:
+44 states in 0.001475 seconds
+33 secrets:
+13 states in 0.000443 seconds
+34 secrets:
+5 states in 0.000187 seconds
+35 secrets:
+1 states in 0.000040 seconds
+36 secrets:
+1 states in 0.000055 seconds
+Agents = 7
+7 secrets:
+1 states in 0.000075 seconds
+8 secrets:
+0 states in 0.000000 seconds
+9 secrets:
+1 states in 0.000062 seconds
+10 secrets:
+0 states in 0.000000 seconds
+11 secrets:
+1 states in 0.000053 seconds
+12 secrets:
+1 states in 0.000052 seconds
+13 secrets:
+2 states in 0.000109 seconds
+14 secrets:
+1 states in 0.000048 seconds
+15 secrets:
+3 states in 0.000145 seconds
+16 secrets:
+3 states in 0.000132 seconds
+17 secrets:
+7 states in 0.000345 seconds
+18 secrets:
+5 states in 0.000239 seconds
+19 secrets:
+9 states in 0.000445 seconds
+20 secrets:
+8 states in 0.000388 seconds
+21 secrets:
+20 states in 0.000963 seconds
+22 secrets:
+29 states in 0.001377 seconds
+23 secrets:
+41 states in 0.002102 seconds
+24 secrets:
+42 states in 0.002276 seconds
+25 secrets:
+59 states in 0.003243 seconds
+26 secrets:
+73 states in 0.004148 seconds
+27 secrets:
+110 states in 0.006931 seconds
+28 secrets:
+160 states in 0.011031 seconds
+29 secrets:
+234 states in 0.018965 seconds
+30 secrets:
+287 states in 0.027963 seconds
+31 secrets:
+367 states in 0.044487 seconds
+32 secrets:
+439 states in 0.084305 seconds
+33 secrets:
+602 states in 0.165863 seconds
+34 secrets:
+789 states in 0.307941 seconds
+35 secrets:
+1066 states in 0.540223 seconds
+36 secrets:
+1420 states in 0.717638 seconds
+37 secrets:
+1860 states in 1.076328 seconds
+38 secrets:
+2165 states in 1.152993 seconds
+39 secrets:
+2284 states in 0.916328 seconds
+40 secrets:
+2011 states in 0.528658 seconds
+41 secrets:
+1546 states in 0.231289 seconds
+42 secrets:
+1007 states in 0.096267 seconds
+43 secrets:
+532 states in 0.034479 seconds
+44 secrets:
+214 states in 0.012743 seconds
+45 secrets:
+67 states in 0.004211 seconds
+46 secrets:
+16 states in 0.001094 seconds
+47 secrets:
+5 states in 0.000368 seconds
+48 secrets:
+1 states in 0.000078 seconds
+49 secrets:
+1 states in 0.000106 seconds
