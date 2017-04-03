@@ -137,11 +137,8 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	struct queue_node_t *p;
 	struct queue_node_t *newItem;
 	
-	if (QUEUE_IS_FULL(hd)) {
-		fprintf(stderr, "Internal error: Trying to insert data in \
-			a full queue\n");
-		exit(1);
-	}
+	if (QUEUE_IS_FULL(hd))
+		INTERNAL_ERROR("Trying to insert data in a full queue");
 	
 	if(QUEUE_IS_EMPTY(hd)) {
 		NEW_QUEUE_ITEM(newItem, data, hd, NULL);

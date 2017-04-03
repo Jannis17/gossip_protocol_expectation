@@ -19,8 +19,7 @@
 					ANY_COMM;	\
 					break;	\
 				default:	\
-					printf("Internal Error: Unknown protocol name!");\
-					exit(1);\
+					INTERNAL_ERROR("Unknown protocol name!");	\
 			}	\
 	} while(0)
 

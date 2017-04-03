@@ -12,7 +12,7 @@
 
 int enqueue_to_twin_queues
 (twin_queues hash[MAXN*MAXN], protocol_state_t* s,
- struct queue_node_t** found)
+ struct queue_node_t** found, int protocol_name)
 {
 	struct queue_t* fixed_name_queue = 
 		hash[s-> edges -1].fixed_name_queue;
@@ -40,10 +40,8 @@ void add_new_child_to_parent
 					
 	if( enqueue_unique_to_sorted_queue
 		(parent->children, NULL, new_child)
-		== DUPLICATE_ITEM ) 
-	{
-		//~ printf("Internal Error: Find duplicate child where I shouldn't!\n");
-		//~ exit(1);
+		== DUPLICATE_ITEM ) {
+		//INTERNAL_ERROR("Found duplicate child where I shouldn't!");
 	} else
 		new_child->calls_to_child = calls;
 }
@@ -85,7 +83,8 @@ void generate_children
 		  else {		  			
 			if ( enqueue_to_twin_queues
 				  (hash, potential_child->childs_state_ptr, 
-				   &queue_node_of_found_child) == DUPLICATE_ITEM )
+				   &queue_node_of_found_child, protocol_name) 
+					== DUPLICATE_ITEM )
 				 destroy_child(potential_child);
  		  
 			add_new_child_to_parent(parent, 
@@ -161,7 +160,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	init_hash(hash, agents, protocol_name);
 	init_secrets_graph(init_secrets, agents);
 	s =	new_protocol_state(init_secrets, agents, protocol_name);
-	enqueue_to_twin_queues(hash, s ,NULL);
+	enqueue_to_twin_queues(hash, s ,NULL, protocol_name);
 	
 	/* build the markov chain */
 	build_the_markov_chain(hash, agents, protocol_name);
@@ -172,11 +171,7 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 	FOR_ALL_EDGES(i, agents) {
 		if ( QUEUE_COUNT(hash[i].can_lab_queue) != 
 			 QUEUE_COUNT(hash[i].fixed_name_queue) )
-		{
-			 printf("Internal error: Queues do not have the\
-			 same number of elements\n");
-			 exit(1);
-		}
+			INTERNAL_ERROR("Queues do not have the same number of elements\n");			 
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
 	}	
 	

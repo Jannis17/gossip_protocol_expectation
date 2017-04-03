@@ -5,7 +5,6 @@
 #include "compar.h"
 #include "graph.h"
 
-
 void init_hash
 (twin_queues hash[MAXN*MAXN], int agents, int protocol_name)
 {

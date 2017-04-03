@@ -19,6 +19,13 @@
 		}				\
 	} while(0)
 
+#define INTERNAL_ERROR(message)			\
+	do {					\
+		fprintf(stderr, "Internal error: %s\n", (message));	\
+		exit(1);	\
+	} while(0)
+
+
 #define MALLOC_SAFE(p, siz) \
 do {					\
 	(p)= malloc((siz)); \
@@ -59,7 +66,5 @@ protocol_state_t* new_protocol_state
 child_t *new_child
 ( graph secrets[MAXN*MAXM], int agents, 
   int protocol_name, int calls_to_child);
-
-
 
 #endif /* H_MEMORY_H_ */
