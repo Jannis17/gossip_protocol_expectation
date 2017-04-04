@@ -2,5 +2,8 @@
 I should keep a pointer to the previous element and then insert the
 new item there
 
+- when I make the search in children I should keep a pointer to the
+prev child and then start the search in the hash from there
+
 - implement the version where the expectation is not calculated
 
