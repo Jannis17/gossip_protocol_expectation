@@ -8,6 +8,11 @@
 
 float find_expectation (int agents, int* no_states, int protocol_name);
 
+typedef struct twin_queues_tag {
+	struct queue_t* fixed_name_queue;
+	struct queue_t* can_lab_queue;
+} twin_queues;
+
 /* State of the protocol. The graph secrets contains the
  * distribution of secrets */
 typedef struct protocol_state_tag {
@@ -17,7 +22,7 @@ typedef struct protocol_state_tag {
 	int id;
 	int agents;
 	int edges;
-	struct queue_t* children;
+	twin_queues children;
 } protocol_state_t;
 
 /* child of a given state */
@@ -25,10 +30,5 @@ typedef struct child_tag {
 	int calls_to_child;
 	protocol_state_t* childs_state_ptr;
 } child_t;
-
-typedef struct twin_queues_tag {
-	struct queue_t* fixed_name_queue;
-	struct queue_t* can_lab_queue;
-} twin_queues;
 
 #endif /* H_STATE_H_ */

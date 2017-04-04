@@ -10,6 +10,24 @@
 #include "compar.h"
 #include "../../nauty26r7/nauty.h"
 
+/* searches for a state in twin queues
+ * return value: 1 if found, 0 ow */
+int search_in_twin_queues 
+(twin_queues twin_q, struct queue_node_t** found, 
+ child_t* child, int protocol_name)
+{
+	struct queue_t* fixed_name_queue, * can_queue;
+	
+	fixed_name_queue = twin_q.fixed_name_queue;
+	can_queue = twin_q.can_lab_queue;
+	
+	if ( protocol_name == ANY &&
+		 search_in_sorted_queue(fixed_name_queue, found, child))
+		return 1;
+	
+	return search_in_sorted_queue(can_queue, found, child); 					
+}
+
 int enqueue_to_twin_queues
 (twin_queues hash[MAXN*MAXN], protocol_state_t* s,
  struct queue_node_t** found, int protocol_name)
@@ -34,6 +52,29 @@ int enqueue_to_twin_queues
 	
 	return result; 					
 }
+
+//~ enqueue_unique_to_sorted_queue(
+//~ parent->children.can_lab_queue,
+//~ &queue_node_of_found_child,
+		//~ potential_child);
+					//~ if (protocol_name == ANY)	
+						//~ enqueue_unique_to_sorted_queue(
+						 //~ parent->children.fixed_name_queue,
+						 //~ &queue_node_of_found_child,
+						 //~ potential_child);			
+
+void enqueue_unique_to_twin_queues
+(twin_queues twin_q, struct queue_node_t** found, void* item,
+int protocol_name)
+{
+  enqueue_unique_to_sorted_queue
+	(twin_q.can_lab_queue, found, item);
+	
+  if (protocol_name == ANY)	
+	 enqueue_unique_to_sorted_queue
+		(twin_q.fixed_name_queue, found, item);					
+}
+
 
 void generate_children
 (protocol_state_t* parent, int agents, 
@@ -64,9 +105,9 @@ void generate_children
 		  potential_child = 
 			new_child(temp, childs_state, calls_to_child);
 		  		  
-		  if ( search_in_sorted_queue( parent->children, 
+		  if ( search_in_twin_queues( parent->children, 
 				 					   &queue_node_of_found_child, 
-									   potential_child) )
+									   potential_child, protocol_name) )
 			{
 				FREE_SAFE(potential_child); 
 				destroy_protocol_state(& childs_state);
@@ -85,15 +126,27 @@ void generate_children
 				     (protocol_state_t *)
 				      queue_node_of_found_child->data;
 				   enqueue_unique_to_sorted_queue(
-					parent->children,
+					parent->children.can_lab_queue,
 					NULL,
 					potential_child);
+				  if (protocol_name == ANY)	
+					enqueue_unique_to_sorted_queue(
+					parent->children.fixed_name_queue,
+					NULL,
+					potential_child);	
 				}
 				else {
-					enqueue_unique_to_sorted_queue(
-						parent->children,
-						&queue_node_of_found_child,
-						potential_child);					
+					enqueue_unique_to_twin_queues(parent->children, NULL,
+					potential_child, protocol_name);
+					//~ enqueue_unique_to_sorted_queue(
+						//~ parent->children.can_lab_queue,
+						//~ NULL,
+						//~ potential_child);
+					//~ if (protocol_name == ANY)	
+						//~ enqueue_unique_to_sorted_queue(
+						 //~ parent->children.fixed_name_queue,
+						 //~ NULL,
+						 //~ potential_child);					
 				} 		    					
 			}
 		  
@@ -138,7 +191,7 @@ float get_prob
 	
 	float enumer, denom;
 	
-	QUEUE_FOREACH(p, s->children) {
+	QUEUE_FOREACH(p, s->children.can_lab_queue) {
 		child = (child_t*) (p-> data);
 		if (child->childs_state_ptr->id == to) {
 			enumer = child->calls_to_child;
@@ -200,7 +253,8 @@ float find_expectation (int agents, int* no_states, int protocol_name)
 		if ( protocol_name == ANY &&
 			 QUEUE_COUNT(hash[i].can_lab_queue) != 
 			 QUEUE_COUNT(hash[i].fixed_name_queue) )
-			INTERNAL_ERROR("Queues do not have the same number of elements\n");			 
+			INTERNAL_ERROR("Queues do not have\
+			the same number of elements\n");			 
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
 	}	
 	

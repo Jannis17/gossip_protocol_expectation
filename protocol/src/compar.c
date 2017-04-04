@@ -63,8 +63,7 @@ int comp_fixed_name_secrets(const void* item1, const void* item2)
 }
 
 
-/* compares the secrets of the args lexicographically */
-int comp_children(const void* item1, const void* item2)
+int comp_can_children(const void* item1, const void* item2)
 {
 	child_t* child1, *child2;
 	
@@ -73,5 +72,17 @@ int comp_children(const void* item1, const void* item2)
 	
 	return comp_graphs(child1->childs_state_ptr->can_secrets, 
 			child2->childs_state_ptr->can_secrets, 
+			child1->childs_state_ptr->agents);
+}
+
+int comp_fixed_name_children(const void* item1, const void* item2)
+{
+	child_t* child1, *child2;
+	
+	child1 = (child_t *) item1;
+	child2 = (child_t *) item2;
+	
+	return comp_graphs(child1->childs_state_ptr->fixed_name_secrets_sorted, 
+			child2->childs_state_ptr->fixed_name_secrets_sorted, 
 			child1->childs_state_ptr->agents);
 }

@@ -63,7 +63,7 @@ void print_usage_and_exit(int argc, char * argv[])
 }
 
 int main (int argc, char * argv[]){
-	if ( argc !=4 || argc!=5) 
+	if ( argc !=4 && argc!=5) 
 		print_usage_and_exit(argc, argv);		
 			
 	int agents_min = atoi(argv[2]), agents_max = atoi(argv[3]);

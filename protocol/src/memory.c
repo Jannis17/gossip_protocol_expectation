@@ -13,7 +13,9 @@ protocol_state_t* new_protocol_state
 	MALLOC_SAFE(s, sizeof(protocol_state_t));
 	
 	copy_graph(s->fixed_name_secrets, g, agents);
-	
+	s->children.fixed_name_queue = 
+		new_queue(MAXN*(MAXN-1), comp_fixed_name_children);
+		
 	if (protocol_name == ANY) {
 		copy_graph(s->fixed_name_secrets_sorted, g, agents);
 		qsort(s->fixed_name_secrets_sorted, 
@@ -23,7 +25,9 @@ protocol_state_t* new_protocol_state
 			
 	find_can_label(g, s->can_secrets, agents); 
 			
-	s->children = new_queue(MAXN*(MAXN-1), comp_children);
+	s->children.can_lab_queue = 
+		new_queue(MAXN*(MAXN-1), comp_can_children);
+		
 	s->id = 0;
 	s->agents = agents;
 	s->edges = edges_of(g, agents);
@@ -46,7 +50,8 @@ child_t *new_child
 
 void destroy_protocol_state (protocol_state_t ** s)
 {
-	DELETE_QUEUE((*s)->children);
+	DELETE_QUEUE((*s)->children.can_lab_queue);
+	DELETE_QUEUE((*s)->children.fixed_name_queue);
 	FREE_SAFE(*s);
 }
 
@@ -69,7 +74,8 @@ void destroy_hash(int agents, twin_queues hash[MAXN*MAXN])
 			//~ printf("state = %d\n", s->id+1);			
 			//~ print_graph(s->can_secrets, s->agents);
 			
-			DELETE_QUEUE(s->children);
+			DELETE_QUEUE(s->children.fixed_name_queue);
+			DELETE_QUEUE(s->children.can_lab_queue);
 			FREE_SAFE(s);
 		}
 		DELETE_QUEUE(hash[i].can_lab_queue);
