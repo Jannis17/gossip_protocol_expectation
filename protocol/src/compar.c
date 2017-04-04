@@ -30,9 +30,9 @@ int cmp_graph_nodes (const void *p, const void *q) {
     /* Avoid return x - y, which can cause undefined behaviour
        because of signed integer overflow. */
     if (x < y)
-        return 1;  // Return -1 if you want ascending, 1 if you want descending order. 
+        return 1;  // Return -1 for ascending, 1 for descending order 
     else if (x > y)
-        return -1;   // Return 1 if you want ascending, -1 if you want descending order. 
+        return -1;   // Return 1 for ascending, -1 for descending order 
 
     return 0;
 }

@@ -10,72 +10,6 @@
 #include "compar.h"
 #include "../../nauty26r7/nauty.h"
 
-/* searches for a state in twin queues
- * return value: 1 if found, 0 ow */
-int search_in_twin_queues 
-(twin_queues twin_q, struct queue_node_t** found, 
- child_t* child, int protocol_name)
-{
-	struct queue_t* fixed_name_queue, * can_queue;
-	
-	fixed_name_queue = twin_q.fixed_name_queue;
-	can_queue = twin_q.can_lab_queue;
-	
-	if ( protocol_name == ANY &&
-		 search_in_sorted_queue(fixed_name_queue, found, child))
-		return 1;
-	
-	return search_in_sorted_queue(can_queue, found, child); 					
-}
-
-int enqueue_to_twin_queues
-(twin_queues hash[MAXN*MAXN], protocol_state_t* s,
- struct queue_node_t** found, int protocol_name)
-{
-	int result;
-	struct queue_t* fixed_name_queue, * can_queue;
-	
-	if (protocol_name == ANY)
-		fixed_name_queue = 
-			hash[s-> edges -1].fixed_name_queue;
-	
-	can_queue = hash[s-> edges -1].can_lab_queue;
-	
-	if ( protocol_name == ANY &&
-		 search_in_sorted_queue(fixed_name_queue, found, s))
-		return DUPLICATE_ITEM;
-	
-	result = enqueue_unique_to_sorted_queue(can_queue, found, s);
-	
-	if (protocol_name == ANY && result == NEW_ITEM)
-		enqueue_unique_to_sorted_queue(fixed_name_queue, found, s);
-	
-	return result; 					
-}
-
-//~ enqueue_unique_to_sorted_queue(
-//~ parent->children.can_lab_queue,
-//~ &queue_node_of_found_child,
-		//~ potential_child);
-					//~ if (protocol_name == ANY)	
-						//~ enqueue_unique_to_sorted_queue(
-						 //~ parent->children.fixed_name_queue,
-						 //~ &queue_node_of_found_child,
-						 //~ potential_child);			
-
-void enqueue_unique_to_twin_queues
-(twin_queues twin_q, struct queue_node_t** found, void* item,
-int protocol_name)
-{
-  enqueue_unique_to_sorted_queue
-	(twin_q.can_lab_queue, found, item);
-	
-  if (protocol_name == ANY)	
-	 enqueue_unique_to_sorted_queue
-		(twin_q.fixed_name_queue, found, item);					
-}
-
-
 void generate_children
 (protocol_state_t* parent, int agents, 
  twin_queues hash[MAXN*MAXN], int protocol_name) 
@@ -108,49 +42,29 @@ void generate_children
 		  if ( search_in_twin_queues( parent->children, 
 				 					   &queue_node_of_found_child, 
 									   potential_child, protocol_name) )
-			{
-				FREE_SAFE(potential_child); 
-				destroy_protocol_state(& childs_state);
-				found_child = 
-					(child_t *) queue_node_of_found_child->data;
-				(found_child->calls_to_child) += calls_to_child;
-			}
-			else {		  			
-				if (enqueue_to_twin_queues
-					( hash, childs_state, 
-					  &queue_node_of_found_child, protocol_name)
+		   {
+			 FREE_SAFE(potential_child); 
+			 destroy_protocol_state(& childs_state);
+			 found_child = 
+				(child_t *) queue_node_of_found_child->data;
+			 (found_child->calls_to_child) += calls_to_child;
+		   }
+		  else 
+			{ if ( enqueue_to_hash( hash, childs_state, 
+				   &queue_node_of_found_child, protocol_name)
 					  == DUPLICATE_ITEM ) 
 				{
 				   destroy_protocol_state(&childs_state);
 				   potential_child->childs_state_ptr =
 				     (protocol_state_t *)
-				      queue_node_of_found_child->data;
-				   enqueue_unique_to_sorted_queue(
-					parent->children.can_lab_queue,
-					NULL,
-					potential_child);
-				  if (protocol_name == ANY)	
-					enqueue_unique_to_sorted_queue(
-					parent->children.fixed_name_queue,
-					NULL,
-					potential_child);	
-				}
-				else {
-					enqueue_unique_to_twin_queues(parent->children, NULL,
-					potential_child, protocol_name);
-					//~ enqueue_unique_to_sorted_queue(
-						//~ parent->children.can_lab_queue,
-						//~ NULL,
-						//~ potential_child);
-					//~ if (protocol_name == ANY)	
-						//~ enqueue_unique_to_sorted_queue(
-						 //~ parent->children.fixed_name_queue,
-						 //~ NULL,
-						 //~ potential_child);					
-				} 		    					
+				      queue_node_of_found_child->data;				
+			    }
+			  enqueue_unique_to_twin_queues
+				( parent->children, NULL, 
+				  potential_child, protocol_name );
 			}
 		  
-		}		  
+		 }		  
 	   }
 }	
 
@@ -199,8 +113,7 @@ float get_prob
 			SWITCH_PROT_NAME(protocol_name, 
 				denom = (s->agents) * (s->agents) - s->edges,
 				denom = ((float) (s->agents) * (s->agents - 1) ) / 2);
-				//~ 1 );
-							
+											
 			return enumer / denom; 
 		}
 	}		
@@ -217,18 +130,15 @@ void init_markov_chain
 	protocol_state_t *s;
 		
 	FOR_ALL_EDGES(i, agents){
-		SWITCH_PROT_NAME(protocol_name,
-			hash[i].can_lab_queue = 
-				new_queue(MAXSTATES, comp_can_secrets),
-			hash[i].can_lab_queue = 
-				new_queue(MAXSTATES, comp_can_secrets);
-			hash[i].fixed_name_queue = 
-				new_queue(MAXSTATES, comp_fixed_name_secrets));
+		hash[i].can_lab_queue = 
+			new_queue(MAXSTATES, comp_can_secrets);
+		hash[i].fixed_name_queue = 
+			new_queue(MAXSTATES, comp_fixed_name_secrets);
 	}
 	
 	init_secrets_graph(init_secrets, agents);
 	s =	new_protocol_state(init_secrets, agents, protocol_name);
-	enqueue_to_twin_queues(hash, s, NULL, protocol_name);
+	enqueue_to_hash(hash, s, NULL, protocol_name);
 }
 
 float find_expectation (int agents, int* no_states, int protocol_name)

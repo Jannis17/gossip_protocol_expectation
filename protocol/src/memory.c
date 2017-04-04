@@ -5,6 +5,24 @@
 #include "compar.h"
 #include "graph.h"
 
+/* searches for a state in twin queues
+ * return value: 1 if found, 0 ow */
+int search_in_twin_queues 
+(twin_queues twin_q, struct queue_node_t** found, 
+ child_t* child, int protocol_name)
+{
+	struct queue_t* fixed_name_queue, * can_queue;
+	
+	fixed_name_queue = twin_q.fixed_name_queue;
+	can_queue = twin_q.can_lab_queue;
+	
+	if ( protocol_name == ANY &&
+		 search_in_sorted_queue(fixed_name_queue, found, child))
+		return 1;
+	
+	return search_in_sorted_queue(can_queue, found, child); 					
+}
+
 protocol_state_t* new_protocol_state 
 (graph g[MAXN*MAXM], int agents, int protocol_name)
 {

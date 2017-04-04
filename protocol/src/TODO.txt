@@ -1,0 +1,6 @@
+- improve the function enqueue_to_hash. When the first search is done, 
+I should keep a pointer to the previous element and then insert the
+new item there
+
+- implement the version where the expectation is not calculated
+

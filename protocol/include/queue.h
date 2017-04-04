@@ -47,6 +47,10 @@ struct queue_t {
 	int (*compar)(const void *, const void *);
 };
 
+void enqueue_unique_to_twin_queues
+(twin_queues twin_q, struct queue_node_t** found, void* item,
+int protocol_name);
+
 void delete_queue(struct queue_t *hd);
 
 int search_in_sorted_queue
@@ -57,5 +61,10 @@ struct queue_t * new_queue(unsigned long max,
 
 int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 	struct queue_node_t **dataPtr, void *data);
+
+int enqueue_to_hash
+(twin_queues hash[MAXN*MAXN], protocol_state_t* s,
+ struct queue_node_t** found, int protocol_name);
+
 	
 #endif /* H_QUEUE_H_ */

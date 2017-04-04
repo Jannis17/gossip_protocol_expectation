@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "main.h"
 #include "graph.h"
 #include "memory.h"
 #include "queue.h"
@@ -195,3 +196,41 @@ int enqueue_unique_to_sorted_queue(struct queue_t *hd,
 
 	return NEW_ITEM;
 }
+
+/* enqueues a unique item to twin queues */
+void enqueue_unique_to_twin_queues
+(twin_queues twin_q, struct queue_node_t** found, void* item,
+int protocol_name)
+{
+  enqueue_unique_to_sorted_queue
+	(twin_q.can_lab_queue, found, item);
+	
+  if (protocol_name == ANY)	
+	 enqueue_unique_to_sorted_queue
+		(twin_q.fixed_name_queue, found, item);					
+}
+
+int enqueue_to_hash
+(twin_queues hash[MAXN*MAXN], protocol_state_t* s,
+ struct queue_node_t** found, int protocol_name)
+{
+	int result;
+	struct queue_t* fixed_name_queue, * can_queue;
+	
+	fixed_name_queue = hash[s-> edges -1].fixed_name_queue;
+	
+	can_queue = hash[s-> edges -1].can_lab_queue;
+	
+	if ( protocol_name == ANY &&
+		 search_in_sorted_queue(fixed_name_queue, found, s))
+		return DUPLICATE_ITEM;
+	
+	result = enqueue_unique_to_sorted_queue(can_queue, found, s);
+	
+	if (protocol_name == ANY && result == NEW_ITEM)
+		enqueue_unique_to_sorted_queue(fixed_name_queue, found, s);
+	
+	return result; 					
+}
+
+

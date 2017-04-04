@@ -2,6 +2,7 @@
 #define H_MEMORY_H_
 
 #include "state.h"
+#include "queue.h"
 
 #define EXIT_IF_OUT_OF_MEMORY(ptr)			\
 	do {					\
@@ -58,5 +59,9 @@ child_t *new_child
 ( graph secrets[MAXN*MAXM], protocol_state_t *s, int calls_to_child);
 
 void destroy_protocol_state (protocol_state_t ** s);
+
+int search_in_twin_queues 
+(twin_queues twin_q, struct queue_node_t** found, 
+ child_t* child, int protocol_name);
 
 #endif /* H_MEMORY_H_ */
