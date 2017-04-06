@@ -56,12 +56,14 @@ protocol_state_t* new_protocol_state
 (graph g[MAXN*MAXM], int agents, int protocol_name);
 
 child_t *new_child
-( graph secrets[MAXN*MAXM], protocol_state_t *s, int calls_to_child);
+( graph secrets[MAXN*MAXM], struct queue_node_t* s, int calls_to_child);
 
 void destroy_protocol_state (protocol_state_t ** s);
 
 int search_in_twin_queues 
 (twin_queues twin_q, struct queue_node_t** found, 
  child_t* child, int protocol_name);
+ 
+void destroy_twin_queues(twin_queues* twin_q);
 
 #endif /* H_MEMORY_H_ */

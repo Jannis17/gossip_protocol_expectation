@@ -6,8 +6,11 @@
 #include "memory.h"
 #include "state.h"
 
-void printResults(int agents_min, int agents_max, int no_states[MAXN],
-	float expectation[MAXN], float elps_time[MAXN], int protocol_name) {
+void print_results
+(int agents_min, int agents_max, int no_states[MAXN],
+ float expectation[MAXN], float elps_time[MAXN], int protocol_name,
+ int calc_exp) 
+{
 	time_t timeNow = time(NULL);
 	struct tm localTime = *localtime(&timeNow);
 	char filename[300];
@@ -42,7 +45,8 @@ void printResults(int agents_min, int agents_max, int no_states[MAXN],
 	for (agents=agents_min; agents<=agents_max; agents++) {
 		fprintf(fp,"%d agents:\n", agents);
 		fprintf(fp,"Number of states = %d\n", no_states[agents]);
-		fprintf(fp,"Expected length = %f\n", expectation[agents]);
+		if (calc_exp)
+			fprintf(fp,"Expected length = %f\n", expectation[agents]);
 		fprintf(fp,"Elapsed Time = %f s\n", elps_time[agents]);
 		fprintf(fp,"==========================================\n");
 	}
@@ -83,8 +87,15 @@ int main (int argc, char * argv[]){
 		else 
 			print_usage_and_exit(argc, argv);			
 	
-	int calc_exp = (argc== 5 && strcmp(argv[4], "no_exp") == 0)? 0 : 1;
-		
+	int calc_exp = 1;
+	
+	if (argc== 5) {
+		if (strcmp(argv[4], "no_exp") == 0)
+			calc_exp = 0;
+		else
+			print_usage_and_exit(argc, argv);
+	}
+			
 	/* The following optional call verifies that we are linking
 	 * to compatible versions of the nauty routines. */
 	nauty_check(WORDSIZE,MAXM,MAXN,NAUTYVERSIONID);
@@ -104,13 +115,14 @@ int main (int argc, char * argv[]){
 	for (agents=agents_min; agents<=agents_max; agents++) {
 		start = clock();		
 		expectation[agents] = 
-			find_expectation(agents, &no_states[agents], protocol_name);								
+			find_expectation(agents, &no_states[agents], 
+			protocol_name, calc_exp);								
 		end = clock();
 		elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
 	}
 			
-	printResults(agents_min, agents_max, no_states, expectation, 
-		elps_time, protocol_name);
+	print_results(agents_min, agents_max, no_states, expectation, 
+		elps_time, protocol_name, calc_exp);
 	
 	//~ graph_test(agents_min);
 	

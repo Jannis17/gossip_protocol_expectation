@@ -30,14 +30,13 @@ int cmp_graph_nodes (const void *p, const void *q) {
     /* Avoid return x - y, which can cause undefined behaviour
        because of signed integer overflow. */
     if (x < y)
-        return 1;  // Return -1 for ascending, 1 for descending order 
+        return -1;  // Return -1 for ascending, 1 for descending order 
     else if (x > y)
-        return -1;   // Return 1 for ascending, -1 for descending order 
+        return 1;   // Return 1 for ascending, -1 for descending order 
 
     return 0;
 }
 
-/* compares the secrets of the args lexicographically */
 int comp_can_secrets(const void* item1, const void* item2)
 {
 	protocol_state_t* state1, *state2;
@@ -49,7 +48,6 @@ int comp_can_secrets(const void* item1, const void* item2)
 			state1->agents);
 }
 
-/* compares the secrets of the args lexicographically */
 int comp_fixed_name_secrets(const void* item1, const void* item2)
 {
 	protocol_state_t* state1, *state2;
@@ -62,7 +60,6 @@ int comp_fixed_name_secrets(const void* item1, const void* item2)
 			state1->agents);
 }
 
-
 int comp_can_children(const void* item1, const void* item2)
 {
 	child_t* child1, *child2;
@@ -70,9 +67,8 @@ int comp_can_children(const void* item1, const void* item2)
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
 	
-	return comp_graphs(child1->childs_state_ptr->can_secrets, 
-			child2->childs_state_ptr->can_secrets, 
-			child1->childs_state_ptr->agents);
+	return comp_can_secrets(child1->child_pos_in_hash, 
+			child2->child_pos_in_hash);
 }
 
 int comp_fixed_name_children(const void* item1, const void* item2)
@@ -82,7 +78,6 @@ int comp_fixed_name_children(const void* item1, const void* item2)
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
 	
-	return comp_graphs(child1->childs_state_ptr->fixed_name_secrets_sorted, 
-			child2->childs_state_ptr->fixed_name_secrets_sorted, 
-			child1->childs_state_ptr->agents);
+	return comp_fixed_name_children(child1->child_pos_in_hash, 
+			child2->child_pos_in_hash);
 }
