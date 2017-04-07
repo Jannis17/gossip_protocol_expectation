@@ -26,7 +26,9 @@ typedef struct protocol_state_tag {
 
 typedef struct child_tag {
 	int calls_to_child;
-	struct queue_node_t* child_pos_in_hash;
+	protocol_state_t* childs_state;
+	struct queue_node_t* child_can_queue_pos;
+	struct queue_node_t* child_fixed_name_queue_pos;
 } child_t;
 
 #endif /* H_STATE_H_ */

@@ -19,7 +19,6 @@ void generate_children
 	child_t* found_child;
 	struct queue_node_t* queue_node_of_found_child;
 	struct queue_node_t* child_pos_in_par_list;
-	struct queue_node_t* pot_node;
 	child_t * potential_child;
 	protocol_state_t* childs_state;
 					
@@ -37,18 +36,14 @@ void generate_children
 		  		  
 		  childs_state = 
 			new_protocol_state(temp, agents, protocol_name);
-		  
-		  MALLOC_SAFE(pot_node, sizeof(struct queue_node_t));
-		  pot_node->data = childs_state;
-		  
-		  potential_child = new_child(temp, pot_node, calls_to_child);
+		  potential_child = 
+			new_child(temp, childs_state, NULL, NULL, calls_to_child);
 		  		  
 		  if (search_in_twin_queues( parent->children,
 		  		 					 &child_pos_in_par_list, 
 		  							 potential_child, protocol_name))
 		  {
 			 FREE_SAFE(potential_child); 
-			 FREE_SAFE(pot_node);
 			 destroy_protocol_state(&childs_state);
 			 found_child = (child_t *) child_pos_in_par_list->data;
 			 found_child->calls_to_child += calls_to_child;
@@ -57,11 +52,15 @@ void generate_children
 		  { if ( enqueue_to_hash( hash, childs_state, 
 				   &queue_node_of_found_child, protocol_name )
 					  == DUPLICATE_ITEM ) 
+			{
 			  destroy_protocol_state(&childs_state);
+			  potential_child->childs_state = 
+				queue_node_of_found_child->data;
+			}
 				   				   
-			  FREE_SAFE(pot_node);  
-			  potential_child->child_pos_in_hash =
-				queue_node_of_found_child;				  
+			  potential_child->child_can_queue_pos = NULL;
+			  potential_child->child_fixed_name_queue_pos = NULL;
+			  			  			  			  
 			  enqueue_unique_to_twin_queues
 				( parent->children, NULL, 
 				  potential_child, protocol_name );
@@ -120,7 +119,7 @@ float get_prob
 	
 	QUEUE_FOREACH(p, s->children.can_lab_queue) {
 		child = (child_t*) (p-> data);
-		t = (protocol_state_t*) child->child_pos_in_hash->data;
+		t = (protocol_state_t*) child->childs_state;
 		
 		if (t->id == to) {
 			enumer = child->calls_to_child;

@@ -54,13 +54,18 @@ protocol_state_t* new_protocol_state
 
 /* creates a new child */
 child_t *new_child
-( graph secrets[MAXN*MAXM], struct queue_node_t* s, int calls_to_child)
+( graph secrets[MAXN*MAXM], protocol_state_t* childs_state,
+  struct queue_node_t* child_can_queue_pos,
+  struct queue_node_t* child_fixed_name_queue_pos,
+  int calls_to_child)
 {
 	child_t* result;
 		
 	MALLOC_SAFE(result, sizeof(child_t));
 	result->calls_to_child=calls_to_child;
-	result->child_pos_in_hash=s;
+	result->childs_state=childs_state;
+	result->child_can_queue_pos=child_can_queue_pos;
+	result->child_fixed_name_queue_pos=child_fixed_name_queue_pos;
 	
 	return result;
 }

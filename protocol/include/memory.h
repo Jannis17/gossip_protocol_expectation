@@ -56,8 +56,11 @@ protocol_state_t* new_protocol_state
 (graph g[MAXN*MAXM], int agents, int protocol_name);
 
 child_t *new_child
-( graph secrets[MAXN*MAXM], struct queue_node_t* s, int calls_to_child);
-
+( graph secrets[MAXN*MAXM], protocol_state_t* childs_state,
+  struct queue_node_t* child_can_queue_pos,
+  struct queue_node_t* child_fixed_name_queue_pos,
+  int calls_to_child);
+  
 void destroy_protocol_state (protocol_state_t ** s);
 
 int search_in_twin_queues 

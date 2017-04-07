@@ -67,8 +67,9 @@ int comp_can_children(const void* item1, const void* item2)
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
 	
-	return comp_can_secrets(child1->child_pos_in_hash, 
-			child2->child_pos_in_hash);
+	return comp_graphs(child1->childs_state->can_secrets, 
+			child2->childs_state->can_secrets,
+			child1->childs_state->agents);
 }
 
 int comp_fixed_name_children(const void* item1, const void* item2)
@@ -78,6 +79,7 @@ int comp_fixed_name_children(const void* item1, const void* item2)
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
 	
-	return comp_fixed_name_children(child1->child_pos_in_hash, 
-			child2->child_pos_in_hash);
+	return comp_graphs(child1->childs_state->fixed_name_secrets, 
+			child2->childs_state->fixed_name_secrets,
+			child1->childs_state->agents);
 }
