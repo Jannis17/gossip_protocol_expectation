@@ -55,9 +55,9 @@ void generate_children
 			{
 			  destroy_protocol_state(&childs_state);
 			  potential_child->childs_state = 
-				queue_node_of_found_child->data;
+				queue_node_of_found_child->data;				
 			}
-				   				   
+			     				   
 			  potential_child->child_can_queue_pos = NULL;
 			  potential_child->child_fixed_name_queue_pos = NULL;
 			  			  			  			  
@@ -77,22 +77,22 @@ void build_the_markov_chain
 	
 	struct queue_node_t * p;
 	
-	printf("=========================================\n");
-	printf("Agents = %d\n", agents);
+	//~ printf("=========================================\n");
+	//~ printf("Agents = %d\n", agents);
 	
-	clock_t start, end;
+	//~ clock_t start, end;
 	
 	*no_states = 0;
 	
 	FOR_ALL_EDGES(i, agents) {
-		start = clock();
-		printf("%d secrets:", i+1);
+		//~ start = clock();
+		//~ printf("%d secrets:", i+1);
 		QUEUE_FOREACH(p, hash[i].can_lab_queue) 
 			generate_children(p->data, agents, hash, protocol_name);
-		end = clock();
-		printf("%lu states in %f seconds\n", 
-				QUEUE_COUNT(hash[i].can_lab_queue),
-				( (float) end - start )/CLOCKS_PER_SEC );
+		//~ end = clock();
+		//~ printf("%lu states in %f seconds\n", 
+				//~ QUEUE_COUNT(hash[i].can_lab_queue),
+				//~ ( (float) end - start )/CLOCKS_PER_SEC );
 		/* count the states */	
 		if ( protocol_name == ANY &&
 			 QUEUE_COUNT(hash[i].can_lab_queue) != 
@@ -104,7 +104,7 @@ void build_the_markov_chain
 		if (!calc_exp)
 			destroy_twin_queues(&hash[i]);		
 	}
-	printf("\n");
+	//~ printf("\n");
 }
 
 float get_prob
@@ -163,7 +163,7 @@ float find_expectation
 	protocol_state_t** trans_matrix;
 	struct queue_node_t * p;
 	float* expect_vec;
-	float result;
+	float result = 0;
 	
 	/* create the lists in the markov chain and
 	 * add the initial state				    */
@@ -209,14 +209,16 @@ float find_expectation
 		
 		result = expect_vec[0];
 		
+		//~ printf("\n");
 		//~ for (i=0; i < *no_states; i++)
 		//~ printf("expectation(%d) = %f\n", i, expect_vec[i]);
-	
+		//~ printf("\n");
+			
 		//~ printf("Transition Matrix (%d agents)\n", agents);
 	
 		//~ for (i=0; i < *no_states; i++) {
 		//~ for (j=0; j < *no_states; j++)
-			//~ printf("%.0f ", get_prob(trans_matrix, i, j, protocol_name));
+			//~ printf("%f ", get_prob(trans_matrix, i, j, protocol_name));
 		//~ printf("\n");
 		//~ }
 	
@@ -224,8 +226,6 @@ float find_expectation
 		FREE_SAFE(trans_matrix);
 		destroy_hash(agents, hash);
 	} 
-	else 
-	  result = 0;
 				
 	return result;	
 }

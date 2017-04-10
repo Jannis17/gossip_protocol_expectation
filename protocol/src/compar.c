@@ -79,7 +79,7 @@ int comp_fixed_name_children(const void* item1, const void* item2)
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
 	
-	return comp_graphs(child1->childs_state->fixed_name_secrets, 
-			child2->childs_state->fixed_name_secrets,
+	return comp_graphs(child1->childs_state->fixed_name_secrets_sorted, 
+			child2->childs_state->fixed_name_secrets_sorted,
 			child1->childs_state->agents);
 }
