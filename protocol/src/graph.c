@@ -69,19 +69,6 @@ void make_call(graph g[MAXN*MAXM], int i, int j)
 	}
 }
 
-/* prints the contexts of g in hex form */
-void print_graph(graph g[MAXN*MAXM], int n)
-{
-	size_t i;
-	
-	for (i=0; i < MAXM*(size_t) n ; i++){
-		printf(SETWORD_FORMAT, g[i]);
-		printf("\n");
-	}
-	
-	printf("\n");
-}
-
 /* returns the number of possible BIDIRECTIONAL calls between i and j
  * in g */
 int poss_calls (graph g[MAXN * MAXM], int i, int j)
@@ -95,70 +82,4 @@ int poss_calls (graph g[MAXN * MAXM], int i, int j)
 		possCalls++;
 	
 	return possCalls;
-}
-
-int comp_perm_graphs(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
-{
-	size_t k, l;
-	
-	int paired[MAXN*MAXM];		
-	
-	for (k = 0; k < MAXM*(size_t)n; ++k)
-		paired[k]=0;
-		
-	for (k = 0; k < MAXM*(size_t)n; ++k) {
-		for (l = 0; l < MAXM*(size_t)n; ++l)
-			if ( (g1[k] == g2[l]) && !paired[l] ) {
-				paired[k] = paired [l] = 1;
-				break;				
-			};
-		
-		if (!paired[k])
-			return comp_graphs(g1, g2, n);
-	}
-			
-	return EQUAL;
-}
-
-/* will be used for tests */
-void graph_test(int n)
-{
-	graph g1[MAXN*MAXM];
-	graph g2[MAXN*MAXM];
-	graph g3[MAXN*MAXM];
-	graph g4[MAXN*MAXM];
-	
-	int i = 2 , j = 0;
-		
-	init_secrets_graph(g1, n);
-	init_secrets_graph(g2, n);
-		
-	make_call(g1, 0, 1);
-	//~ make_call(g1, 2, 3);
-	//~ make_call(g1, 0, 2);
-	//~ make_call(g1, 1, 3);	
-	print_graph(g1, n);
-	
-	find_can_label(g1, g3, n);
-	
-	print_graph(g3, n);
-	
-	make_call(g2, 3, 0);
-	//~ make_call(g2, 1, 3);
-	//~ make_call(g2, 2, 1);
-	//~ make_call(g2, 0, 3);
-		
-	print_graph(g2, n);
-	
-	find_can_label(g2, g4, n);
-	
-	print_graph(g4, n);
-	
-	printf ("equal = %d \n", comp_perm_graphs(g1, g2, n));
-		
-	printf ("edges of g1 = %d \n", edges_of(g1,n));
-	
-	printf ("edges of g2 = %d \n", edges_of(g2,n));
-	
-	printf ("poss Calls = %d \n", poss_calls(g1,i,j) );
 }

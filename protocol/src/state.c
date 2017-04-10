@@ -19,6 +19,8 @@ void generate_children
 	child_t* found_child;
 	struct queue_node_t* queue_node_of_found_child;
 	struct queue_node_t* child_pos_in_par_list;
+	struct queue_node_t* childs_can_prev;
+	struct queue_node_t* childs_fixed_name_prev;
 	child_t * potential_child;
 	protocol_state_t* childs_state;
 					
@@ -37,11 +39,15 @@ void generate_children
 		  childs_state = 
 			new_protocol_state(temp, agents, protocol_name);
 		  potential_child = 
-			new_child(temp, childs_state, NULL, NULL, calls_to_child);
+			new_child(temp, childs_state, calls_to_child);
 		  		  
-		  if (search_in_twin_queues( parent->children,
-		  		 					 &child_pos_in_par_list, 
-		  							 potential_child, protocol_name))
+		  if (search_in_twin_queues(parent->children, 
+									NULL,
+									NULL,
+		                            &childs_fixed_name_prev,
+									&childs_can_prev,
+									&child_pos_in_par_list, 
+		  							potential_child, protocol_name))
 		  {
 			 FREE_SAFE(potential_child); 
 			 destroy_protocol_state(&childs_state);
@@ -49,20 +55,23 @@ void generate_children
 			 found_child->calls_to_child += calls_to_child;
 		  } 
 		  else 
-		  { if ( enqueue_to_hash( hash, childs_state, 
-				   &queue_node_of_found_child, protocol_name )
+		  { if ( enqueue_to_hash
+				   (hash, 
+					NULL,
+					NULL,
+					childs_state, 
+				    &queue_node_of_found_child, 
+				    protocol_name)
 					  == DUPLICATE_ITEM ) 
 			{
 			  destroy_protocol_state(&childs_state);
 			  potential_child->childs_state = 
 				queue_node_of_found_child->data;				
 			}
-			     				   
-			  potential_child->child_can_queue_pos = NULL;
-			  potential_child->child_fixed_name_queue_pos = NULL;
-			  			  			  			  
 			  enqueue_unique_to_twin_queues
-				( parent->children, NULL, 
+				( parent->children, 
+				  NULL,
+				  NULL,	
 				  potential_child, protocol_name );
 		   }		  
 		 }		  
@@ -77,34 +86,37 @@ void build_the_markov_chain
 	
 	struct queue_node_t * p;
 	
-	//~ printf("=========================================\n");
-	//~ printf("Agents = %d\n", agents);
+	printf("=========================================\n");
+	printf("Agents = %d\n", agents);
 	
-	//~ clock_t start, end;
+	clock_t start, end;
 	
 	*no_states = 0;
 	
 	FOR_ALL_EDGES(i, agents) {
-		//~ start = clock();
-		//~ printf("%d secrets:", i+1);
+		start = clock();
+		printf("%d secrets:", i+1);
 		QUEUE_FOREACH(p, hash[i].can_lab_queue) 
 			generate_children(p->data, agents, hash, protocol_name);
-		//~ end = clock();
-		//~ printf("%lu states in %f seconds\n", 
-				//~ QUEUE_COUNT(hash[i].can_lab_queue),
-				//~ ( (float) end - start )/CLOCKS_PER_SEC );
+		end = clock();
+		printf("%lu states in %f seconds\n", 
+				QUEUE_COUNT(hash[i].can_lab_queue),
+				( (float) end - start )/CLOCKS_PER_SEC );
 		/* count the states */	
 		if ( protocol_name == ANY &&
 			 QUEUE_COUNT(hash[i].can_lab_queue) != 
-			 QUEUE_COUNT(hash[i].fixed_name_queue) )
+			 QUEUE_COUNT(hash[i].fixed_name_queue) ) {
+			printf("canonical = %lu	\n", QUEUE_COUNT(hash[i].can_lab_queue));
+			printf("fixed name = %lu\n", QUEUE_COUNT(hash[i].fixed_name_queue));
 		   INTERNAL_ERROR("Queues do not have\
 		   the same number of elements\n");			 
+		  }
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
 					
 		if (!calc_exp)
 			destroy_twin_queues(&hash[i]);		
 	}
-	//~ printf("\n");
+	printf("\n");
 }
 
 float get_prob
@@ -144,14 +156,14 @@ void init_markov_chain
 		
 	FOR_ALL_EDGES(i, agents){
 		hash[i].can_lab_queue = 
-			new_queue(MAXSTATES, comp_can_secrets);
+			new_queue(MAXSTATES, cmp_can_secrets);
 		hash[i].fixed_name_queue = 
-			new_queue(MAXSTATES, comp_fixed_name_secrets);
+			new_queue(MAXSTATES, cmp_fixed_name_secrets);
 	}
 	
 	init_secrets_graph(init_secrets, agents);
 	s =	new_protocol_state(init_secrets, agents, protocol_name);
-	enqueue_to_hash(hash, s, NULL, protocol_name);
+	enqueue_to_hash(hash, NULL, NULL, s, NULL, protocol_name);
 }
 
 float find_expectation
@@ -208,20 +220,7 @@ float find_expectation
 		}
 		
 		result = expect_vec[0];
-		
-		//~ printf("\n");
-		//~ for (i=0; i < *no_states; i++)
-		//~ printf("expectation(%d) = %f\n", i, expect_vec[i]);
-		//~ printf("\n");
 			
-		//~ printf("Transition Matrix (%d agents)\n", agents);
-	
-		//~ for (i=0; i < *no_states; i++) {
-		//~ for (j=0; j < *no_states; j++)
-			//~ printf("%f ", get_prob(trans_matrix, i, j, protocol_name));
-		//~ printf("\n");
-		//~ }
-	
 		FREE_SAFE(expect_vec);
 		FREE_SAFE(trans_matrix);
 		destroy_hash(agents, hash);

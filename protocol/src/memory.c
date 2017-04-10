@@ -5,24 +5,6 @@
 #include "compar.h"
 #include "graph.h"
 
-/* searches for a state in twin queues
- * return value: 1 if found, 0 ow */
-int search_in_twin_queues 
-(twin_queues twin_q, struct queue_node_t** found, 
- child_t* child, int protocol_name)
-{
-	struct queue_t* fixed_name_queue, * can_queue;
-	
-	fixed_name_queue = twin_q.fixed_name_queue;
-	can_queue = twin_q.can_lab_queue;
-	
-	if ( protocol_name == ANY &&
-		 search_in_sorted_queue(fixed_name_queue, found, child))
-		return 1;
-	
-	return search_in_sorted_queue(can_queue, found, child); 					
-}
-
 protocol_state_t* new_protocol_state 
 (graph g[MAXN*MAXM], int agents, int protocol_name)
 {
@@ -33,9 +15,9 @@ protocol_state_t* new_protocol_state
 	copy_graph(s->fixed_name_secrets, g, agents);
 	
 	s->children.fixed_name_queue = 
-		new_queue(MAXN*(MAXN-1), comp_fixed_name_children);
+		new_queue(MAXN*(MAXN-1), cmp_fixed_name_children);
 	s->children.can_lab_queue = 
-		new_queue(MAXN*(MAXN-1), comp_can_children);
+		new_queue(MAXN*(MAXN-1), cmp_can_children);
 		
 	if (protocol_name == ANY) {
 		copy_graph(s->fixed_name_secrets_sorted, g, agents);
@@ -55,8 +37,6 @@ protocol_state_t* new_protocol_state
 /* creates a new child */
 child_t *new_child
 ( graph secrets[MAXN*MAXM], protocol_state_t* childs_state,
-  struct queue_node_t* child_can_queue_pos,
-  struct queue_node_t* child_fixed_name_queue_pos,
   int calls_to_child)
 {
 	child_t* result;
@@ -64,8 +44,6 @@ child_t *new_child
 	MALLOC_SAFE(result, sizeof(child_t));
 	result->calls_to_child=calls_to_child;
 	result->childs_state=childs_state;
-	result->child_can_queue_pos=child_can_queue_pos;
-	result->child_fixed_name_queue_pos=child_fixed_name_queue_pos;
 	
 	return result;
 }
@@ -102,3 +80,4 @@ void destroy_hash(int agents, twin_queues hash[MAXN*MAXN])
 		destroy_twin_queues(&hash[i]);
 	}	
 }
+

@@ -48,23 +48,35 @@ struct queue_t {
 };
 
 void enqueue_unique_to_twin_queues
-(twin_queues twin_q, struct queue_node_t** found, void* item,
+(twin_queues twin_q, 
+struct queue_node_t* fixed_name_prev,
+struct queue_node_t* can_prev, 
+void* item,
 int protocol_name);
 
 void delete_queue(struct queue_t *hd);
 
-int search_in_sorted_queue
-	(struct queue_t *hd, struct queue_node_t **found, const void *data);
+int enqueue_unique_to_sorted_queue
+(struct queue_t *hd, struct queue_node_t *start,
+ struct queue_node_t **found, void *data);
 
 struct queue_t * new_queue(unsigned long max, 
 	int (*compar)(const void *, const void *));
 
-int enqueue_unique_to_sorted_queue(struct queue_t *hd,
-	struct queue_node_t **dataPtr, void *data);
-
 int enqueue_to_hash
-(twin_queues hash[MAXN*MAXN], protocol_state_t* s,
+(twin_queues hash[MAXN*MAXN], 
+ struct queue_node_t* fixed_name_start,
+ struct queue_node_t* can_start,
+ protocol_state_t* s,
  struct queue_node_t** found, int protocol_name);
 
+int search_in_twin_queues 
+(twin_queues twin_q, 
+ struct queue_node_t* fixed_name_start,
+ struct queue_node_t* can_start,
+ struct queue_node_t** fixed_name_prev,
+ struct queue_node_t** can_prev,
+ struct queue_node_t** found,  
+ child_t* child, int protocol_name);
 	
 #endif /* H_QUEUE_H_ */
