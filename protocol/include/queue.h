@@ -24,11 +24,11 @@
 		}				\
 	} while(0)
 
-#define NEW_QUEUE_ITEM(newItem, theData, queue, theNext)			\
+#define NEW_QUEUE_ITEM(new_item, the_data, queue, the_next)			\
 	do {					\
-		MALLOC_SAFE(newItem, sizeof(struct queue_node_t));	\
-		(newItem)->data=(theData);	\
-		(newItem)->next=(theNext);	\
+		MALLOC_SAFE(new_item, sizeof(struct queue_node_t));	\
+		(new_item)->data=(the_data);	\
+		(new_item)->next=(the_next);	\
 		QUEUE_COUNT(queue)++;	\
 	} while(0)
 
@@ -68,7 +68,8 @@ int enqueue_to_hash
  struct queue_node_t* fixed_name_start,
  struct queue_node_t* can_start,
  protocol_state_t* s,
- struct queue_node_t** found, int protocol_name);
+ struct queue_node_t** found, 
+ int protocol_name);
 
 int search_in_twin_queues 
 (twin_queues twin_q, 

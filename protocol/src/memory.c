@@ -30,7 +30,7 @@ protocol_state_t* new_protocol_state
 	s->id = 0;
 	s->agents = agents;
 	s->edges = edges_of(g, agents);
-							
+				
 	return s;		
 }
 
@@ -62,8 +62,6 @@ void destroy_twin_queues(twin_queues* twin_q)
 	
 	QUEUE_FOREACH(p, twin_q->can_lab_queue) {
 			s = (protocol_state_t *) (p->data);
-			//~ printf("state = %d\n", s->id+1);			
-			//~ print_graph(s->can_secrets, s->agents);
 			destroy_protocol_state(&s);			
 		}
 		DELETE_QUEUE(twin_q->can_lab_queue);

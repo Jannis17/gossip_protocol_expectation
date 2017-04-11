@@ -17,10 +17,10 @@ void generate_children
 	int i, j, calls_to_child;
 	graph temp[MAXN*MAXM];
 	child_t* found_child;
-	struct queue_node_t* queue_node_of_found_child;
+	struct queue_node_t* found_child_node;
 	struct queue_node_t* child_pos_in_par_list;
-	struct queue_node_t* childs_can_prev;
-	struct queue_node_t* childs_fixed_name_prev;
+	struct queue_node_t* childs_can_prev = NULL;
+	struct queue_node_t* childs_fixed_name_prev = NULL;
 	child_t * potential_child;
 	protocol_state_t* childs_state;
 					
@@ -60,13 +60,13 @@ void generate_children
 					NULL,
 					NULL,
 					childs_state, 
-				    &queue_node_of_found_child, 
+				    &found_child_node, 
 				    protocol_name)
 					  == DUPLICATE_ITEM ) 
 			{
 			  destroy_protocol_state(&childs_state);
 			  potential_child->childs_state = 
-				queue_node_of_found_child->data;				
+				found_child_node->data;				
 			}
 			  enqueue_unique_to_twin_queues
 				( parent->children, 

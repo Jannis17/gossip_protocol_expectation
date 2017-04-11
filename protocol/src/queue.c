@@ -116,16 +116,21 @@ int search_in_sorted_queue
 	if(QUEUE_IS_EMPTY(hd))
 			return 0;
 		
-	p=hd->head;
-	
-	switch(hd->compar(p->data, data)){
+	if (!start)
+		start = hd->head;			
+		
+	switch(hd->compar(start->data, data)){
 		case LESS:
 			break;
 		case EQUAL:
-			if (prev)
-				*prev=NULL;
+			if (prev) {
+				if (start == hd->head)
+					*prev=NULL;
+				else
+					*prev=start;
+			}
 			if (found)
-				*found=p;
+				*found=start;
 			return 1;
 		case GREATER:
 			if (prev)
@@ -134,10 +139,7 @@ int search_in_sorted_queue
 				*found=NULL;
 			return 0;					
 	}
-	
-	if (!start)
-		start = hd->head;			
-			
+				
 	for(p=start; p; p=p->next)
 		if(p->next)
 			switch(hd->compar(p->next->data, data))
@@ -153,25 +155,6 @@ int search_in_sorted_queue
 				case GREATER:
 					if (prev)
 						*prev=p;
-					if (found)
-						*found = NULL;									
-					return 0;					
-			}
-	
-	if (start == hd->tail)
-		switch(hd->compar(start->data, data))
-			{
-				case LESS:
-					break;
-				case EQUAL:
-					if (prev)
-						*prev=start;
-					if (found)
-						*found=start;
-					return 1;
-				case GREATER:
-					if (prev)
-						*prev=start;
 					if (found)
 						*found = NULL;									
 					return 0;					
@@ -191,41 +174,42 @@ int enqueue_unique_to_sorted_queue
  struct queue_node_t **found, void *data)
 {
 	struct queue_node_t *p;
-	struct queue_node_t *newItem;
+	struct queue_node_t *new_item;
 	
 	if (QUEUE_IS_FULL(hd))
 		INTERNAL_ERROR("Trying to insert data in a full queue");
 		
-	
 	if(QUEUE_IS_EMPTY(hd)) {
-		NEW_QUEUE_ITEM(newItem, data, hd, NULL);
-		hd->head=hd->tail=newItem;
+		NEW_QUEUE_ITEM(new_item, data, hd, NULL);
+		hd->head=hd->tail=new_item;
 		if (found)
-			*found=newItem;
+			*found=new_item;
 							
 		return NEW_ITEM;
 	}	
-		p=hd->head;
 	
-		switch(hd->compar(p->data, data)){
-			case LESS:
-				break;
-			case EQUAL:
-				if (found)
-					*found=p;
-				return DUPLICATE_ITEM;
-			case GREATER:
-				NEW_QUEUE_ITEM(newItem, data, hd, p);
-				hd->head=newItem;
-				if (found)
-					*found=newItem;
-							
-				return NEW_ITEM;					
-			}
-			
 	if (!start)
 		start = hd->head;
 		
+	switch(hd->compar(start->data, data)){
+		case LESS:
+			break;
+		case EQUAL:
+			if (found)
+				*found=start;
+			return DUPLICATE_ITEM;
+		case GREATER:
+			NEW_QUEUE_ITEM(new_item, data, hd, start);
+			if (start == hd-> head)
+				hd->head=new_item;
+			else
+				start->next = new_item;
+			if (found)
+				*found=new_item;
+					
+			return NEW_ITEM;					
+	}
+			
 	for(p=start; p; p=p->next)
 		if(p->next)
 			switch(hd->compar(p->next->data, data))
@@ -237,22 +221,66 @@ int enqueue_unique_to_sorted_queue
 						*found=p->next;
 					return DUPLICATE_ITEM;
 				case GREATER:
-					NEW_QUEUE_ITEM(newItem, data, hd, p->next);
-					p->next=newItem;
+					NEW_QUEUE_ITEM(new_item, data, hd, p->next);
+					p->next=new_item;
 					if (found)
-						*found=newItem;
+						*found=new_item;
 									
 					return NEW_ITEM;					
 			}
 					
-	NEW_QUEUE_ITEM(newItem, data, hd, NULL);
-	hd->tail->next=newItem;
-	hd->tail = newItem;
+	NEW_QUEUE_ITEM(new_item, data, hd, NULL);
+	hd->tail->next=new_item;
+	hd->tail = new_item;
+	
 	if (found)
-		*found=newItem;
+		*found=new_item;
 
 	return NEW_ITEM;
 }
+
+//~ int enqueue_unique_to_sorted_queue
+//~ (struct queue_t *hd, struct queue_node_t *start,
+ //~ struct queue_node_t **found, void *data)
+//~ {
+	//~ struct queue_node_t *p, *prev;
+	//~ struct queue_node_t *new_item;
+	
+	//~ if (QUEUE_IS_FULL(hd))
+		//~ INTERNAL_ERROR("Trying to insert data in a full queue");
+		
+	//~ if (!start)
+		//~ start = hd->head;
+		
+	//~ for(p=prev=start; p; p=p->next) {
+		//~ switch(hd->compar(p->data, data))
+		//~ {
+			//~ case LESS:
+				//~ break;
+			//~ case EQUAL:
+				//~ if (found)
+					//~ *found=p;
+				//~ return DUPLICATE_ITEM;
+			//~ case GREATER:
+				//~ NEW_QUEUE_ITEM(new_item, data, hd, p);
+				//~ prev->next=newItem;
+				//~ if (found)
+					//~ *found=newItem;
+								
+				//~ return NEW_ITEM;					
+		//~ }
+		//~ prev = p;		
+	//~ }
+						
+	//~ NEW_QUEUE_ITEM(new_item, data, hd, NULL);
+	//~ hd->tail->next=new_item;
+	//~ hd->tail=new_item;
+	//~ if (found)
+		//~ *found=new_item;
+
+	//~ return NEW_ITEM;
+//~ }
+
 
 /* enqueues a unique item to twin queues */
 void enqueue_unique_to_twin_queues
@@ -275,7 +303,8 @@ int enqueue_to_hash
  struct queue_node_t* fixed_name_start,
  struct queue_node_t* can_start,
  protocol_state_t* s,
- struct queue_node_t** found, int protocol_name)
+ struct queue_node_t** found, 
+ int protocol_name)
 {
 	int result;
 	struct queue_t* fixed_name_queue, * can_queue;
@@ -283,7 +312,7 @@ int enqueue_to_hash
 	struct queue_node_t* fixed_name_prev;
 	
 	fixed_name_prev = NULL;
-	
+		
 	fixed_name_queue = hash[s-> edges -1].fixed_name_queue;
 	
 	can_queue = hash[s-> edges -1].can_lab_queue;
@@ -322,12 +351,6 @@ int search_in_twin_queues
 	fixed_name_queue = twin_q.fixed_name_queue;
 	can_queue = twin_q.can_lab_queue;
 	
-	if (fixed_name_prev)
-		*fixed_name_prev=NULL;
-	
-	if (can_prev)
-		*can_prev=NULL;
-	
 	if ( protocol_name == ANY &&
 		 search_in_sorted_queue
 		 (fixed_name_queue, 
@@ -339,3 +362,5 @@ int search_in_twin_queues
 		search_in_sorted_queue
 			(can_queue, can_start, can_prev, found, child); 					
 }
+
+
