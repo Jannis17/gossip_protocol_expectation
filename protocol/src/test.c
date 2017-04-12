@@ -18,7 +18,7 @@ void print_graph(graph g[MAXN*MAXM], int n)
 void print_expect_vec_and_trans_matrix
 (int no_states, float* expect_vec, protocol_state_t** trans_matrix,
  int agents,
- int protocol_name)
+ int protocol_name, int rand_ag)
 {
 	int i,j;
 	
@@ -31,7 +31,8 @@ void print_expect_vec_and_trans_matrix
 	
 	for (i=0; i < no_states; i++) {
 		for (j=0; j < no_states; j++)
-			printf("%f ", get_prob(trans_matrix, i, j, protocol_name));
+			printf("%f ", get_prob(trans_matrix, i, j, protocol_name, 
+				rand_ag));	
 		printf("\n");
 	}
 }

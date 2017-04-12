@@ -69,6 +69,11 @@ void make_call(graph g[MAXN*MAXM], int i, int j)
 	}
 }
 
+int can_call(graph g[MAXN * MAXM], int i, int j) 
+{	
+	return !ISELEMENT(GRAPHROW(g,i,MAXM), j);
+}
+
 /* returns the number of possible BIDIRECTIONAL calls between i and j
  * in g */
 int poss_calls (graph g[MAXN * MAXM], int i, int j)

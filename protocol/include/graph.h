@@ -16,4 +16,6 @@ void make_call(graph g[MAXN*MAXM], int i, int j);
 
 int poss_calls (graph g[MAXN * MAXM], int i, int j);
 
+int can_call(graph g[MAXN * MAXM], int i, int j);
+
 #endif /* H_GRAPH_H_ */

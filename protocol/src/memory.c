@@ -40,10 +40,15 @@ child_t *new_child
   int calls_to_child)
 {
 	child_t* result;
+	int i,j;
 		
 	MALLOC_SAFE(result, sizeof(child_t));
 	result->calls_to_child=calls_to_child;
 	result->childs_state=childs_state;
+	
+	for (i=0; i< childs_state -> agents; i++)
+		for (j=0; j< childs_state -> agents; j++)
+			result->calls[i][j]=0;
 	
 	return result;
 }

@@ -8,6 +8,7 @@
 #include "state.h"
 #include "queue.h"
 #include "compar.h"
+#include "test.h"
 #include "../../nauty26r7/nauty.h"
 
 void generate_children
@@ -40,6 +41,12 @@ void generate_children
 			new_protocol_state(temp, agents, protocol_name);
 		  potential_child = 
 			new_child(temp, childs_state, calls_to_child);
+		  
+		  potential_child->calls[i][j] = 
+			can_call( parent->fixed_name_secrets, i, j);
+				
+		  potential_child->calls[j][i] = 
+			can_call(parent->fixed_name_secrets, j, i);
 		  		  
 		  if (search_in_twin_queues(parent->children, 
 									NULL,
@@ -53,6 +60,12 @@ void generate_children
 			 destroy_protocol_state(&childs_state);
 			 found_child = (child_t *) child_pos_in_par_list->data;
 			 found_child->calls_to_child += calls_to_child;
+			 
+			 found_child->calls[i][j] = 
+				can_call(parent->fixed_name_secrets, i, j);
+				
+			 found_child->calls[j][i] = 
+				can_call(parent->fixed_name_secrets, j, i);
 		  } 
 		  else 
 		  { if ( enqueue_to_hash
@@ -121,30 +134,50 @@ void build_the_markov_chain
 
 float get_prob
 ( protocol_state_t ** trans_matrix, 
-  int from, int to, int protocol_name ) 
+  int from, int to, int protocol_name, int rand_ag) 
 {
 	protocol_state_t* s = trans_matrix[from];
 	protocol_state_t* t;
 	struct queue_node_t *p;
 	child_t* child;	
-	float enumer, denom;
+	float prob = 0;
+	int i,j, calls, av_agents;
 	
 	QUEUE_FOREACH(p, s->children.can_lab_queue) {
 		child = (child_t*) (p-> data);
 		t = (protocol_state_t*) child->childs_state;
 		
 		if (t->id == to) {
-			enumer = child->calls_to_child;
+			if (rand_ag) {
+				for (av_agents = i=0; i<s->agents;i++) {
+					calls = s->agents - POPCOUNT(s->fixed_name_secrets[i]);
+					if (calls)
+						av_agents++;
+				}		
+								
+				for (i=0; i<s->agents;i++) {
+					calls = s->agents - 
+							POPCOUNT(s->fixed_name_secrets[i]);
+					if (calls)
+						for (j=0; j<s->agents;j++) 
+							prob = prob +
+									( (float) child->calls[i][j]) / (calls * av_agents);
+				}							
+			}
+			else {	
+				prob = child->calls_to_child;
 			
-			SWITCH_PROT_NAME(protocol_name, 
-				denom = (s->agents) * (s->agents) - s->edges,
-				denom = ((float) (s->agents) * (s->agents - 1) ) / 2);
-											
-			return enumer / denom; 
+				SWITCH_PROT_NAME(protocol_name, 
+					prob = 
+						prob / ((s->agents) * (s->agents) - s->edges),
+					prob = 
+						(2 * prob) / 
+						( (s->agents) * (s->agents - 1) ) );
+			}									 
 		}
 	}		
-	
-	return 0;	
+		
+	return prob;	
 }
 
 void init_markov_chain
@@ -167,7 +200,8 @@ void init_markov_chain
 }
 
 float find_expectation
-(int agents, int* no_states, int protocol_name, int calc_exp)
+(int agents, int* no_states, int protocol_name, int calc_exp, 
+ int rand_ag)
 {		
 	twin_queues hash[MAXN*MAXN];
 	protocol_state_t *s;
@@ -210,16 +244,19 @@ float find_expectation
                                         
 			for(j=i+1; j<(* no_states); j++)
 				expect_vec[i] += 
-					get_prob(trans_matrix, i, j, protocol_name) * 
+					get_prob(trans_matrix, i, j, protocol_name, rand_ag) * 
 						expect_vec[j];
 		
 			if (protocol_name == ANY)			       
 				expect_vec[i] = 
 					expect_vec[i] / 
-					(1-get_prob(trans_matrix, i, i, protocol_name));
+					(1-get_prob(trans_matrix, i, i, protocol_name, rand_ag));
 		}
 		
 		result = expect_vec[0];
+		
+		print_expect_vec_and_trans_matrix(*no_states, 
+			expect_vec, trans_matrix, agents, protocol_name, rand_ag);
 			
 		FREE_SAFE(expect_vec);
 		FREE_SAFE(trans_matrix);

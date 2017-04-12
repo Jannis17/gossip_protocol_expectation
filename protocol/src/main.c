@@ -57,17 +57,19 @@ void print_results
 void print_usage_and_exit(int argc, char * argv[])
 {
 	printf("Usage: %s protocol_name ", argv[0]);
-	printf("agents_min agents_max [no_exp]\n\n");
+	printf("agents_min agents_max [no_exp] [rand_ag]\n\n");
 	printf("agents_min:  minimum number of agents\n");
 	printf("agents_max:  maximum number of agents (%d >= agents_max >= agents_min) \n", MAXN);
 	printf("protocol_name: ANY or LNS\n");
-	printf("no_exp: if present then the program will not calculate the expectation (optional)\n");
+	printf("no_exp:  if present then the program will not calculate the expectation (optional)\n");
+	printf("rand_ag: if present then we will have randomization over agents.\n");
+	printf("         by default we have randomization over calls.\n");
 	
 	exit(1);
 }
 
 int main (int argc, char * argv[]){
-	if ( argc !=4 && argc!=5) 
+	if ( argc < 4 || argc>6) 
 		print_usage_and_exit(argc, argv);		
 			
 	int agents_min = atoi(argv[2]), agents_max = atoi(argv[3]);
@@ -88,12 +90,26 @@ int main (int argc, char * argv[]){
 			print_usage_and_exit(argc, argv);			
 	
 	int calc_exp = 1;
+	int rand_ag = 0;
 	
 	if (argc== 5) {
 		if (strcmp(argv[4], "no_exp") == 0)
 			calc_exp = 0;
-		else
-			print_usage_and_exit(argc, argv);
+		else if (strcmp(argv[4], "rand_ag") == 0)
+				rand_ag = 1;
+			else
+				print_usage_and_exit(argc, argv);
+	}
+	
+	
+	
+	if (argc== 6) {
+		if (strcmp(argv[5], "no_exp") == 0)
+			calc_exp = 0;
+		else if (strcmp(argv[5], "rand_ag") == 0)
+				rand_ag = 1;
+			else
+				print_usage_and_exit(argc, argv);
 	}
 			
 	/* The following optional call verifies that we are linking
@@ -116,7 +132,7 @@ int main (int argc, char * argv[]){
 		start = clock();		
 		expectation[agents] = 
 			find_expectation(agents, &no_states[agents], 
-			protocol_name, calc_exp);								
+			protocol_name, calc_exp, rand_ag);								
 		end = clock();
 		elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
 	}
