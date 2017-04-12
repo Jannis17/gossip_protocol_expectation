@@ -1,0 +1,25 @@
+==========================================
+||        The ANY protocol              ||
+==========================================
+   Timestamp = 2017-4-12-13h-49m-9s   
+==========================================
+3 agents:
+Number of states = 4
+Expected length = 3.000000
+Elapsed Time = 0.000200 s
+==========================================
+4 agents:
+Number of states = 13
+Expected length = 5.159721
+Elapsed Time = 0.000310 s
+==========================================
+5 agents:
+Number of states = 68
+Expected length = 7.682240
+Elapsed Time = 0.002206 s
+==========================================
+6 agents:
+Number of states = 775
+Expected length = 10.460718
+Elapsed Time = 0.047320 s
+==========================================
