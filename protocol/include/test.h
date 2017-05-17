@@ -13,4 +13,10 @@ void print_expect_vec_and_trans_matrix
  int agents,
  int protocol_name, int rand_ag);
 
+void multiply_matrices(float** a, float** b, float** c, int n);
+
+void print_probs_to_absorption 
+(int no_states, protocol_state_t** trans_matrix,
+ int agents, int protocol_name, int rand_ag, int max_calls);
+
 #endif /* H_TEST_H_ */

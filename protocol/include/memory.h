@@ -33,6 +33,7 @@ do {					\
 	EXIT_IF_OUT_OF_MEMORY(p); \
 } while(0)
 
+
 #define MALLOC_ZERO(p, siz)\
 do {					\
   MALLOC_SAFE((p), (siz)); \
@@ -62,5 +63,10 @@ child_t *new_child
 void destroy_protocol_state (protocol_state_t ** s);
  
 void destroy_twin_queues(twin_queues* twin_q);
+
+void malloc_safe_2D_float(float ***p, int n); 
+
+void free_safe_2D_float(float ***p, int n);
+
 
 #endif /* H_MEMORY_H_ */

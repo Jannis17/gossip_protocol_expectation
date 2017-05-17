@@ -255,8 +255,11 @@ float find_expectation
 		
 		result = expect_vec[0];
 		
-		//~ print_expect_vec_and_trans_matrix(*no_states, 
-			//~ expect_vec, trans_matrix, agents, protocol_name, rand_ag);
+		print_expect_vec_and_trans_matrix(*no_states, 
+			expect_vec, trans_matrix, agents, protocol_name, rand_ag);
+		
+		//~ print_probs_to_absorption (*no_states, trans_matrix,
+			//~ agents, protocol_name, rand_ag, (agents*(agents-1)) / 2);		
 			
 		FREE_SAFE(expect_vec);
 		FREE_SAFE(trans_matrix);

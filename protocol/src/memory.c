@@ -84,3 +84,23 @@ void destroy_hash(int agents, twin_queues hash[MAXN*MAXN])
 	}	
 }
 
+void malloc_safe_2D_float(float ***p, int n) 
+{
+	int i;
+	
+	MALLOC_SAFE(*p, n * sizeof(float*) );
+		
+	for(i=0; i < n; i++)
+		MALLOC_SAFE((*p)[i], n * sizeof(float) );
+}
+
+
+void free_safe_2D_float(float ***p, int n)
+{
+	int i;
+	
+	for(i=0; i < n; i++)
+		FREE_SAFE((*p)[i]);
+	
+	FREE_SAFE(*p);	
+}
