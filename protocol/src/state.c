@@ -102,19 +102,19 @@ void build_the_markov_chain
 	printf("=========================================\n");
 	printf("Agents = %d\n", agents);
 	
-	clock_t start, end;
+	//~ clock_t start, end;
 	
 	*no_states = 0;
 	
 	FOR_ALL_EDGES(i, agents) {
-		start = clock();
-		printf("%d secrets:", i+1);
+		//~ start = clock();
+		//~ printf("%d secrets:", i+1);
 		QUEUE_FOREACH(p, hash[i].can_lab_queue) 
 			generate_children(p->data, agents, hash, protocol_name);
-		end = clock();
-		printf("%lu states in %f seconds\n", 
-				QUEUE_COUNT(hash[i].can_lab_queue),
-				( (float) end - start )/CLOCKS_PER_SEC );
+		//~ end = clock();
+		//~ printf("%lu states in %f seconds\n", 
+				//~ QUEUE_COUNT(hash[i].can_lab_queue),
+				//~ ( (float) end - start )/CLOCKS_PER_SEC );
 		/* count the states */	
 		if ( protocol_name == ANY &&
 			 QUEUE_COUNT(hash[i].can_lab_queue) != 
@@ -255,15 +255,16 @@ float find_expectation
 		
 		result = expect_vec[0];
 		
-		print_expect_vec_and_trans_matrix(*no_states, 
-			expect_vec, trans_matrix, agents, protocol_name, rand_ag);
+		//~ print_expect_vec_and_trans_matrix(*no_states, 
+			//~ expect_vec, trans_matrix, agents, protocol_name, rand_ag);
 		
-		//~ print_probs_to_absorption (*no_states, trans_matrix,
-			//~ agents, protocol_name, rand_ag, (agents*(agents-1)) / 2);		
+		print_probs_to_absorption (*no_states, trans_matrix,
+			agents, protocol_name, rand_ag, 50,
+			hash);		
 			
 		FREE_SAFE(expect_vec);
-		FREE_SAFE(trans_matrix);
-		destroy_hash(agents, hash);
+		//~ FREE_SAFE(trans_matrix);
+		//~ destroy_hash(agents, hash);
 	} 
 				
 	return result;	

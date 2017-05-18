@@ -92,7 +92,7 @@ void multiply_matrices(float **c, float** a, float**b, int n)
 	int i,j,k;
 	
 	for(i=0;i<n;i++)
-		for(j=0;j<n;j++) {
+		for(j=i;j<n;j++) {
 			c[i][j] = 0;
 			for(k=0;k<n;k++)
 				c[i][j] += a[i][k] * b[k][j];
@@ -111,19 +111,29 @@ void copy_matrix(float **to, float** from, int n)
 /* prints the probabilities to absorption*/
 void print_probs_to_absorption 
 (int no_states, protocol_state_t** trans_matrix,
- int agents, int protocol_name, int rand_ag, int max_calls)
+ int agents, int protocol_name, int rand_ag, int max_calls, 
+ twin_queues hash[MAXN*MAXN])
 {
 	int i,j;	
 	float **tm1, **tm2, **tm3;
 	
 	malloc_safe_2D_float(&tm1, no_states); 
-	malloc_safe_2D_float(&tm2, no_states);
-	malloc_safe_2D_float(&tm3, no_states);
+	
 						
 	for(i=0;i<no_states;i++)
 		for(j=0;j<no_states;j++)
-			tm2[i][j] = tm1[i][j] = 
+			tm1[i][j] = 
 				get_prob(trans_matrix,i,j,protocol_name, rand_ag);
+	
+	FREE_SAFE(trans_matrix);
+	destroy_hash(agents, hash);
+	
+	malloc_safe_2D_float(&tm2, no_states);
+	malloc_safe_2D_float(&tm3, no_states);
+	
+	for(i=0;i<no_states;i++)
+		for(j=0;j<no_states;j++)
+			tm2[i][j] = tm1[i][j];
 	
 	tm1[no_states-1][no_states-1]=tm2[no_states-1][no_states-1]=1;
 	

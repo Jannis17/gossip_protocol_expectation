@@ -55,9 +55,11 @@ child_t *new_child
 
 void destroy_protocol_state (protocol_state_t ** s)
 {
-	DELETE_QUEUE((*s)->children.can_lab_queue);
-	DELETE_QUEUE((*s)->children.fixed_name_queue);
-	FREE_SAFE(*s);
+	if (*s) {
+		DELETE_QUEUE((*s)->children.can_lab_queue);
+		DELETE_QUEUE((*s)->children.fixed_name_queue);
+		FREE_SAFE(*s);
+	}
 }
 
 void destroy_twin_queues(twin_queues* twin_q)
