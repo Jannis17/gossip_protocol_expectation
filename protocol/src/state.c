@@ -259,7 +259,7 @@ float find_expectation
 			//~ expect_vec, trans_matrix, agents, protocol_name, rand_ag);
 		
 		print_probs_to_absorption (*no_states, trans_matrix,
-			agents, protocol_name, rand_ag, 50,
+			agents, protocol_name, rand_ag, 80,
 			hash);		
 			
 		FREE_SAFE(expect_vec);
