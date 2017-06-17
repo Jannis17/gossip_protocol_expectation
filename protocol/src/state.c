@@ -210,6 +210,7 @@ float find_expectation
 	struct queue_node_t * p;
 	float* expect_vec;
 	float result = 0;
+	clock_t start, end;	
 	
 	/* create the lists in the markov chain and
 	 * add the initial state				    */
@@ -258,9 +259,13 @@ float find_expectation
 		//~ print_expect_vec_and_trans_matrix(*no_states, 
 			//~ expect_vec, trans_matrix, agents, protocol_name, rand_ag);
 		
+		start = clock();
 		print_probs_to_absorption (*no_states, trans_matrix,
-			agents, protocol_name, rand_ag, 80,
+			agents, protocol_name, rand_ag, (agents*(agents-1))/2,
 			hash);		
+		end = clock();
+		printf("Elapsed time = %f seconds\n", 
+			( (float) end - start )/CLOCKS_PER_SEC );
 			
 		FREE_SAFE(expect_vec);
 		//~ FREE_SAFE(trans_matrix);

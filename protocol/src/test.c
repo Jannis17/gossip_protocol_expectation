@@ -115,7 +115,7 @@ void print_probs_to_absorption
  twin_queues hash[MAXN*MAXN])
 {
 	int i,j;	
-	float **tm1, **tm2, **tm3;
+	float **tm1, **tm2, **tm3, prev;
 	
 	malloc_safe_2D_float(&tm1, no_states); 
 	
@@ -138,10 +138,13 @@ void print_probs_to_absorption
 	tm1[no_states-1][no_states-1]=tm2[no_states-1][no_states-1]=1;
 	
 	printf("Probabilities to reach absorption after:\n");
-		
-	for(i=2; i <= max_calls; i++) {
+	
+	prev = 0;	
+	for(i= 2; i <= max_calls; i++) {
 		multiply_matrices(tm3, tm2,tm1, no_states);
-		printf("%d calls = %f\n", i, tm3[0][no_states-1]);
+		if (i >= 2 * agents -4)
+			printf("%d calls = %f\n", i, tm3[0][no_states-1]-prev);
+		prev = tm3[0][no_states-1];
 		//~ print_trans_matrix(tm3, no_states);
 		copy_matrix(tm2, tm3, no_states);
 	}
