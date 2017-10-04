@@ -4,19 +4,21 @@ Ioannis Kokkinis, ykokkinis@gmail.com
 
 ### Short Description:
 
-The aim of this project is to compute the expected duration
-of some sequential gossip protocols. The current version of
+The aim of this project is to compute the exact value
+of the expected duration
+of some sequential distributed gossip protocols. 
+The current version of
 this project computes the expected duration for the protocols
 "Learn New Secrets" (LNS) and "Any Call" (ANY) that are
-defined in the paper https://arxiv.org/abs/1511.00867. 
+defined in the paper: https://arxiv.org/abs/1511.00867. 
 The expected duration is computed by constructing the
-Markov chain that corresponds to the LNS protocol and then
+Markov chain that corresponds to the execution of
+the protocols and then
 by computing the average time that this Markov chain needs
 in order to hit the absorption state (i.e. the state where
-all the agents know all the secrets). A description
-of the algorithm we use can be found in this
-short poster:
-https://sites.google.com/site/ykokkinis/poster_dagstuhl17.pdf
+all the agents know all the secrets). A detailed explanation
+of the algorithm can be found in section 4 of the following
+paper: https://sites.google.com/site/ykokkinis/prima17.pdf
 
 The downloading, building and running instructions are
 for a UNIX system. The commands should be run in the
