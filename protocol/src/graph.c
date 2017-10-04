@@ -27,6 +27,19 @@ void init_secrets_graph (graph g[MAXN*MAXM], int n)
 		ADDONEARC(g,i,i, MAXM);
 }
 
+/* sets the main diagonal equal to 0 and the rest equal to 1*/
+void init_avail_calls_graph (graph g[MAXN*MAXM], int n) 
+{			
+	size_t i, j;
+		
+	for (i=0; i < MAXM*(size_t) n; i++)
+		for (j=0; j < MAXM*(size_t) n; j++)
+			if (! (i==j) )
+				ADDONEARC(g,i,j, MAXM);
+}
+
+
+
 /* copies graph "from" to graph "to" */
 void copy_graph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n) 
 {

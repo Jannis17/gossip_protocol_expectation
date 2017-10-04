@@ -7,6 +7,8 @@ int edges_of (graph g[MAXN*MAXM], int n);
 
 void init_secrets_graph (graph g[MAXN*MAXM], int n);
 
+void init_avail_calls_graph (graph g[MAXN*MAXM], int n);
+
 void copy_graph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n);
 
 void find_can_label 
