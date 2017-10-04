@@ -3,7 +3,7 @@
 #include "state.h"
 #include "compar.h"
 
-/* counts the directed edges (including loops) in g */
+/* counts the directed edges (including self loops) in g */
 int edges_of (graph g[MAXN*MAXM], int n) 
 {
 	size_t i;
@@ -31,10 +31,12 @@ void init_secrets_graph (graph g[MAXN*MAXM], int n)
 void init_avail_calls_graph (graph g[MAXN*MAXM], int n) 
 {			
 	size_t i, j;
+	
+	EMPTYGRAPH(g, MAXM, MAXN);
 		
 	for (i=0; i < MAXM*(size_t) n; i++)
 		for (j=0; j < MAXM*(size_t) n; j++)
-			if (! (i==j) )
+			if (i!=j)
 				ADDONEARC(g,i,j, MAXM);
 }
 

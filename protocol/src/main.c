@@ -5,11 +5,12 @@
 #include "graph.h"
 #include "memory.h"
 #include "state.h"
+#include "simulations.h"
 
 void print_results
 (int agents_min, int agents_max, int no_states[MAXN],
  float expectation[MAXN], float elps_time[MAXN], int protocol_name,
- int calc_exp) 
+ int calc_exp, int sim) 
 {
 	time_t timeNow = time(NULL);
 	struct tm localTime = *localtime(&timeNow);
@@ -56,11 +57,10 @@ void print_results
 
 void print_usage_and_exit(int argc, char * argv[])
 {
-	printf("Usage: %s [protocol_name] ", argv[0]);
-	printf("[agents_min] [agents_max] s ra ne \n\n");
-	printf("[protocol_name]: ANY or LNS\n");
-	printf("agents_min:  minimum number of agents\n");
-	printf("agents_max:  maximum number of agents (%d >= agents_max >= agents_min) \n", MAXN);
+	printf("Usage: %s [name] [min] [max] s ra ne \n\n", argv[0]);
+	printf("name: ANY or LNS\n");
+	printf("min:  minimum number of agents\n");
+	printf("max:  maximum number of agents (%d >= agents_max >= agents_min) \n", MAXN);
 	printf("ne:  if it is present, the program will not calculate the expectation. If it is used with the s option, it has no effect.\n");
 	printf("s: if it is present, the program calculates simulations. If it is absent, the program caluclates exact values\n");
 	printf("ra: if it is present, we have randomization over agents. If it is absent, we have randomization over calls\n");
@@ -123,24 +123,32 @@ int main (int argc, char * argv[]){
 	float elps_time[MAXN];
 	
 	//~ printf("%d\n", protocol_name);
-													
-	for (agents=agents_min; agents<=agents_max; agents++) {
-		start = clock();		
-		expectation[agents] = 
-			find_expectation(agents, &no_states[agents], 
-			protocol_name, calc_exp, rand_ag);								
-		end = clock();
-		elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
+	
+	printf("MAXM = %d\n", MAXM);
+		
+	if (sim) {
+		srand(time(NULL));
+		for (agents=agents_min; agents<= agents_max; agents++)
+			expectation[agents] = simulate(agents);
 	}
+	else												
+		for (agents=agents_min; agents<=agents_max; agents++) {
+			start = clock();		
+			expectation[agents] = 
+				find_expectation(agents, &no_states[agents], 
+				protocol_name, calc_exp, rand_ag);								
+			end = clock();
+			elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
+		}
 			
+	
 	print_results(agents_min, agents_max, no_states, expectation, 
-		elps_time, protocol_name, calc_exp);
+		elps_time, protocol_name, calc_exp, sim);
 	
 	//~ graph_test(agents_min);
 	
 	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
 	
-	//~ printf("MAXM = %d\n", MAXM);
 	
 	//~ printf("size of graph = %lu\n", sizeof(graph));
 	

@@ -1,3 +1,4 @@
+#include "main.h"
 #include "graph.h"
 #include "test.h"
 #include "state.h"
@@ -12,8 +13,6 @@ void print_graph(graph g[MAXN*MAXM], int n)
 		printf(SETWORD_FORMAT, g[i]);
 		printf("\n");
 	}
-	
-	printf("\n");
 }
 
 void print_trans_matrix(float**tm, int n)

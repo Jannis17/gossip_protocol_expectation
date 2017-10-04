@@ -5,7 +5,10 @@
 #define ANY 0
 
 /* MAXN = ULTIMATELY MAXIMUM number of agents */
-#define MAXN 10
+#define MAXN 50
+
+/* MAX_SIM = maximum number of simulations */
+#define MAX_SIM 50000
 
 #include "../../nauty26r7/nauty.h"
 
