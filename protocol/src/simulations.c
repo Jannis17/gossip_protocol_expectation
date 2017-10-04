@@ -5,52 +5,54 @@
 #include <math.h>
 #include "main.h"
 #include "graph.h"
-#include "memory.h"
 #include "state.h"
-#include "queue.h"
-#include "compar.h"
 #include "test.h"
 #include "../../nauty26r7/nauty.h"
-
-int count_avail_calls(graph avail_calls[MAXN*MAXM], int n) {
-	int count=0;
-	
-	size_t i;
-		
-	for (i=0; i < MAXM*(size_t) n; i++)
-		count+=POPCOUNT(avail_calls[i]);
-	
-	return count;
-}
+#include "../../nauty26r7/naututil.h"
 
 void execute_r_call(int r_call, graph secrets[MAXN*MAXM], 
-	graph avail_calls[MAXN*MAXM],int n) {
-	int i,j;
-	
+	graph avail_calls[MAXN*MAXM],int n, int protocol_name) {
+	int i, j, k;
+		
 	for (i=0; i < MAXM*(size_t) n; i++)
 		for (j=0; j < MAXM*(size_t) n; j++) {
 			r_call-=ISELEMENT(GRAPHROW(avail_calls,i,MAXM), j);
-			if (r_call == 0) {
+			if (!r_call) {
 				make_call(secrets, i, j);
+				if (protocol_name == LNS) {
+					for(k=0;k<n;k++)
+						if (ISELEMENT(GRAPHROW(secrets,i,MAXM),k)) {
+							DELELEMENT(GRAPHROW(avail_calls,i,MAXM),k);
+							DELELEMENT(GRAPHROW(avail_calls,j,MAXM),k);							
+						}
+						else {
+							ADDELEMENT(GRAPHROW(avail_calls,i,MAXM),k);
+							ADDELEMENT(GRAPHROW(avail_calls,j,MAXM),k);
+						}
+				}
+				else if (protocol_name == CO) {
+					DELELEMENT(GRAPHROW(avail_calls,i,MAXM),j);
+					DELELEMENT(GRAPHROW(avail_calls,j,MAXM),i);
+				}
 				return;
 			}
 		}
-			
 }
 
-
-float simulate (int n) {
+float simulate (int n, int protocol_name) {
 	int s, r_call, duration=0;		
 	graph secrets[MAXN*MAXM];
 	graph avail_calls[MAXN*MAXM];
-						
+							
 	for(s=0; s<MAX_SIM;s++) {
 		init_secrets_graph(secrets, n);
 		init_avail_calls_graph(avail_calls,n);
 		while (1) {
-			r_call = rand() % count_avail_calls(avail_calls,n);
-			execute_r_call(r_call, secrets, avail_calls, n);
+			r_call = rand() % edges_of(avail_calls,n) + 1;
+			printf("r_call = %d\n", r_call);
+			execute_r_call(r_call, secrets, avail_calls, n, protocol_name);
 			duration++;
+			
 			if (edges_of(secrets,n) == n * n)
 				break;
 		}

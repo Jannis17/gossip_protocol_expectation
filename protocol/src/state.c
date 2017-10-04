@@ -31,6 +31,7 @@ void generate_children
 	    SWITCH_PROT_NAME(protocol_name, 
 	    	calls_to_child = 
 				poss_calls(parent->fixed_name_secrets, i, j),
+	    	calls_to_child = 1,
 	    	calls_to_child = 1);	    	
 	    if ( calls_to_child > 0 )
 		{
@@ -172,7 +173,7 @@ float get_prob
 						prob / ((s->agents) * (s->agents) - s->edges),
 					prob = 
 						(2 * prob) / 
-						( (s->agents) * (s->agents - 1) ) );
+						( (s->agents) * (s->agents - 1) ), ;);
 			}									 
 		}
 	}		

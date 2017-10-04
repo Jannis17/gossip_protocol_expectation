@@ -18,7 +18,7 @@ void print_results
 	int agents;
 	char *prot_name;
 		
-	SWITCH_PROT_NAME(protocol_name, prot_name = "LNS", prot_name = "ANY");
+	SWITCH_PROT_NAME(protocol_name, prot_name = "LNS", prot_name = "ANY", prot_name = "CO" );
 		
 	/* create the name of the file with timestamp */
 	sprintf(filename, 
@@ -32,26 +32,32 @@ void print_results
     
     EXIT_IF_ERROR_OPENING_FILE(fp, filename);
 	
-	/* print expectation time, number of states, elapsed time etc. */
-	fprintf(fp,"==========================================\n");
-	fprintf(fp,"||        The %s protocol              ||\n", 
-				prot_name);
-	fprintf(fp,"==========================================\n");
-	fprintf(fp,"   Timestamp = %d-%d-%d-%dh-%dm-%ds   \n",
-		localTime.tm_year + 1900, localTime.tm_mon + 1, 
-		localTime.tm_mday,
-		localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
-	fprintf(fp,"==========================================\n");
-	
-	for (agents=agents_min; agents<=agents_max; agents++) {
-		fprintf(fp,"%d agents:\n", agents);
-		fprintf(fp,"Number of states = %d\n", no_states[agents]);
-		if (calc_exp)
-			fprintf(fp,"Expected length = %f\n", expectation[agents]);
-		fprintf(fp,"Elapsed Time = %f s\n", elps_time[agents]);
-		fprintf(fp,"==========================================\n");
+	if (sim) {
+		fprintf(fp,"agents, expectation\n");
+		for (agents=agents_min; agents<=agents_max; agents++)
+			fprintf(fp,"%d, %f\n", agents, expectation[agents]);
 	}
-	
+	else {
+		fprintf(fp,"==========================================\n");
+		fprintf(fp,"||        The %s protocol              ||\n", 
+					prot_name);
+		fprintf(fp,"==========================================\n");
+		fprintf(fp,"   Timestamp = %d-%d-%d-%dh-%dm-%ds   \n",
+			localTime.tm_year + 1900, localTime.tm_mon + 1, 
+			localTime.tm_mday,
+			localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
+		fprintf(fp,"==========================================\n");
+		
+		for (agents=agents_min; agents<=agents_max; agents++) {
+			fprintf(fp,"%d agents:\n", agents);
+			fprintf(fp,"Number of states = %d\n", no_states[agents]);
+			if (calc_exp)
+				fprintf(fp,"Expected length = %f\n", 
+					expectation[agents]);
+			fprintf(fp,"Elapsed Time = %f s\n", elps_time[agents]);
+			fprintf(fp,"==========================================\n");
+		}
+	}
 	fclose(fp);
 }
 
@@ -95,6 +101,8 @@ int main (int argc, char * argv[]){
 				protocol_name = LNS;
 			else if ( strcmp(argv[1], "ANY") == 0 )
 				protocol_name = ANY;
+			else if ( strcmp(argv[1], "CO") == 0 )
+				protocol_name = CO;
 			else print_usage_and_exit(argc, argv);
 		break;	
 		default:
@@ -124,12 +132,12 @@ int main (int argc, char * argv[]){
 	
 	//~ printf("%d\n", protocol_name);
 	
-	printf("MAXM = %d\n", MAXM);
+	//~ printf("MAXM = %d\n", MAXM);
 		
 	if (sim) {
 		srand(time(NULL));
 		for (agents=agents_min; agents<= agents_max; agents++)
-			expectation[agents] = simulate(agents);
+			expectation[agents] = simulate(agents, protocol_name);
 	}
 	else												
 		for (agents=agents_min; agents<=agents_max; agents++) {
