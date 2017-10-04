@@ -13,9 +13,8 @@ this project computes the expected duration for the protocols
 defined in the paper: https://arxiv.org/abs/1511.00867. 
 The expected duration is computed by constructing the
 Markov chain that corresponds to the execution of
-the protocols and then
-by computing the average time that this Markov chain needs
-in order to hit the absorption state (i.e. the state where
+the protocols and then by computing the average time that this Markov
+chain needs in order to hit the absorption state (i.e. the state where
 all the agents know all the secrets). A detailed explanation
 of the algorithm can be found in section 4 of the following
 paper: https://sites.google.com/site/ykokkinis/prima17.pdf
@@ -53,10 +52,5 @@ Navigate to the folder
 
 gossip_protocol_expectation/protocl/src
 
-and type ./protocol [protocol_name] [aMin] [aMax]
-
-where aMin and aMax are the minimum and maximum number
-of agents respectively. Protocol_name should be ANY or LNS. The current version of our
-program will give results in reasonable time (approx. 5 minutes) for aMax <= 7.
-
-The results will be generated in a file with timestamp in the folder gossip_protocol_expectation/results.
+and type ./protocol. Then some instructions will be typed
+in your terminal.
