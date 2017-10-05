@@ -67,7 +67,7 @@ int enqueue_to_hash
 (twin_queues hash[MAXN*MAXN], 
  struct queue_node_t* fixed_name_start,
  struct queue_node_t* can_start,
- protocol_state_t* s,
+ pstate_t* s,
  struct queue_node_t** found, 
  int prot);
 

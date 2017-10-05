@@ -126,13 +126,9 @@ int main (int argc, char * argv[]){
 			print_usage_and_exit(argc, argv);
 	}
 
-	if ( agents_min > agents_max ) 
+	if ( agents_min > agents_max || agents_max > MAXN) 
 		print_usage_and_exit(argc, argv);			
-	
-	if ( agents_max > MAXN ) 
-		print_usage_and_exit(argc, argv);			
-	
-			
+				
 	/* The following optional call verifies that we are linking
 	 * to compatible versions of the nauty routines. */
 	nauty_check(WORDSIZE,MAXM,MAXN,NAUTYVERSIONID);

@@ -12,8 +12,8 @@
 #include "../../nauty26r7/nauty.h"
 
 void generate_children
-(protocol_state_t* parent, int agents, 
- twin_queues hash[MAXN*MAXN], int prot) 
+(pstate_t* parent, int agents, twin_queues hash[MAXN*MAXN], 
+ int prot) 
 {
 	int i, j, calls_to_child =0;
 	graph temp[MAXN*MAXM];
@@ -23,7 +23,7 @@ void generate_children
 	struct queue_node_t* childs_can_prev = NULL;
 	struct queue_node_t* childs_fixed_name_prev = NULL;
 	child_t * potential_child;
-	protocol_state_t* childs_state;
+	pstate_t* childs_state;
 					
 	for (i=0; i<agents; i++)
 	  for (j=i+1; j<agents; j++) 
@@ -50,8 +50,7 @@ void generate_children
 		  copy_graph(temp, parent->fixed_name_secrets, agents);
 		  make_call(temp, i ,j);
 		  		  
-		  childs_state = 
-			new_protocol_state(temp, agents, prot);
+		  childs_state = new_pstate(temp, agents, prot);
 		  potential_child = 
 			new_child(temp, childs_state, calls_to_child);
 		  
@@ -82,12 +81,8 @@ void generate_children
 		  } 
 		  else 
 		  { if ( enqueue_to_hash
-				   (hash, 
-					NULL,
-					NULL,
-					childs_state, 
-				    &found_child_node, 
-				    prot)
+				   (hash, NULL, NULL, childs_state, 
+				    &found_child_node, prot)
 					  == DUPLICATE_ITEM ) 
 			{
 			  destroy_protocol_state(&childs_state);
@@ -95,9 +90,7 @@ void generate_children
 				found_child_node->data;				
 			}
 			  enqueue_unique_to_twin_queues
-				( parent->children, 
-				  NULL,
-				  NULL,	
+				( parent->children, NULL, NULL,	
 				  potential_child, prot );
 		   }		  
 		 }		  
@@ -146,11 +139,11 @@ void build_the_markov_chain
 }
 
 float get_prob
-( protocol_state_t ** trans_matrix, 
+( pstate_t ** trans_matrix, 
   int from, int to, int prot, int rand_ag) 
 {
-	protocol_state_t* s = trans_matrix[from];
-	protocol_state_t* t;
+	pstate_t* s = trans_matrix[from];
+	pstate_t* t;
 	struct queue_node_t *p;
 	child_t* child;	
 	float prob = 0;
@@ -158,7 +151,7 @@ float get_prob
 	
 	QUEUE_FOREACH(p, s->children.can_lab_queue) {
 		child = (child_t*) (p-> data);
-		t = (protocol_state_t*) child->childs_state;
+		t = (pstate_t*) child->childs_state;
 		
 		if (t->id == to) {
 			if (rand_ag) {
@@ -211,7 +204,7 @@ void init_markov_chain
 {
 	int i;
 	graph init_secrets [MAXN*MAXM];
-	protocol_state_t *s;
+	pstate_t *s;
 		
 	FOR_ALL_EDGES(i, agents){
 		hash[i].can_lab_queue = 
@@ -221,7 +214,7 @@ void init_markov_chain
 	}
 	
 	init_secrets_graph(init_secrets, agents);
-	s =	new_protocol_state(init_secrets, agents, prot);
+	s =	new_pstate(init_secrets, agents, prot);
 	enqueue_to_hash(hash, NULL, NULL, s, NULL, prot);
 }
 
@@ -230,9 +223,9 @@ float find_expectation
  int rand_ag)
 {		
 	twin_queues hash[MAXN*MAXN];
-	protocol_state_t *s;
+	pstate_t *s;
 	int i, j, label;
-	protocol_state_t** trans_matrix;
+	pstate_t** trans_matrix;
 	struct queue_node_t * p;
 	float* expect_vec;
 	float result = 0;
@@ -249,14 +242,14 @@ float find_expectation
 	if (calc_exp)
 	{		
 		MALLOC_SAFE( trans_matrix,
-				(* no_states) * sizeof(protocol_state_t *) );
+				(* no_states) * sizeof(pstate_t *) );
 		 	
 		/* label the states */
 		label = 0;
 		
 		FOR_ALL_EDGES(i, agents)
 			QUEUE_FOREACH(p, hash[i].can_lab_queue) {
-				s = (protocol_state_t *) (p->data);
+				s = (pstate_t *) (p->data);
 				trans_matrix[label] = s;
 				s->id = label++;
 			}

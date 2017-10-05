@@ -40,10 +40,10 @@ int cmp_graph_nodes (const void *p, const void *q) {
 /* compares the canonical secrets of the args */
 int cmp_can_secrets(const void* item1, const void* item2)
 {
-	protocol_state_t* state1, *state2;
+	pstate_t* state1, *state2;
 			
-	state1 = (protocol_state_t *) item1;
-	state2 = (protocol_state_t *) item2;
+	state1 = (pstate_t *) item1;
+	state2 = (pstate_t *) item2;
 	
 	return cmp_graphs(state1->can_secrets, state2->can_secrets, 
 			state1->agents);
@@ -52,10 +52,10 @@ int cmp_can_secrets(const void* item1, const void* item2)
 /* compares the fixed name secrets (as unordered tuple ) of the args */
 int cmp_fixed_name_secrets(const void* item1, const void* item2)
 {
-	protocol_state_t* state1, *state2;
+	pstate_t* state1, *state2;
 			
-	state1 = (protocol_state_t *) item1;
-	state2 = (protocol_state_t *) item2;
+	state1 = (pstate_t *) item1;
+	state2 = (pstate_t *) item2;
 	
 	return cmp_graphs(state1->fixed_name_secrets_sorted, 
 			state2->fixed_name_secrets_sorted, 

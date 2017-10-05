@@ -5,12 +5,12 @@
 #include "compar.h"
 #include "graph.h"
 
-protocol_state_t* new_protocol_state 
+pstate_t* new_pstate 
 (graph g[MAXN*MAXM], int agents, int prot)
 {
-	protocol_state_t* s;
+	pstate_t* s;
 	
-	MALLOC_SAFE(s, sizeof(protocol_state_t));
+	MALLOC_SAFE(s, sizeof(pstate_t));
 	
 	copy_graph(s->fixed_name_secrets, g, agents);
 	
@@ -36,7 +36,7 @@ protocol_state_t* new_protocol_state
 
 /* creates a new child */
 child_t *new_child
-( graph secrets[MAXN*MAXM], protocol_state_t* childs_state,
+( graph secrets[MAXN*MAXM], pstate_t* childs_state,
   int calls_to_child)
 {
 	child_t* result;
@@ -53,7 +53,7 @@ child_t *new_child
 	return result;
 }
 
-void destroy_protocol_state (protocol_state_t ** s)
+void destroy_protocol_state (pstate_t ** s)
 {
 	if (*s) {
 		DELETE_QUEUE((*s)->children.can_lab_queue);
@@ -64,11 +64,11 @@ void destroy_protocol_state (protocol_state_t ** s)
 
 void destroy_twin_queues(twin_queues* twin_q)
 {
-	protocol_state_t *s;
+	pstate_t *s;
 	struct queue_node_t * p;
 	
 	QUEUE_FOREACH(p, twin_q->can_lab_queue) {
-			s = (protocol_state_t *) (p->data);
+			s = (pstate_t *) (p->data);
 			destroy_protocol_state(&s);			
 		}
 		DELETE_QUEUE(twin_q->can_lab_queue);

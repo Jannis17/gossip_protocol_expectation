@@ -27,7 +27,7 @@ void print_trans_matrix(float**tm, int n)
 }
 
 void print_expect_vec_and_trans_matrix
-(int no_states, float* expect_vec, protocol_state_t** trans_matrix,
+(int no_states, float* expect_vec, pstate_t** trans_matrix,
  int agents, int prot, int rand_ag)
 {
 	int i,j;
@@ -109,7 +109,7 @@ void copy_matrix(float **to, float** from, int n)
 }
 /* prints the probabilities to absorption*/
 void print_probs_to_absorption 
-(int no_states, protocol_state_t** trans_matrix,
+(int no_states, pstate_t** trans_matrix,
  int agents, int prot, int rand_ag, int max_calls, 
  twin_queues hash[MAXN*MAXN])
 {

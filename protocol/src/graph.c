@@ -40,8 +40,6 @@ void init_avail_calls_graph (graph g[MAXN*MAXM], int n)
 				ADDONEARC(g,i,j, MAXM);
 }
 
-
-
 /* copies graph "from" to graph "to" */
 void copy_graph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n) 
 {
@@ -53,8 +51,7 @@ void copy_graph (graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n)
 
 /* g2 will be equal to the canonical labeling of g1
  * n : size of g1 and g2 */
-void find_can_label 
-	(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n)
+void find_can_label (graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n)
 {
 	int lab[MAXN], ptn[MAXN], orbits[MAXN];
 	
