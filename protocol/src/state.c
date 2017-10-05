@@ -13,9 +13,9 @@
 
 void generate_children
 (protocol_state_t* parent, int agents, 
- twin_queues hash[MAXN*MAXN], int protocol_name) 
+ twin_queues hash[MAXN*MAXN], int prot) 
 {
-	int i, j, calls_to_child;
+	int i, j, calls_to_child =0;
 	graph temp[MAXN*MAXM];
 	child_t* found_child;
 	struct queue_node_t* found_child_node;
@@ -28,18 +28,30 @@ void generate_children
 	for (i=0; i<agents; i++)
 	  for (j=i+1; j<agents; j++) 
 	  {
-	    SWITCH_PROT_NAME(protocol_name, 
-	    	calls_to_child = 
-				poss_calls(parent->fixed_name_secrets, i, j),
-	    	calls_to_child = 1,
-	    	calls_to_child = 1);	    	
+	    switch (prot) {
+			case (ANY):
+				calls_to_child = 1;
+				break;
+			case (LNS):
+	        	calls_to_child = 
+				poss_calls(parent->fixed_name_secrets, i, j);
+				break;
+			case (CO):
+				break;
+			case (TOK):
+				break;
+			case (SPI):
+				break;
+			default:
+				INTERNAL_ERROR("Unknown protocol name!");
+		}
 	    if ( calls_to_child > 0 )
 		{
 		  copy_graph(temp, parent->fixed_name_secrets, agents);
 		  make_call(temp, i ,j);
 		  		  
 		  childs_state = 
-			new_protocol_state(temp, agents, protocol_name);
+			new_protocol_state(temp, agents, prot);
 		  potential_child = 
 			new_child(temp, childs_state, calls_to_child);
 		  
@@ -55,7 +67,7 @@ void generate_children
 		                            &childs_fixed_name_prev,
 									&childs_can_prev,
 									&child_pos_in_par_list, 
-		  							potential_child, protocol_name))
+		  							potential_child, prot))
 		  {
 			 FREE_SAFE(potential_child); 
 			 destroy_protocol_state(&childs_state);
@@ -75,7 +87,7 @@ void generate_children
 					NULL,
 					childs_state, 
 				    &found_child_node, 
-				    protocol_name)
+				    prot)
 					  == DUPLICATE_ITEM ) 
 			{
 			  destroy_protocol_state(&childs_state);
@@ -86,7 +98,7 @@ void generate_children
 				( parent->children, 
 				  NULL,
 				  NULL,	
-				  potential_child, protocol_name );
+				  potential_child, prot );
 		   }		  
 		 }		  
 	   }
@@ -94,7 +106,7 @@ void generate_children
 
 void build_the_markov_chain
 (twin_queues hash[MAXN*MAXN], int agents, 
- int protocol_name, int calc_exp, int *no_states)
+ int prot, int calc_exp, int *no_states)
 {
 	int i;
 	
@@ -111,13 +123,13 @@ void build_the_markov_chain
 		//~ start = clock();
 		//~ printf("%d secrets:", i+1);
 		QUEUE_FOREACH(p, hash[i].can_lab_queue) 
-			generate_children(p->data, agents, hash, protocol_name);
+			generate_children(p->data, agents, hash, prot);
 		//~ end = clock();
 		//~ printf("%lu states in %f seconds\n", 
 				//~ QUEUE_COUNT(hash[i].can_lab_queue),
 				//~ ( (float) end - start )/CLOCKS_PER_SEC );
 		/* count the states */	
-		if ( protocol_name == ANY &&
+		if ( prot == ANY &&
 			 QUEUE_COUNT(hash[i].can_lab_queue) != 
 			 QUEUE_COUNT(hash[i].fixed_name_queue) ) {
 			printf("canonical = %lu	\n", QUEUE_COUNT(hash[i].can_lab_queue));
@@ -135,7 +147,7 @@ void build_the_markov_chain
 
 float get_prob
 ( protocol_state_t ** trans_matrix, 
-  int from, int to, int protocol_name, int rand_ag) 
+  int from, int to, int prot, int rand_ag) 
 {
 	protocol_state_t* s = trans_matrix[from];
 	protocol_state_t* t;
@@ -168,12 +180,25 @@ float get_prob
 			else {	
 				prob = child->calls_to_child;
 			
-				SWITCH_PROT_NAME(protocol_name, 
-					prob = 
-						prob / ((s->agents) * (s->agents) - s->edges),
-					prob = 
-						(2 * prob) / 
-						( (s->agents) * (s->agents - 1) ), ;);
+			
+				switch (prot) {
+					case (ANY):
+						prob = 
+						(2 * prob) / ( (s->agents) * (s->agents - 1) );
+						break;
+					case (LNS):
+						prob = 
+						prob / ((s->agents) * (s->agents) - s->edges);
+						break;
+					case (CO):
+						break;
+					case (TOK):
+						break;
+					case (SPI):
+						break;
+					default:
+						INTERNAL_ERROR("Unknown protocol name!");
+				}
 			}									 
 		}
 	}		
@@ -182,7 +207,7 @@ float get_prob
 }
 
 void init_markov_chain
-(twin_queues hash[MAXN*MAXN], int agents, int protocol_name)
+(twin_queues hash[MAXN*MAXN], int agents, int prot)
 {
 	int i;
 	graph init_secrets [MAXN*MAXM];
@@ -196,12 +221,12 @@ void init_markov_chain
 	}
 	
 	init_secrets_graph(init_secrets, agents);
-	s =	new_protocol_state(init_secrets, agents, protocol_name);
-	enqueue_to_hash(hash, NULL, NULL, s, NULL, protocol_name);
+	s =	new_protocol_state(init_secrets, agents, prot);
+	enqueue_to_hash(hash, NULL, NULL, s, NULL, prot);
 }
 
 float find_expectation
-(int agents, int* no_states, int protocol_name, int calc_exp, 
+(int agents, int* no_states, int prot, int calc_exp, 
  int rand_ag)
 {		
 	twin_queues hash[MAXN*MAXN];
@@ -215,11 +240,11 @@ float find_expectation
 	
 	/* create the lists in the markov chain and
 	 * add the initial state				    */
-	init_markov_chain(hash, agents, protocol_name);
+	init_markov_chain(hash, agents, prot);
 			
 	/* build the markov chain */
 	build_the_markov_chain(hash, agents, 
-		protocol_name, calc_exp, no_states);
+		prot, calc_exp, no_states);
 	
 	if (calc_exp)
 	{		
@@ -246,23 +271,23 @@ float find_expectation
                                         
 			for(j=i+1; j<(* no_states); j++)
 				expect_vec[i] += 
-					get_prob(trans_matrix, i, j, protocol_name, rand_ag) * 
+					get_prob(trans_matrix, i, j, prot, rand_ag) * 
 						expect_vec[j];
 		
-			if (protocol_name == ANY)			       
+			if (prot == ANY)			       
 				expect_vec[i] = 
 					expect_vec[i] / 
-					(1-get_prob(trans_matrix, i, i, protocol_name, rand_ag));
+					(1-get_prob(trans_matrix, i, i, prot, rand_ag));
 		}
 		
 		result = expect_vec[0];
 		
 		//~ print_expect_vec_and_trans_matrix(*no_states, 
-			//~ expect_vec, trans_matrix, agents, protocol_name, rand_ag);
+			//~ expect_vec, trans_matrix, agents, prot, rand_ag);
 		
 		//~ start = clock();
 		//~ print_probs_to_absorption (*no_states, trans_matrix,
-			//~ agents, protocol_name, rand_ag, (agents*(agents-1))/2,
+			//~ agents, prot, rand_ag, (agents*(agents-1))/2,
 			//~ hash);		
 		//~ end = clock();
 		//~ printf("Elapsed time = %f seconds\n", 

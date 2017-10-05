@@ -28,11 +28,11 @@ typedef struct child_tag {
 } child_t;
 
 float find_expectation
-(int agents, int* no_states, int protocol_name, int calc_exp, int rand_ag);
+(int agents, int* no_states, int prot, int calc_exp, int rand_ag);
 
 float get_prob
 ( protocol_state_t ** trans_matrix, 
-  int from, int to, int protocol_name, int rand_ag);
+  int from, int to, int prot, int rand_ag);
 
 
 #endif /* H_STATE_H_ */

@@ -52,7 +52,7 @@ void enqueue_unique_to_twin_queues
 struct queue_node_t* fixed_name_prev,
 struct queue_node_t* can_prev, 
 void* item,
-int protocol_name);
+int prot);
 
 void delete_queue(struct queue_t *hd);
 
@@ -69,7 +69,7 @@ int enqueue_to_hash
  struct queue_node_t* can_start,
  protocol_state_t* s,
  struct queue_node_t** found, 
- int protocol_name);
+ int prot);
 
 int search_in_twin_queues 
 (twin_queues twin_q, 
@@ -78,6 +78,6 @@ int search_in_twin_queues
  struct queue_node_t** fixed_name_prev,
  struct queue_node_t** can_prev,
  struct queue_node_t** found,  
- child_t* child, int protocol_name);
+ child_t* child, int prot);
 	
 #endif /* H_QUEUE_H_ */

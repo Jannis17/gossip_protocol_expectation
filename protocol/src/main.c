@@ -9,55 +9,72 @@
 
 void print_results
 (int agents_min, int agents_max, int no_states[MAXN],
- float expectation[MAXN], float elps_time[MAXN], int protocol_name,
- int calc_exp, int sim) 
+ float expectation[MAXN], float elps_time[MAXN], int prot,
+ int calc_exp, int sim, int rand_ag) 
 {
 	time_t timeNow = time(NULL);
 	struct tm localTime = *localtime(&timeNow);
 	char filename[300];
 	int agents;
-	char *prot_name;
+	char *pname;
 		
-	SWITCH_PROT_NAME(protocol_name, prot_name = "LNS", prot_name = "ANY", prot_name = "CO" );
-		
+	switch (prot) {
+		case (ANY):
+			pname = "ANY";
+			break;
+		case (LNS):
+			pname = "LNS";
+			break;
+		case (CO):
+			pname = "CO";
+			break;
+		case (TOK):
+			pname = "TOK";
+			break;
+		case (SPI):
+			pname = "SPI";
+			break;
+		default:
+			INTERNAL_ERROR("Unknown protocol name!");
+	}
+	
+	char *mode=(sim)?"SIM":"EXACT";
+	
+	char *ra=(rand_ag)?"RA":"RC";
+			
 	/* create the name of the file with timestamp */
 	sprintf(filename, 
-	"../../results/%s-%d-%d-%d-%dh-%dm-%ds-Agents_%d_to_%d.txt",
-	prot_name,
+	"../../results/%s-%s-%s-%d-%d-%d-%dh-%dm-%ds-agents_%d_to_%d.CSV",
+	pname, mode, ra,
 	localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
-	localTime.tm_hour, localTime.tm_min, localTime.tm_sec,
+	localTime.tm_hour, localTime.tm_min, localTime.tm_sec, 
 	agents_min, agents_max);
 	
 	FILE * fp = fopen (filename, "w+");
     
     EXIT_IF_ERROR_OPENING_FILE(fp, filename);
 	
-	if (sim) {
-		fprintf(fp,"agents, expectation\n");
-		for (agents=agents_min; agents<=agents_max; agents++)
-			fprintf(fp,"%d, %f\n", agents, expectation[agents]);
-	}
-	else {
-		fprintf(fp,"==========================================\n");
-		fprintf(fp,"||        The %s protocol              ||\n", 
-					prot_name);
-		fprintf(fp,"==========================================\n");
-		fprintf(fp,"   Timestamp = %d-%d-%d-%dh-%dm-%ds   \n",
-			localTime.tm_year + 1900, localTime.tm_mon + 1, 
-			localTime.tm_mday,
-			localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
-		fprintf(fp,"==========================================\n");
+	fprintf(fp,"agents, ");
+	for (agents=agents_min; agents<=agents_max; agents++)
+		fprintf(fp,"%d, ", agents);
+	
+	fprintf(fp,"\nexpectation, ");
+	for (agents=agents_min; agents<=agents_max; agents++)
+		fprintf(fp,"%f, ", expectation[agents]);
+				
+	if (!sim) {
+		fprintf(fp,"\nstates, ");
 		
-		for (agents=agents_min; agents<=agents_max; agents++) {
-			fprintf(fp,"%d agents:\n", agents);
-			fprintf(fp,"Number of states = %d\n", no_states[agents]);
-			if (calc_exp)
-				fprintf(fp,"Expected length = %f\n", 
-					expectation[agents]);
-			fprintf(fp,"Elapsed Time = %f s\n", elps_time[agents]);
-			fprintf(fp,"==========================================\n");
-		}
-	}
+		for (agents=agents_min; agents<=agents_max; agents++)	
+			fprintf(fp,"%d, ", no_states[agents]);
+		
+		fprintf(fp,"\ntime, ");
+		
+		for (agents=agents_min; agents<=agents_max; agents++)	
+			fprintf(fp,"%f, ", elps_time[agents]);
+		
+	}	
+	
 	fclose(fp);
 }
 
@@ -76,7 +93,7 @@ void print_usage_and_exit(int argc, char * argv[])
 }
 
 int main (int argc, char * argv[]){
-	int agents_min, agents_max, protocol_name;
+	int agents_min, agents_max, prot;
 	int calc_exp = 1;
 	int rand_ag = 0;
 	int sim =0;
@@ -98,11 +115,11 @@ int main (int argc, char * argv[]){
 			agents_min = atoi(argv[2]);
 			agents_max = atoi(argv[3]);
 			if ( strcmp(argv[1], "LNS") == 0)
-				protocol_name = LNS;
+				prot = LNS;
 			else if ( strcmp(argv[1], "ANY") == 0 )
-				protocol_name = ANY;
+				prot = ANY;
 			else if ( strcmp(argv[1], "CO") == 0 )
-				protocol_name = CO;
+				prot = CO;
 			else print_usage_and_exit(argc, argv);
 		break;	
 		default:
@@ -130,33 +147,30 @@ int main (int argc, char * argv[]){
 	int agents;
 	float elps_time[MAXN];
 	
-	//~ printf("%d\n", protocol_name);
+	//~ printf("%d\n", prot);
 	
 	//~ printf("MAXM = %d\n", MAXM);
 		
 	if (sim) {
 		srand(time(NULL));
 		for (agents=agents_min; agents<= agents_max; agents++)
-			expectation[agents] = simulate(agents, protocol_name);
+			expectation[agents] = simulate(agents, prot, rand_ag);
 	}
-	else												
-		for (agents=agents_min; agents<=agents_max; agents++) {
-			start = clock();		
-			expectation[agents] = 
+	else for (agents=agents_min; agents<=agents_max; agents++) {
+			 start = clock();		
+			 expectation[agents] = 
 				find_expectation(agents, &no_states[agents], 
-				protocol_name, calc_exp, rand_ag);								
-			end = clock();
-			elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
-		}
-			
+				prot, calc_exp, rand_ag);								
+			 end = clock();
+			 elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
+		 }
 	
 	print_results(agents_min, agents_max, no_states, expectation, 
-		elps_time, protocol_name, calc_exp, sim);
+		elps_time, prot, calc_exp, sim, rand_ag);
 	
 	//~ graph_test(agents_min);
 	
 	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
-	
 	
 	//~ printf("size of graph = %lu\n", sizeof(graph));
 	

@@ -6,7 +6,7 @@
 #include "graph.h"
 
 protocol_state_t* new_protocol_state 
-(graph g[MAXN*MAXM], int agents, int protocol_name)
+(graph g[MAXN*MAXM], int agents, int prot)
 {
 	protocol_state_t* s;
 	
@@ -19,7 +19,7 @@ protocol_state_t* new_protocol_state
 	s->children.can_lab_queue = 
 		new_queue(MAXN*(MAXN-1), cmp_can_children);
 		
-	if (protocol_name == ANY) {
+	if (prot == ANY) {
 		copy_graph(s->fixed_name_secrets_sorted, g, agents);
 		qsort(s->fixed_name_secrets_sorted, 
 			agents*MAXM, sizeof(graph), cmp_graph_nodes);

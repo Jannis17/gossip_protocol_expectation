@@ -288,12 +288,12 @@ void enqueue_unique_to_twin_queues
 struct queue_node_t* fixed_name_start,
 struct queue_node_t* can_start, 
 void* item,
-int protocol_name)
+int prot)
 {
   enqueue_unique_to_sorted_queue
 	(twin_q.can_lab_queue, can_start, NULL, item);
 	
-  if (protocol_name == ANY)	
+  if (prot == ANY)	
 	 enqueue_unique_to_sorted_queue
 		(twin_q.fixed_name_queue, fixed_name_start, NULL, item);					
 }
@@ -304,7 +304,7 @@ int enqueue_to_hash
  struct queue_node_t* can_start,
  protocol_state_t* s,
  struct queue_node_t** found, 
- int protocol_name)
+ int prot)
 {
 	int result;
 	struct queue_t* fixed_name_queue, * can_queue;
@@ -317,7 +317,7 @@ int enqueue_to_hash
 	
 	can_queue = hash[s-> edges -1].can_lab_queue;
 	
-	if ( protocol_name == ANY &&
+	if ( prot == ANY &&
 		 search_in_sorted_queue
 			(fixed_name_queue, fixed_name_start, 
 			 &fixed_name_prev, found, s))
@@ -327,7 +327,7 @@ int enqueue_to_hash
 		enqueue_unique_to_sorted_queue
 			(can_queue, can_start, found, s);
 	
-	if (protocol_name == ANY && result == NEW_ITEM)
+	if (prot == ANY && result == NEW_ITEM)
 		enqueue_unique_to_sorted_queue
 			(fixed_name_queue, fixed_name_prev, found, s);
 	
@@ -344,14 +344,14 @@ int search_in_twin_queues
  struct queue_node_t** can_prev,
  struct queue_node_t** found,  
  child_t* child, 
- int protocol_name)
+ int prot)
 {
 	struct queue_t* fixed_name_queue, *can_queue;
 	
 	fixed_name_queue = twin_q.fixed_name_queue;
 	can_queue = twin_q.can_lab_queue;
 	
-	if ( protocol_name == ANY &&
+	if ( prot == ANY &&
 		 search_in_sorted_queue
 		 (fixed_name_queue, 
 		  fixed_name_start, 

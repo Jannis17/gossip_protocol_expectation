@@ -49,12 +49,12 @@ do {	\
 } while(0)
 
 protocol_state_t* new_protocol_state 
-(graph g[MAXN*MAXM], int agents, int protocol_name);
+(graph g[MAXN*MAXM], int agents, int prot);
   
 void destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
 
 protocol_state_t* new_protocol_state 
-(graph g[MAXN*MAXM], int agents, int protocol_name);
+(graph g[MAXN*MAXM], int agents, int prot);
 
 child_t *new_child
 ( graph secrets[MAXN*MAXM], protocol_state_t* childs_state,
