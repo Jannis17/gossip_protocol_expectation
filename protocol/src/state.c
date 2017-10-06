@@ -12,11 +12,11 @@
 #include "../../nauty26r7/nauty.h"
 
 void generate_children
-(pstate_t* parent, int agents, twin_queues hash[MAXN*MAXN], 
- int prot) 
+(pstate_t *parent, int agents, twin_queues hash[MAXN*MAXN], int prot) 
 {
 	int i, j, calls_to_child =0;
-	graph temp[MAXN*MAXM];
+	graph temp_secrets[MAXN*MAXM];
+	graph temp_calls[MAXN*MAXM];
 	child_t* found_child;
 	struct queue_node_t* found_child_node;
 	struct queue_node_t* child_pos_in_par_list;
@@ -34,7 +34,7 @@ void generate_children
 				break;
 			case (LNS):
 	        	calls_to_child = 
-				poss_calls(parent->fixed_name_secrets, i, j);
+					no_LNS_calls(parent->fixed_name_secrets, i, j);
 				break;
 			case (CO):
 				break;
@@ -45,14 +45,16 @@ void generate_children
 			default:
 				INTERNAL_ERROR("Unknown protocol name!");
 		}
+	    
 	    if ( calls_to_child > 0 )
 		{
-		  copy_graph(temp, parent->fixed_name_secrets, agents);
-		  make_call(temp, i ,j);
+		  copy_graph(temp_secrets, parent->fixed_name_secrets, agents);
+		  copy_graph(temp_calls, parent->can_calls, agents);
+		  make_call(temp_secrets, i ,j);
 		  		  
-		  childs_state = new_pstate(temp, agents, prot);
+		  childs_state = new_pstate(temp_secrets, temp_calls, agents, prot);
 		  potential_child = 
-			new_child(temp, childs_state, calls_to_child);
+			new_child(temp_secrets, childs_state, calls_to_child);
 		  
 		  potential_child->calls[i][j] = 
 			can_call( parent->fixed_name_secrets, i, j);
@@ -60,13 +62,9 @@ void generate_children
 		  potential_child->calls[j][i] = 
 			can_call(parent->fixed_name_secrets, j, i);
 		  		  
-		  if (search_in_twin_queues(parent->children, 
-									NULL,
-									NULL,
-		                            &childs_fixed_name_prev,
-									&childs_can_prev,
-									&child_pos_in_par_list, 
-		  							potential_child, prot))
+		  if (search_in_twin_queues(parent->children, NULL, NULL,
+			   &childs_fixed_name_prev, &childs_can_prev,
+			   &child_pos_in_par_list, potential_child, prot))
 		  {
 			 FREE_SAFE(potential_child); 
 			 destroy_protocol_state(&childs_state);
@@ -80,16 +78,14 @@ void generate_children
 				can_call(parent->fixed_name_secrets, j, i);
 		  } 
 		  else 
-		  { if ( enqueue_to_hash
-				   (hash, NULL, NULL, childs_state, 
-				    &found_child_node, prot)
-					  == DUPLICATE_ITEM ) 
+		  { if ( enqueue_to_hash (hash, NULL, NULL, childs_state, 
+				 &found_child_node, prot) == DUPLICATE_ITEM ) 
 			{
 			  destroy_protocol_state(&childs_state);
 			  potential_child->childs_state = 
 				found_child_node->data;				
 			}
-			  enqueue_unique_to_twin_queues
+			 enqueue_unique_to_twin_queues
 				( parent->children, NULL, NULL,	
 				  potential_child, prot );
 		   }		  
@@ -171,8 +167,7 @@ float get_prob
 				}							
 			}
 			else {	
-				prob = child->calls_to_child;
-			
+				prob = child->calls_to_child;			
 			
 				switch (prot) {
 					case (ANY):
@@ -181,7 +176,7 @@ float get_prob
 						break;
 					case (LNS):
 						prob = 
-						prob / ((s->agents) * (s->agents) - s->edges);
+						prob / ((s->agents) * (s->agents) - s->total_secrets);
 						break;
 					case (CO):
 						break;
@@ -204,6 +199,7 @@ void init_markov_chain
 {
 	int i;
 	graph init_secrets [MAXN*MAXM];
+	graph init_calls [MAXN*MAXM];
 	pstate_t *s;
 		
 	FOR_ALL_EDGES(i, agents){
@@ -213,8 +209,10 @@ void init_markov_chain
 			new_queue(MAXSTATES, cmp_fixed_name_secrets);
 	}
 	
-	init_secrets_graph(init_secrets, agents);
-	s =	new_pstate(init_secrets, agents, prot);
+	diagonal(init_secrets, agents);
+	diagonal(init_calls, agents);
+	
+	s =	new_pstate(init_secrets, init_calls, agents, prot);
 	enqueue_to_hash(hash, NULL, NULL, s, NULL, prot);
 }
 

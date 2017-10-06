@@ -112,7 +112,7 @@ float simulate (int n, int prot, int rand_ag) {
 	graph avail_calls[MAXN*MAXM];
 							
 	for(s=0; s<MAX_SIM;s++) {
-		init_secrets_graph(secrets, n);
+		diagonal(secrets, n);
 		init_avail_calls_graph(avail_calls,n);
 		while (1) {
 			if (rand_ag) {

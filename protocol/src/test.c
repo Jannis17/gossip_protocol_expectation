@@ -55,8 +55,8 @@ void graph_test(int n)
 	
 	int i = 2 , j = 0;
 		
-	init_secrets_graph(g1, n);
-	init_secrets_graph(g2, n);
+	diagonal(g1, n);
+	diagonal(g2, n);
 		
 	make_call(g1, 0, 1);
 	//~ make_call(g1, 2, 3);
@@ -83,7 +83,7 @@ void graph_test(int n)
 	
 	printf ("edges of g2 = %d \n", edges_of(g2,n));
 	
-	printf ("poss Calls = %d \n", poss_calls(g1,i,j) );
+	printf ("poss Calls = %d \n", no_LNS_calls(g1,i,j) );
 }
 
 void multiply_matrices(float **c, float** a, float**b, int n)

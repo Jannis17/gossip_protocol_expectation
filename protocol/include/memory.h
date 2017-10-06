@@ -48,14 +48,13 @@ do {	\
 	}	\
 } while(0)
 
-pstate_t* new_pstate 
-(graph g[MAXN*MAXM], int agents, int prot);
+pstate_t* new_pstate(graph secrets[MAXN*MAXM], graph calls[MAXN*MAXM],
+int agents, int prot);
   
 void destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
 
-child_t *new_child
-( graph secrets[MAXN*MAXM], pstate_t* childs_state,
-  int calls_to_child);
+child_t *new_child(graph secrets[MAXN*MAXM], pstate_t* childs_state,
+int calls_to_child);
   
 void destroy_protocol_state (pstate_t ** s);
  

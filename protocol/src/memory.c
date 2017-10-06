@@ -6,13 +6,13 @@
 #include "graph.h"
 
 pstate_t* new_pstate 
-(graph g[MAXN*MAXM], int agents, int prot)
+(graph secrets[MAXN*MAXM], graph calls[MAXN*MAXM], int agents, int prot)
 {
 	pstate_t* s;
 	
 	MALLOC_SAFE(s, sizeof(pstate_t));
 	
-	copy_graph(s->fixed_name_secrets, g, agents);
+	copy_graph(s->fixed_name_secrets, secrets, agents);
 	
 	s->children.fixed_name_queue = 
 		new_queue(MAXN*(MAXN-1), cmp_fixed_name_children);
@@ -20,16 +20,16 @@ pstate_t* new_pstate
 		new_queue(MAXN*(MAXN-1), cmp_can_children);
 		
 	if (prot == ANY) {
-		copy_graph(s->fixed_name_secrets_sorted, g, agents);
+		copy_graph(s->fixed_name_secrets_sorted, secrets, agents);
 		qsort(s->fixed_name_secrets_sorted, 
 			agents*MAXM, sizeof(graph), cmp_graph_nodes);
 	}
 			
-	find_can_label(g, s->can_secrets, agents); 
+	find_can_label(secrets, s->can_secrets, agents); 
 			
 	s->id = 0;
 	s->agents = agents;
-	s->edges = edges_of(g, agents);
+	s->total_secrets = edges_of(secrets, agents);
 				
 	return s;		
 }

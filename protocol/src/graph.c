@@ -17,7 +17,7 @@ int edges_of (graph g[MAXN*MAXM], int n)
 }
 
 /* adds only self loops and NO OTHER edge in g */
-void init_secrets_graph (graph g[MAXN*MAXM], int n) 
+void diagonal (graph g[MAXN*MAXM], int n) 
 {			
 	size_t i;
 	
@@ -86,9 +86,9 @@ int can_call(graph g[MAXN * MAXM], int i, int j)
 	return !ISELEMENT(GRAPHROW(g,i,MAXM), j);
 }
 
-/* returns the number of possible BIDIRECTIONAL calls between i and j
- * in g */
-int poss_calls (graph g[MAXN * MAXM], int i, int j)
+/* returns the number of possible bidirectional LNS calls between
+ * i and j in g */
+int no_LNS_calls (graph g[MAXN * MAXM], int i, int j)
 {
 	int possCalls = 0;
 	
