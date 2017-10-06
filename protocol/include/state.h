@@ -16,9 +16,11 @@ typedef struct pstate_tag {
 	graph fixed_name_secrets[MAXN*MAXM];
 	graph fixed_name_secrets_sorted[MAXN*MAXM];
 	graph can_calls[MAXN*MAXM];
+	graph fixed_name_calls[MAXN*MAXM];
 	int id;
 	int agents;
 	int total_secrets;
+	int total_scalls;
 	twin_queues children;
 } pstate_t;
 

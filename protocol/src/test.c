@@ -53,7 +53,6 @@ void graph_test(int n)
 	graph g3[MAXN*MAXM];
 	graph g4[MAXN*MAXM];
 	
-	int i = 2 , j = 0;
 		
 	diagonal(g1, n);
 	diagonal(g2, n);
@@ -83,7 +82,6 @@ void graph_test(int n)
 	
 	printf ("edges of g2 = %d \n", edges_of(g2,n));
 	
-	printf ("poss Calls = %d \n", no_LNS_calls(g1,i,j) );
 }
 
 void multiply_matrices(float **c, float** a, float**b, int n)

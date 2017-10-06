@@ -14,7 +14,7 @@
 void generate_children
 (pstate_t *parent, int agents, twin_queues hash[MAXN*MAXN], int prot) 
 {
-	int i, j, calls_to_child =0;
+	int i, j, calls_to_child;
 	graph temp_secrets[MAXN*MAXM];
 	graph temp_calls[MAXN*MAXM];
 	child_t* found_child;
@@ -26,27 +26,8 @@ void generate_children
 	pstate_t* childs_state;
 					
 	for (i=0; i<agents; i++)
-	  for (j=i+1; j<agents; j++) 
-	  {
-	    switch (prot) {
-			case (ANY):
-				calls_to_child = 1;
-				break;
-			case (LNS):
-	        	calls_to_child = 
-					no_LNS_calls(parent->fixed_name_secrets, i, j);
-				break;
-			case (CO):
-				break;
-			case (TOK):
-				break;
-			case (SPI):
-				break;
-			default:
-				INTERNAL_ERROR("Unknown protocol name!");
-		}
-	    
-	    if ( calls_to_child > 0 )
+	 for (j=i+1; j<agents; j++)
+	  if ( (calls_to_child = no_poss_calls(parent,i,j,prot)) > 0 )
 		{
 		  copy_graph(temp_secrets, parent->fixed_name_secrets, agents);
 		  copy_graph(temp_calls, parent->can_calls, agents);
@@ -90,7 +71,6 @@ void generate_children
 				  potential_child, prot );
 		   }		  
 		 }		  
-	   }
 }	
 
 void build_the_markov_chain
@@ -171,12 +151,10 @@ float get_prob
 			
 				switch (prot) {
 					case (ANY):
-						prob = 
-						(2 * prob) / ( (s->agents) * (s->agents - 1) );
+						prob = prob / ( (s->agents) * (s->agents - 1) );
 						break;
 					case (LNS):
-						prob = 
-						prob / ((s->agents) * (s->agents) - s->total_secrets);
+						prob = prob / ((s->agents) * (s->agents) - s->total_secrets);
 						break;
 					case (CO):
 						break;

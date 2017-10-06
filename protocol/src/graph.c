@@ -2,6 +2,7 @@
 #include "graph.h"
 #include "state.h"
 #include "compar.h"
+#include "memory.h"
 
 /* counts the directed edges (including self loops) in g */
 int edges_of (graph g[MAXN*MAXM], int n) 
@@ -86,17 +87,31 @@ int can_call(graph g[MAXN * MAXM], int i, int j)
 	return !ISELEMENT(GRAPHROW(g,i,MAXM), j);
 }
 
-/* returns the number of possible bidirectional LNS calls between
- * i and j in g */
-int no_LNS_calls (graph g[MAXN * MAXM], int i, int j)
+/* returns the number of possible bidirectional calls between
+ * i and j according to prot */
+int no_poss_calls(pstate_t * pstate, int i, int j, int prot)
 {
-	int possCalls = 0;
+	int poss_calls = 0;
 	
-	if ( !ISELEMENT(GRAPHROW(g,i,MAXM), j) )
-		possCalls++;
+	switch (prot) {
+		case (ANY):
+			poss_calls = 2;
+			break;
+		case (LNS):
+	       	if ( !ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,i,MAXM), j) )
+				poss_calls++;
+			if ( !ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,j,MAXM), i) )
+				poss_calls++;
+			break;
+		case (CO):
+			break;
+		case (TOK):
+			break;
+		case (SPI):
+			break;
+		default:
+			INTERNAL_ERROR("Unknown protocol name!");
+		}
 	
-	if ( !ISELEMENT(GRAPHROW(g,j,MAXM), i) )
-		possCalls++;
-	
-	return possCalls;
+	return poss_calls;	
 }
