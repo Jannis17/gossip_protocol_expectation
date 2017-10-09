@@ -71,7 +71,7 @@ void destroy_twin_queues(twin_queues* twin_q)
 			s = (pstate_t *) (p->data);
 			destroy_protocol_state(&s);			
 		}
-		DELETE_QUEUE(twin_q->can_lab_queue);
+	DELETE_QUEUE(twin_q->can_lab_queue);
 }
 
 void destroy_hash(int agents, twin_queues hash[MAXN*MAXN]) 

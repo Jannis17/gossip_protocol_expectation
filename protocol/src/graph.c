@@ -71,6 +71,24 @@ void find_can_label (graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n)
 	densenauty(from,lab,ptn,orbits,&options,&stats, MAXM, n, to);
 }
 
+
+//~ void can_label_calls(int init_calls[MAXN][MAXN],
+//~ graph can_label[MAXN*MAXM], int n)
+//~ {
+	//~ int lab[MAXN], ptn[MAXN], orbits[MAXN];
+	
+	//~ /* this is a function for vertex invariants. If it is set to NULL
+	 //~ * we loose some optimizations. I am not sure if there are any
+	 //~ * other side-effects */
+	//~ void* adjacencies = NULL;
+	
+	//~ int i,j;
+	
+	
+//~ }
+
+
+
 /* makes the call from i to j in g */
 void make_call(graph g[MAXN*MAXM], int i, int j) 
 {	
@@ -98,10 +116,9 @@ int no_poss_calls(pstate_t * pstate, int i, int j, int prot)
 			poss_calls = 2;
 			break;
 		case (LNS):
-	       	if ( !ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,i,MAXM), j) )
-				poss_calls++;
-			if ( !ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,j,MAXM), i) )
-				poss_calls++;
+			poss_calls=
+	       	!ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,i,MAXM),j) + 
+	       	!ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,j,MAXM),i);
 			break;
 		case (CO):
 			break;
@@ -115,3 +132,6 @@ int no_poss_calls(pstate_t * pstate, int i, int j, int prot)
 	
 	return poss_calls;	
 }
+
+
+

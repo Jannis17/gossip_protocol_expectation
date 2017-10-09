@@ -128,11 +128,24 @@ int main (int argc, char * argv[]){
 
 	if ( agents_min > agents_max || agents_max > MAXN) 
 		print_usage_and_exit(argc, argv);			
+	
+	printf("MAXM = %d\n", MAXM);
 				
+	/* The nauty parameter m is a value such that an array of
+	m setwords is sufficient to hold n bits. The type setword
+	is defined in nauty.h. The number of bits in a setword is
+	WORDSIZE, which is 16, 32 or 64. Here we calculate
+	m = ceiling(n/WORDSIZE). */
+	int m = SETWORDSNEEDED(MAXN);
+	
+	printf("m = %d\n", m);
+	
+	printf("WORDSIZE = %d\n", WORDSIZE);
+	
 	/* The following optional call verifies that we are linking
-	 * to compatible versions of the nauty routines. */
-	nauty_check(WORDSIZE,MAXM,MAXN,NAUTYVERSIONID);
-
+	to compatible versions of the nauty routines. */
+	nauty_check(WORDSIZE,m,MAXN,NAUTYVERSIONID);
+	
 	/* expectation[i] = expected execution length for i agents */
 	float expectation[MAXN];
 
@@ -145,7 +158,7 @@ int main (int argc, char * argv[]){
 	
 	//~ printf("%d\n", prot);
 	
-	//~ printf("MAXM = %d\n", MAXM);
+	printf("MAXM = %d\n", MAXM);
 		
 	if (sim) {
 		srand(time(NULL));
