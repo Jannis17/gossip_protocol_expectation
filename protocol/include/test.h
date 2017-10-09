@@ -4,8 +4,6 @@
 #include "../../nauty26r7/nauty.h"
 #include "state.h"
 
-void print_graph(graph g[MAXN*MAXM], int n);
-
 void graph_test(int n);
 
 void print_expect_vec_and_trans_matrix

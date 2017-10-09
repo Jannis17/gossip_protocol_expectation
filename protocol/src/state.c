@@ -30,8 +30,8 @@ void generate_children
 	  if ( (calls_to_child = no_poss_calls(parent,i,j,prot)) > 0 )
 		{
 		  copy_graph(temp_secrets, parent->fixed_name_secrets, agents);
-		  copy_graph(temp_calls, parent->can_calls, agents);
-		  make_call(temp_secrets, i ,j);
+		  //~ copy_graph(temp_calls, parent->can_calls, agents);
+		  update_secrets(temp_secrets, i ,j);
 		  		  
 		  childs_state = new_pstate(temp_secrets, temp_calls, agents, prot);
 		  potential_child = 

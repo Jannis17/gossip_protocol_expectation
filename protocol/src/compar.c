@@ -3,11 +3,7 @@
 #include "graph.h"
 #include "compar.h"
 
-/* compares g1 and g2 lexicographically
- * return value: 
- * LESS iff g1 < g2
- * EQUAL iff g1 == g2 
- * GREATER iff g1 > g2 */
+/* compares g1 and g2 lexicographically */
 int cmp_graphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) 
 {
 	size_t k;
@@ -21,6 +17,23 @@ int cmp_graphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
 	
 	return EQUAL;
 }
+
+/* compares c1 and c2 lexicographically */
+int cmp_call_graphs (int c1[MAXN][MAXN], int c2[MAXN][MAXN], int n) 
+{
+	size_t i,j;
+	
+	for(i=0;i<n;i++)
+		for(j=0;j<n;j++) {
+			if (c1[i][j] < c2[i][j])
+				return LESS;
+			if (c1[i][j] > c2[i][j])
+				return GREATER;
+		}
+	
+	return EQUAL;
+}
+
 
 /* needed for qsort*/
 int cmp_graph_nodes (const void *p, const void *q) {

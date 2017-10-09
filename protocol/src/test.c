@@ -3,17 +3,7 @@
 #include "test.h"
 #include "state.h"
 #include "memory.h"
-
-/* prints the contexts of g in hex form */
-void print_graph(graph g[MAXN*MAXM], int n)
-{
-	size_t i;
-	
-	for (i=0; i < MAXM*(size_t) n ; i++){
-		printf(SETWORD_FORMAT, g[i]);
-		printf("\n");
-	}
-}
+#include "compar.h"
 
 void print_trans_matrix(float**tm, int n)
 {
@@ -48,40 +38,61 @@ void print_expect_vec_and_trans_matrix
 
 void graph_test(int n)
 {
-	graph g1[MAXN*MAXM];
-	graph g2[MAXN*MAXM];
-	graph g3[MAXN*MAXM];
-	graph g4[MAXN*MAXM];
-	
+	//~ graph g1[MAXN*MAXM];
+	//~ graph g2[MAXN*MAXM];
+	//~ graph g3[MAXN*MAXM];
+	//~ graph g4[MAXN*MAXM];
 		
-	diagonal(g1, n);
-	diagonal(g2, n);
+	//~ diagonal(g1, n);
+	//~ diagonal(g2, n);
 		
-	make_call(g1, 0, 1);
-	//~ make_call(g1, 2, 3);
-	//~ make_call(g1, 0, 2);
-	//~ make_call(g1, 1, 3);	
-	print_graph(g1, n);
+	//~ update_secrets(g1, 0, 1);
+	//~ update_secrets(g1, 2, 3);
+	//~ update_secrets(g1, 0, 2);
+	//~ update_secrets(g1, 1, 3);	
+	//~ print_graph(g1, n);
 	
-	find_can_label(g1, g3, n);
+	//~ find_can_label(g1, g3, n);
 	
-	print_graph(g3, n);
+	//~ print_graph(g3, n);
 	
-	make_call(g2, 3, 0);
-	//~ make_call(g2, 1, 3);
-	//~ make_call(g2, 2, 1);
-	//~ make_call(g2, 0, 3);
+	//~ update_secrets(g2, 3, 0);
+	//~ update_secrets(g2, 1, 3);
+	//~ update_secrets(g2, 2, 1);
+	//~ update_secrets(g2, 0, 3);
 		
-	print_graph(g2, n);
+	//~ print_graph(g2, n);
 	
-	find_can_label(g2, g4, n);
+	//~ find_can_label(g2, g4, n);
 	
-	print_graph(g4, n);
+	//~ print_graph(g4, n);
 			
-	printf ("edges of g1 = %d \n", edges_of(g1,n));
+	//~ printf ("edges of g1 = %d \n", edges_of(g1,n));
 	
-	printf ("edges of g2 = %d \n", edges_of(g2,n));
+	//~ printf ("edges of g2 = %d \n", edges_of(g2,n));
 	
+	
+	int c1[MAXN][MAXN], c2[MAXN][MAXN], 	
+		can_calls1[MAXN][MAXN], can_calls2[MAXN][MAXN];
+	
+	init_calls_graph(c1,n);
+	init_calls_graph(c2,n);
+	
+	c1[0][1] = c1[1][0] = 1;
+	c1[0][2] = c1[2][0] = 2;
+	
+	c2[1][2] = c2[2][1] = 1;
+	c2[3][2] = c2[2][3] = 2;
+	
+	printf("Initial c1\n");
+	print_calls_graph(c1,n);
+	printf("Initial c2\n");
+	print_calls_graph(c2,n);
+	
+	can_label_calls(c1,can_calls1,n);
+	can_label_calls(c2,can_calls2,n);
+	
+	printf("%d\n", cmp_call_graphs(can_calls1,can_calls2,n));
 }
 
 void multiply_matrices(float **c, float** a, float**b, int n)

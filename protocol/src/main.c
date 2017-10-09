@@ -3,6 +3,7 @@
 #include <time.h>
 #include "main.h"
 #include "graph.h"
+#include "test.h"
 #include "memory.h"
 #include "state.h"
 #include "simulations.h"
@@ -128,9 +129,7 @@ int main (int argc, char * argv[]){
 
 	if ( agents_min > agents_max || agents_max > MAXN) 
 		print_usage_and_exit(argc, argv);			
-	
-	printf("MAXM = %d\n", MAXM);
-				
+			
 	/* The nauty parameter m is a value such that an array of
 	m setwords is sufficient to hold n bits. The type setword
 	is defined in nauty.h. The number of bits in a setword is
@@ -138,9 +137,9 @@ int main (int argc, char * argv[]){
 	m = ceiling(n/WORDSIZE). */
 	int m = SETWORDSNEEDED(MAXN);
 	
-	printf("m = %d\n", m);
+	//~ printf("m = %d\n", m);
 	
-	printf("WORDSIZE = %d\n", WORDSIZE);
+	//~ printf("WORDSIZE = %d\n", WORDSIZE);
 	
 	/* The following optional call verifies that we are linking
 	to compatible versions of the nauty routines. */
@@ -158,26 +157,26 @@ int main (int argc, char * argv[]){
 	
 	//~ printf("%d\n", prot);
 	
-	printf("MAXM = %d\n", MAXM);
+	//~ printf("MAXM = %d\n", MAXM);
 		
-	if (sim) {
-		srand(time(NULL));
-		for (agents=agents_min; agents<= agents_max; agents++)
-			expectation[agents] = simulate(agents, prot, rand_ag);
-	}
-	else for (agents=agents_min; agents<=agents_max; agents++) {
-			 start = clock();		
-			 expectation[agents] = 
-				find_expectation(agents, &no_states[agents], 
-				prot, calc_exp, rand_ag);								
-			 end = clock();
-			 elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
-		 }
+	//~ if (sim) {
+		//~ srand(time(NULL));
+		//~ for (agents=agents_min; agents<= agents_max; agents++)
+			//~ expectation[agents] = simulate(agents, prot, rand_ag);
+	//~ }
+	//~ else for (agents=agents_min; agents<=agents_max; agents++) {
+			 //~ start = clock();		
+			 //~ expectation[agents] = 
+				//~ find_expectation(agents, &no_states[agents], 
+				//~ prot, calc_exp, rand_ag);								
+			 //~ end = clock();
+			 //~ elps_time[agents] = ( (float) end - start )/CLOCKS_PER_SEC;	
+		 //~ }
 	
-	print_results(agents_min, agents_max, no_states, expectation, 
-		elps_time, prot, calc_exp, sim, rand_ag);
+	//~ print_results(agents_min, agents_max, no_states, expectation, 
+		//~ elps_time, prot, calc_exp, sim, rand_ag);
 	
-	//~ graph_test(agents_min);
+	graph_test(agents_min);
 	
 	//~ printf("MAXM = %d\n", SETWORDSNEEDED(MAXN));
 	
