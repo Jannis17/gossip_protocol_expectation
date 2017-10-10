@@ -12,7 +12,7 @@
 #include "../../nauty26r7/nauty.h"
 
 void generate_children
-(pstate_t *parent, int agents, twin_queues hash[MAXN*MAXN], int prot) 
+(pstate_t *parent, int n, int m, twin_queues hash[MAXN*MAXN], int prot) 
 {
 	int i, j, calls_to_child;
 	graph temp_secrets[MAXN*MAXM];
@@ -25,23 +25,22 @@ void generate_children
 	child_t * potential_child;
 	pstate_t* childs_state;
 					
-	for (i=0; i<agents; i++)
-	 for (j=i+1; j<agents; j++)
-	  if ( (calls_to_child = no_poss_calls(parent,i,j,prot)) > 0 )
+	for (i=0; i<n; i++)
+	 for (j=i+1; j<n; j++)
+	  if ( (calls_to_child = no_poss_calls(parent,i,j,prot, n)) > 0 )
 		{
-		  copy_graph(temp_secrets, parent->fixed_name_secrets, agents);
-		  //~ copy_graph(temp_calls, parent->can_calls, agents);
-		  update_secrets(temp_secrets, i ,j);
+		  copy_graph(temp_secrets, parent->fixed_name_secrets, n, m);
+		  update_secrets(temp_secrets, i ,j, n);
 		  		  
-		  childs_state = new_pstate(temp_secrets, temp_calls, agents, prot);
+		  childs_state = new_pstate(temp_secrets, temp_calls, n, m, prot);
 		  potential_child = 
 			new_child(temp_secrets, childs_state, calls_to_child);
 		  
 		  potential_child->calls[i][j] = 
-			can_call( parent->fixed_name_secrets, i, j);
+			can_call( parent->fixed_name_secrets, i, j, n);
 				
 		  potential_child->calls[j][i] = 
-			can_call(parent->fixed_name_secrets, j, i);
+			can_call(parent->fixed_name_secrets, j, i, n);
 		  		  
 		  if (search_in_twin_queues(parent->children, NULL, NULL,
 			   &childs_fixed_name_prev, &childs_can_prev,
@@ -53,10 +52,10 @@ void generate_children
 			 found_child->calls_to_child += calls_to_child;
 			 
 			 found_child->calls[i][j] = 
-				can_call(parent->fixed_name_secrets, i, j);
+				can_call(parent->fixed_name_secrets, i, j, n);
 				
 			 found_child->calls[j][i] = 
-				can_call(parent->fixed_name_secrets, j, i);
+				can_call(parent->fixed_name_secrets, j, i, n);
 		  } 
 		  else 
 		  { if ( enqueue_to_hash (hash, NULL, NULL, childs_state, 
@@ -74,7 +73,7 @@ void generate_children
 }	
 
 void build_the_markov_chain
-(twin_queues hash[MAXN*MAXN], int agents, 
+(twin_queues hash[MAXN*MAXN], int n, int m,
  int prot, int calc_exp, int *no_states)
 {
 	int i;
@@ -82,17 +81,17 @@ void build_the_markov_chain
 	struct queue_node_t * p;
 	
 	//~ printf("=========================================\n");
-	//~ printf("Agents = %d\n", agents);
+	//~ printf("Agents = %d\n", n);
 	
 	//~ clock_t start, end;
 	
 	*no_states = 0;
 	
-	FOR_ALL_EDGES(i, agents) {
+	FOR_ALL_EDGES(i, n) {
 		//~ start = clock();
 		//~ printf("%d secrets:", i+1);
 		QUEUE_FOREACH(p, hash[i].can_lab_queue) 
-			generate_children(p->data, agents, hash, prot);
+			generate_children(p->data, n, m, hash, prot);
 		//~ end = clock();
 		//~ printf("%lu states in %f seconds\n", 
 				//~ QUEUE_COUNT(hash[i].can_lab_queue),
@@ -131,17 +130,17 @@ float get_prob
 		
 		if (t->id == to) {
 			if (rand_ag) {
-				for (av_agents = i=0; i<s->agents;i++) {
-					calls = s->agents - POPCOUNT(s->fixed_name_secrets[i]);
+				for (av_agents = i=0; i<s->n;i++) {
+					calls = s->n - POPCOUNT(s->fixed_name_secrets[i]);
 					if (calls)
 						av_agents++;
 				}		
 								
-				for (i=0; i<s->agents;i++) {
-					calls = s->agents - 
+				for (i=0; i<s->n;i++) {
+					calls = s->n - 
 							POPCOUNT(s->fixed_name_secrets[i]);
 					if (calls)
-						for (j=0; j<s->agents;j++) 
+						for (j=0; j<s->n;j++) 
 							prob = prob +
 									( (float) child->calls[i][j]) / (calls * av_agents);
 				}							
@@ -151,10 +150,10 @@ float get_prob
 			
 				switch (prot) {
 					case (ANY):
-						prob = prob / ( (s->agents) * (s->agents - 1) );
+						prob = prob / ( (s->n) * (s->n - 1) );
 						break;
 					case (LNS):
-						prob = prob / ((s->agents) * (s->agents) - s->total_secrets);
+						prob = prob / ((s->n) * (s->n) - s->total_secrets);
 						break;
 					case (CO):
 						break;
@@ -173,30 +172,28 @@ float get_prob
 }
 
 void init_markov_chain
-(twin_queues hash[MAXN*MAXN], int agents, int prot)
+(twin_queues hash[MAXN*MAXN], int n, int m, int prot)
 {
 	int i;
 	graph init_secrets [MAXN*MAXM];
 	graph init_calls [MAXN*MAXM];
 	pstate_t *s;
 		
-	FOR_ALL_EDGES(i, agents){
+	FOR_ALL_EDGES(i, n){
 		hash[i].can_lab_queue = 
 			new_queue(MAXSTATES, cmp_can_secrets);
 		hash[i].fixed_name_queue = 
 			new_queue(MAXSTATES, cmp_fixed_name_secrets);
 	}
 	
-	diagonal(init_secrets, agents);
-	diagonal(init_calls, agents);
+	diagonal(init_secrets, n, m);
+	diagonal(init_calls, n, m);
 	
-	s =	new_pstate(init_secrets, init_calls, agents, prot);
+	s =	new_pstate(init_secrets, init_calls, n, m, prot);
 	enqueue_to_hash(hash, NULL, NULL, s, NULL, prot);
 }
 
-float find_expectation
-(int agents, int* no_states, int prot, int calc_exp, 
- int rand_ag)
+float exact(int n, int m, int* no_states, int prot, int calc_exp, int rand_ag)
 {		
 	twin_queues hash[MAXN*MAXN];
 	pstate_t *s;
@@ -209,11 +206,10 @@ float find_expectation
 	
 	/* create the lists in the markov chain and
 	 * add the initial state				    */
-	init_markov_chain(hash, agents, prot);
+	init_markov_chain(hash, n, m, prot);
 			
 	/* build the markov chain */
-	build_the_markov_chain(hash, agents, 
-		prot, calc_exp, no_states);
+	build_the_markov_chain(hash, n, m, prot, calc_exp, no_states);
 	
 	if (calc_exp)
 	{		
@@ -223,7 +219,7 @@ float find_expectation
 		/* label the states */
 		label = 0;
 		
-		FOR_ALL_EDGES(i, agents)
+		FOR_ALL_EDGES(i, n)
 			QUEUE_FOREACH(p, hash[i].can_lab_queue) {
 				s = (pstate_t *) (p->data);
 				trans_matrix[label] = s;
@@ -252,11 +248,11 @@ float find_expectation
 		result = expect_vec[0];
 		
 		//~ print_expect_vec_and_trans_matrix(*no_states, 
-			//~ expect_vec, trans_matrix, agents, prot, rand_ag);
+			//~ expect_vec, trans_matrix, n, prot, rand_ag);
 		
 		//~ start = clock();
 		//~ print_probs_to_absorption (*no_states, trans_matrix,
-			//~ agents, prot, rand_ag, (agents*(agents-1))/2,
+			//~ n, prot, rand_ag, (n*(n-1))/2,
 			//~ hash);		
 		//~ end = clock();
 		//~ printf("Elapsed time = %f seconds\n", 
@@ -264,7 +260,7 @@ float find_expectation
 			
 		FREE_SAFE(expect_vec);
 		FREE_SAFE(trans_matrix);
-		destroy_hash(agents, hash);
+		destroy_hash(n, hash);
 	} 
 				
 	return result;	

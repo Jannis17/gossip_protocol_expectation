@@ -49,7 +49,7 @@ do {	\
 } while(0)
 
 pstate_t* new_pstate(graph secrets[MAXN*MAXM], graph calls[MAXN*MAXM],
-int agents, int prot);
+int n, int m, int prot);
   
 void destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
 

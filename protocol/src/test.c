@@ -1,3 +1,4 @@
+#include <math.h>
 #include "main.h"
 #include "graph.h"
 #include "test.h"
@@ -36,7 +37,8 @@ void print_expect_vec_and_trans_matrix
 	}
 }
 
-void graph_test(int n)
+
+void graph_test(int n, int m)
 {
 	//~ graph g1[MAXN*MAXM];
 	//~ graph g2[MAXN*MAXM];
@@ -50,11 +52,11 @@ void graph_test(int n)
 	//~ update_secrets(g1, 2, 3);
 	//~ update_secrets(g1, 0, 2);
 	//~ update_secrets(g1, 1, 3);	
-	//~ print_graph(g1, n);
+	//~ print_graph(g1, n, m);
 	
 	//~ find_can_label(g1, g3, n);
 	
-	//~ print_graph(g3, n);
+	//~ print_graph(g3, n, m);
 	
 	//~ update_secrets(g2, 3, 0);
 	//~ update_secrets(g2, 1, 3);
@@ -72,17 +74,29 @@ void graph_test(int n)
 	//~ printf ("edges of g2 = %d \n", edges_of(g2,n));
 	
 	
-	int c1[MAXN][MAXN], c2[MAXN][MAXN], 	
-		can_calls1[MAXN][MAXN], can_calls2[MAXN][MAXN];
+	int c1[MAXN][MAXN], c2[MAXN][MAXN]; 	
+	graph can_calls1[MAXM*MAXN];
+	
+	graph can_calls2[MAXM*MAXN];
+		 
+	 printf("m=%d, n=%d, MAXN=%d , MAXM=%d\n", m, n, MAXN, MAXM);
+		
+	 /* The following optional call verifies that we are linking
+	 to compatible versions of the nauty routines. */
+	 nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
 	
 	init_calls_graph(c1,n);
 	init_calls_graph(c2,n);
 	
 	c1[0][1] = c1[1][0] = 1;
-	c1[0][2] = c1[2][0] = 2;
+	c1[2][3] = c1[3][2] = 2;
+	c1[0][2] = c1[2][0] = 3;
+	c1[3][1] = c1[1][3] = 4;
 	
-	c2[1][2] = c2[2][1] = 1;
-	c2[3][2] = c2[2][3] = 2;
+	c2[3][0] = c2[0][3] = 1;
+	c2[2][1] = c2[1][2] = 2;
+	c2[3][2] = c2[2][3] = 3;
+	c2[0][1] = c2[1][0] = 4;
 	
 	printf("Initial c1\n");
 	print_calls_graph(c1,n);
@@ -90,9 +104,11 @@ void graph_test(int n)
 	print_calls_graph(c2,n);
 	
 	can_label_calls(c1,can_calls1,n);
+	printf("afsafasfa\n");
 	can_label_calls(c2,can_calls2,n);
 	
-	printf("%d\n", cmp_call_graphs(can_calls1,can_calls2,n));
+		
+	printf("%d\n", cmp_graphs(can_calls1,can_calls2,MAXN));
 }
 
 void multiply_matrices(float **c, float** a, float**b, int n)

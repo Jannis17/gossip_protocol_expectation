@@ -4,6 +4,6 @@
 /* MAX_SIM = maximum number of simulations */
 #define MAX_SIM 50000
 
-float simulate (int n, int prot, int rand_ag);
+float simulated(int n, int m, int prot, int rand_ag);
 
 #endif /* H_SIMULATIONS_H_ */

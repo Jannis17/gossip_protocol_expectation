@@ -10,12 +10,14 @@
 #include "../../nauty26r7/nauty.h"
 #include "../../nauty26r7/naututil.h"
 
+
+
 void execute_call(int caller, int callee, graph secrets[MAXN*MAXM], 
 	graph avail_calls[MAXN*MAXM],int n, int prot) 
 {
 	size_t k;
 		
-	update_secrets(secrets, caller, callee);
+	update_secrets(secrets, caller, callee, n);
 	if (prot == LNS) {
 		for(k=0;k<n;k++)
 		if (ISELEMENT(GRAPHROW(secrets,caller,MAXM),k)) {
@@ -106,14 +108,14 @@ void get_call_parts(graph avail_calls[MAXN*MAXM], int r_call,
 }
 
 
-float simulate (int n, int prot, int rand_ag) {
+float simulated(int n, int m, int prot, int rand_ag) {
 	int s, r_caller, r_callee, duration=0;		
 	graph secrets[MAXN*MAXM];
 	graph avail_calls[MAXN*MAXM];
 							
 	for(s=0; s<MAX_SIM;s++) {
-		diagonal(secrets, n);
-		init_avail_calls_graph(avail_calls,n);
+		diagonal(secrets, n, m);
+		init_avail_calls_graph(avail_calls,n,m);
 		while (1) {
 			if (rand_ag) {
 				r_caller = get_caller(avail_calls, 
@@ -122,12 +124,12 @@ float simulate (int n, int prot, int rand_ag) {
 					rand() % count_callees(avail_calls,r_caller,n)+1, n);
 			} else
 				get_call_parts(avail_calls, 
-					rand() % edges_of(avail_calls,n) + 1, &r_caller, 
+					rand() % edges_of(avail_calls,n,m) + 1, &r_caller, 
 					&r_callee, n);
 			execute_call(r_caller, r_callee, secrets, avail_calls, n, prot);
 			duration++;
 			
-			if (edges_of(secrets,n) == n * n)
+			if (edges_of(secrets,n,m) == n * n)
 				break;
 		}
 	}

@@ -4,7 +4,7 @@
 #include "../../nauty26r7/nauty.h"
 #include "state.h"
 
-void graph_test(int n);
+void graph_test(int n, int m);
 
 void print_expect_vec_and_trans_matrix
 (int no_states, float* expect_vec, pstate_t** trans_matrix,

@@ -8,7 +8,9 @@ int cmp_graphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n)
 {
 	size_t k;
 	
-	for (k = 0; k < MAXM*(size_t)n; ++k) {
+	int m = SETWORDSNEEDED(n);
+	
+	for (k = 0; k < m*(size_t)n; ++k) {
 		 if (g1[k] < g2[k])
 			return LESS;
 		 if (g1[k] > g2[k])
@@ -59,7 +61,7 @@ int cmp_can_secrets(const void* item1, const void* item2)
 	state2 = (pstate_t *) item2;
 	
 	return cmp_graphs(state1->can_secrets, state2->can_secrets, 
-			state1->agents);
+			state1->n);
 }
 
 /* compares the fixed name secrets (as unordered tuple ) of the args */
@@ -72,7 +74,7 @@ int cmp_fixed_name_secrets(const void* item1, const void* item2)
 	
 	return cmp_graphs(state1->fixed_name_secrets_sorted, 
 			state2->fixed_name_secrets_sorted, 
-			state1->agents);
+			state1->n);
 }
 
 int cmp_can_children(const void* item1, const void* item2)
@@ -84,7 +86,7 @@ int cmp_can_children(const void* item1, const void* item2)
 	
 	return cmp_graphs(child1->childs_state->can_secrets, 
 			child2->childs_state->can_secrets,
-			child1->childs_state->agents);
+			child1->childs_state->n);
 }
 
 int cmp_fixed_name_children(const void* item1, const void* item2)
@@ -96,5 +98,5 @@ int cmp_fixed_name_children(const void* item1, const void* item2)
 	
 	return cmp_graphs(child1->childs_state->fixed_name_secrets_sorted, 
 			child2->childs_state->fixed_name_secrets_sorted,
-			child1->childs_state->agents);
+			child1->childs_state->n);
 }

@@ -1,11 +1,11 @@
 IDIR =../include
 CC=gcc
-CFLAGS=-Wall -O3 -I$(IDIR)
+CFLAGS=-Wall -O0 -g -I$(IDIR)
 
 ODIR=obj
 LDIR =../lib
 
-LIBS=-lm
+LIBS=-lm ../../nauty26r7/nauty.a
 
 _DEPS = *.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
@@ -18,7 +18,7 @@ $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 protocol: $(OBJ)
-	$(CC) -o $@ $^ ../../nauty26r7/nauty1.a $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 

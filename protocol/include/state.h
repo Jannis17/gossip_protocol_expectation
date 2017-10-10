@@ -15,12 +15,13 @@ typedef struct pstate_tag {
 	graph can_secrets[MAXN*MAXM];
 	graph fixed_name_secrets[MAXN*MAXM];
 	graph fixed_name_secrets_sorted[MAXN*MAXM];
-	int can_calls[MAXN][MAXN];
+	graph can_calls[MAXM*MAXN];
 	int fixed_name_calls[MAXN][MAXN];
 	int id;
-	int agents;
+	int n; //number of agents/bits
+	int m; //number of setwords
 	int total_secrets;
-	int total_scalls;
+	int total_calls;
 	twin_queues children;
 } pstate_t;
 
@@ -30,8 +31,8 @@ typedef struct child_tag {
 	pstate_t* childs_state;
 } child_t;
 
-float find_expectation
-(int agents, int* no_states, int prot, int calc_exp, int rand_ag);
+float exact
+(int agents, int m, int* no_states, int prot, int calc_exp, int rand_ag);
 
 float get_prob
 (pstate_t ** trans_matrix, int from, int to, int prot, int rand_ag);
