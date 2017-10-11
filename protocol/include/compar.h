@@ -8,7 +8,7 @@
 #define EQUAL 0
 #define GREATER 1
 
-int cmp_call_graphs (int c1[MAXN][MAXN], int c2[MAXN][MAXN], int n);
+int cmp_call_graphs(int c1[MAXN][MAXN], int c2[MAXN][MAXN], int n);
 
 int cmp_can_children(const void* item1, const void* item2);
 

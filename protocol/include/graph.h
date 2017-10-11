@@ -4,13 +4,15 @@
 #include "state.h"
 #include "../../nauty26r7/nauty.h"
 
-int edges_of (graph g[MAXN*MAXM], int n, int m);
+int edges_of(graph g[MAXN*MAXM], int n, int m);
 
-void diagonal (graph g[MAXN*MAXM], int n, int m);
+void diagonal(graph g[MAXN*MAXM], int n, int m);
 
-void init_avail_calls_graph (graph g[MAXN*MAXM], int n, int m);
+void init_avail_calls_graph(graph g[MAXN*MAXM], int n, int m);
 
 void copy_graph(graph to[MAXN*MAXM],graph from[MAXN*MAXM],int n, int m);
+
+void copy_calls_graph(int to[MAXN][MAXN],int from[MAXN][MAXN],int n);
 
 void find_can_label(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n);
 	

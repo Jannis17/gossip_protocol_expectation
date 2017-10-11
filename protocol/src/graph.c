@@ -83,6 +83,15 @@ void copy_graph(graph to[MAXN*MAXM], graph from[MAXN*MAXM], int n, int m)
 		to[i] = from[i];
 }
 
+void copy_calls_graph(int to[MAXN][MAXN],int from[MAXN][MAXN],int n)
+{
+	size_t i, j;
+	
+	for (i=0; i < (size_t) n; i++)
+		for (j=0; j < (size_t) n; j++)
+			to[i][j] = from[i][j];
+}
+
 /* g2 will be equal to the canonical labeling of g1
  * n : size of g1 and g2 */
 void find_can_label(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n)
@@ -123,8 +132,6 @@ graph can_calls[MAXN*MAXM], int n)
 	 * graph */
 	graph init_calls_layered[MAXN*MAXM];
 	
-	printf("max_layers = %d, n_layered = %d\n", max_layers, n_layered);
-		
 	/* this is a function for vertex invariants. If it is set to NULL
 	 * we loose some optimizations. I am not sure if there are any
 	 * other side-effects */
@@ -163,12 +170,9 @@ graph can_calls[MAXN*MAXM], int n)
 				}
 			}
 	
-	printf("aek\n");            
     /* create the cannonicaly labeled graph */        		
 	densenauty(init_calls_layered,lab,ptn,orbits,&options,&stats,m_layered, 
 		n_layered, can_calls);
-		
-	printf("aek12321\n");            	
 }			
 
 
@@ -210,6 +214,7 @@ int no_poss_calls(pstate_t * pstate, int i, int j, int prot, int n)
 	       	!ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,j,m),i);
 			break;
 		case (CO):
+			poss_calls= 2 * !pstate->fixed_name_calls[i][j];
 			break;
 		case (TOK):
 			break;

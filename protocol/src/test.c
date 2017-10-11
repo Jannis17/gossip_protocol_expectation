@@ -71,10 +71,7 @@ void graph_test(int n, int m)
 			
 	//~ printf ("edges of g1 = %d \n", edges_of(g1,n));
 	
-	//~ printf ("edges of g2 = %d \n", edges_of(g2,n));
-	
-	
-	int c1[MAXN][MAXN], c2[MAXN][MAXN]; 	
+	int c1[MAXN][MAXN], c2[MAXN][MAXN], i, j; 	
 	graph can_calls1[MAXM*MAXN];
 	
 	graph can_calls2[MAXM*MAXN];
@@ -88,15 +85,22 @@ void graph_test(int n, int m)
 	init_calls_graph(c1,n);
 	init_calls_graph(c2,n);
 	
-	c1[0][1] = c1[1][0] = 1;
-	c1[2][3] = c1[3][2] = 2;
-	c1[0][2] = c1[2][0] = 3;
-	c1[3][1] = c1[1][3] = 4;
+	int c=1;
 	
-	c2[3][0] = c2[0][3] = 1;
-	c2[2][1] = c2[1][2] = 2;
-	c2[3][2] = c2[2][3] = 3;
-	c2[0][1] = c2[1][0] = 4;
+	for(i=0;i<n;i++)
+		for(j=i+1;j<n;j++, c++)
+			c1[i][j] = (c1[j][i] = c);
+	c=1;
+	
+	for(i=0;i<n;i++)
+		for(j=n-1;j>i;j--, c++)
+			c2[i][j] = (c2[j][i] = c);		
+
+	//~ c1[0][1]=c1[1][0]=1;
+	//~ c1[0][2]=c1[2][0]=2;
+	
+	//~ c2[0][1]=c2[1][0]=1;
+	//~ c2[0][4]=c2[4][0]=2;
 	
 	printf("Initial c1\n");
 	print_calls_graph(c1,n);
@@ -104,10 +108,8 @@ void graph_test(int n, int m)
 	print_calls_graph(c2,n);
 	
 	can_label_calls(c1,can_calls1,n);
-	printf("afsafasfa\n");
 	can_label_calls(c2,can_calls2,n);
-	
-		
+			
 	printf("%d\n", cmp_graphs(can_calls1,can_calls2,MAXN));
 }
 

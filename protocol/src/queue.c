@@ -313,9 +313,9 @@ int enqueue_to_hash
 	
 	fixed_name_prev = NULL;
 		
-	fixed_name_queue = hash[s-> total_secrets -1].fixed_name_queue;
+	fixed_name_queue = hash[s->total_secrets -1].fixed_name_queue;
 	
-	can_queue = hash[s-> total_secrets -1].can_lab_queue;
+	can_queue = hash[s->total_secrets -1].can_lab_queue;
 	
 	if ( prot == ANY &&
 		 search_in_sorted_queue
@@ -323,9 +323,8 @@ int enqueue_to_hash
 			 &fixed_name_prev, found, s))
 		return DUPLICATE_ITEM;
 	
-	result = 
-		enqueue_unique_to_sorted_queue
-			(can_queue, can_start, found, s);
+	result=
+		enqueue_unique_to_sorted_queue(can_queue, can_start, found, s);
 	
 	if (prot == ANY && result == NEW_ITEM)
 		enqueue_unique_to_sorted_queue

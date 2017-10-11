@@ -1,10 +1,12 @@
 #ifndef H_STATE_H_
 #define H_STATE_H_
 
+#include "../../nauty26r7/nauty.h"
+
 #define MAXSTATES 100000000
 
 #define FOR_ALL_EDGES(VAR, AGENTS)					\
-	for((VAR)= (AGENTS)-1; i < (AGENTS) * (AGENTS); (VAR)++)
+	for((VAR)= 1; i < (AGENTS) * (AGENTS); (VAR)++)
 
 typedef struct twin_queues_tag {
 	struct queue_t* fixed_name_queue;
@@ -15,8 +17,8 @@ typedef struct pstate_tag {
 	graph can_secrets[MAXN*MAXM];
 	graph fixed_name_secrets[MAXN*MAXM];
 	graph fixed_name_secrets_sorted[MAXN*MAXM];
-	graph can_calls[MAXM*MAXN];
 	int fixed_name_calls[MAXN][MAXN];
+	graph can_calls[MAXM*MAXN];
 	int id;
 	int n; //number of agents/bits
 	int m; //number of setwords

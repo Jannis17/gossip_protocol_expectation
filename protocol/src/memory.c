@@ -5,17 +5,24 @@
 #include "compar.h"
 #include "graph.h"
 
+/* creates a new protocol state */
 pstate_t* new_pstate 
-(graph secrets[MAXN*MAXM], graph calls[MAXN*MAXM], int n, int m, int prot)
+(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN], int total_calls,
+ int n, int m, int prot)
 {
 	pstate_t* s;
 	
 	MALLOC_SAFE(s, sizeof(pstate_t));
 	
 	copy_graph(s->fixed_name_secrets, secrets, n, m);
+	find_can_label(secrets, s->can_secrets, n); 
+	
+	copy_calls_graph(s->fixed_name_calls, calls, n);
+	can_label_calls(calls, s->can_calls,n);
 	
 	s->children.fixed_name_queue = 
 		new_queue(MAXN*(MAXN-1), cmp_fixed_name_children);
+	
 	s->children.can_lab_queue = 
 		new_queue(MAXN*(MAXN-1), cmp_can_children);
 				
@@ -24,21 +31,18 @@ pstate_t* new_pstate
 		qsort(s->fixed_name_secrets_sorted, 
 			n*m, sizeof(graph), cmp_graph_nodes);
 	}
-			
-	find_can_label(secrets, s->can_secrets, n); 
-			
-	s->id = 0;
-	s->n = n;
-	s->m = m;
-	s->total_secrets = edges_of(secrets, n, m);
+					
+	s->id=0;
+	s->n=n;
+	s->m=m;
+	s->total_secrets=edges_of(secrets, n, m);
+	s->total_calls=total_calls;
 				
 	return s;		
 }
 
 /* creates a new child */
-child_t *new_child
-( graph secrets[MAXN*MAXM], pstate_t* childs_state,
-  int calls_to_child)
+child_t *new_child (pstate_t* childs_state, int calls_to_child)
 {
 	child_t* result;
 	int i,j;

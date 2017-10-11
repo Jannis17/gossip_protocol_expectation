@@ -79,12 +79,12 @@ void print_results
 
 void print_usage_and_exit(int argc, char * argv[])
 {
-	printf("Usage: %s [name] [n] s ra ne \n\n", argv[0]);
+	printf("Usage: %s [name] [n] -s=[max_sim] -ra -ne \n\n", argv[0]);
 	printf("name: ANY or LNS\n");
-	printf("n:  maximum number of agents (%d >= n >= 1) \n", MAXN);
-	printf("ne:  if it is present, the program will not calculate the expectation. If it is used with the s option, it has no effect.\n");
-	printf("s: if it is present, the program calculates simulations. If it is absent, the program caluclates exact values\n");
-	printf("ra: if it is present, we have randomization over i. If it is absent, we have randomization over calls\n");
+	printf("n:  number of agents (in the range 1..%d) \n", MAXN);
+	printf("-ne:  if it is present, the program will not calculate the expectation. If it is used with the s option, it has no effect.\n");
+	printf("-s: if it is present, the expected duration is computed using max_sim simulations. If it is absent, the program caluclates exact values\n");
+	printf("-ra: if it is present, we have randomization over agents. If it is absent, we have randomization over calls\n");
 	printf("\nThe results will be generated in a file with timestamp in the folder gossip_protocol_expectation/results.\n");
 			
 	exit(1);
@@ -95,18 +95,19 @@ int main (int argc, char * argv[]){
 	int calc_exp = 1;
 	int rand_ag = 0;
 	int sim =0;
+	int max_sim=0;
 	
 	switch(argc) {
 		case 6:
-			if (strcmp(argv[5], "ne") == 0)
+			if (strcmp(argv[5], "-ne") == 0)
 				calc_exp = 0;
 			else print_usage_and_exit(argc, argv);
 		case 5:
-			if (strcmp(argv[4], "ra") == 0)
+			if (strcmp(argv[4], "-ra") == 0)
 				rand_ag = 1;
 			else print_usage_and_exit(argc, argv);
 		case 4:
-			if (strcmp(argv[3], "s") == 0)
+			if (sscanf(argv[3], "-s=%d", &max_sim) ==1)
 				sim = 1;
 			else print_usage_and_exit(argc, argv);
 		case 3:
@@ -155,11 +156,11 @@ int main (int argc, char * argv[]){
 		 start = clock();		
 		 
 		 /* compute the simulated or exact expectation */
-		 expectation[n] = (sim)?simulated(n, m, prot, rand_ag):
+		 expectation[n] = (sim)?simulated(n, m, prot, rand_ag, max_sim):
 	     exact(n, m, &no_states[n], prot, calc_exp, rand_ag);								
 		 
 		 end = clock();
-		 elps_time[n] = ((float) end - start)/CLOCKS_PER_SEC;	
+		 elps_time[n] = ((float) end - start)/CLOCKS_PER_SEC;
 	}
 	
 	expectation[1]=0;
@@ -168,10 +169,11 @@ int main (int argc, char * argv[]){
 	no_states[1]=1;
 	no_states[2]=2;
 			
-	print_results(max_n, no_states, expectation, elps_time, prot, calc_exp, 
-		sim, rand_ag);
+	print_results(max_n, no_states, expectation, elps_time, prot, 
+		calc_exp, sim, rand_ag);
 	
-	//~ graph_test(max_n);
+	m = SETWORDSNEEDED(max_n);
+	//~ graph_test(max_n,m);
 		
 	return 0;
 }
