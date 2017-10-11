@@ -4,17 +4,25 @@
 #include "../../nauty26r7/nauty.h"
 #include "state.h"
 
-void graph_test(int n, int m);
+void
+graph_test(int n, int m);
 
-void print_expect_vec_and_trans_matrix
-(int no_states, float* expect_vec, pstate_t** trans_matrix,
- int agents, int prot, int rand_ag);
+void
+print_trans_matrix
+(float**tm, int n);
 
-void multiply_matrices(float** a, float** b, float** c, int n);
+void 
+print_expect_vec_and_trans_matrix
+(int no_states, float* expect_vec, pstate_t** trans_matrix, int n,
+ int prot, int rand_ag);
 
-void print_probs_to_absorption 
-(int no_states, pstate_t** trans_matrix,
- int agents, int prot, int rand_ag, int max_calls,
- twin_queues hash[MAXN*MAXN]);
+void 
+multiply_matrices
+(float** a, float** b, float** c, int n);
+
+void
+print_probs_to_absorption
+(int no_states, pstate_t** trans_matrix, int agents, int prot,
+ int rand_ag, int max_calls, twin_queues hash[MAXN*MAXN]);
 
 #endif /* H_TEST_H_ */

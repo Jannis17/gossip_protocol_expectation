@@ -6,7 +6,7 @@
 #define MAXSTATES 100000000
 
 #define FOR_ALL_EDGES(VAR, AGENTS)					\
-	for((VAR)= 1; i < (AGENTS) * (AGENTS); (VAR)++)
+	for((VAR)= 0; i < (AGENTS) * (AGENTS); (VAR)++)
 
 typedef struct twin_queues_tag {
 	struct queue_t* fixed_name_queue;
@@ -20,10 +20,13 @@ typedef struct pstate_tag {
 	int fixed_name_calls[MAXN][MAXN];
 	graph can_calls[MAXM*MAXN];
 	int id;
+	int nl; //number of agents/bits in the layered graph
+	int ml; //number of setwords in the layered graph
 	int n; //number of agents/bits
 	int m; //number of setwords
 	int total_secrets;
 	int total_calls;
+	int is_absorption;
 	twin_queues children;
 } pstate_t;
 
@@ -33,10 +36,13 @@ typedef struct child_tag {
 	pstate_t* childs_state;
 } child_t;
 
-float exact
-(int agents, int m, int* no_states, int prot, int calc_exp, int rand_ag);
+float 
+exact_expectation
+(int agents, int m, int* no_states, int prot, int calc_exp,
+ int rand_ag);
 
-float get_prob
+float 
+get_prob
 (pstate_t ** trans_matrix, int from, int to, int prot, int rand_ag);
 
 

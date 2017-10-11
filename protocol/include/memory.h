@@ -48,20 +48,26 @@ do {	\
 	}	\
 } while(0)
 
-pstate_t* new_pstate(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN],
+pstate_t* 
+new_pstate(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN],
 int total_calls, int n, int m, int prot);
   
-void destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
+void
+destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
 
-child_t *new_child(pstate_t* childs_state, int calls_to_child);
+child_t*
+new_child(pstate_t* childs_state, int calls_to_child);
   
-void destroy_protocol_state (pstate_t ** s);
+void
+destroy_protocol_state (pstate_t ** s);
  
-void destroy_twin_queues(twin_queues* twin_q);
+void
+destroy_twin_queues(twin_queues* twin_q);
 
-void malloc_safe_2D_float(float ***p, int n); 
+void
+malloc_safe_2D_float(float ***p, int n); 
 
-void free_safe_2D_float(float ***p, int n);
-
+void
+free_safe_2D_float(float ***p, int n);
 
 #endif /* H_MEMORY_H_ */

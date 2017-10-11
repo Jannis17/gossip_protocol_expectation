@@ -307,20 +307,27 @@ int enqueue_to_hash
  int prot)
 {
 	int result;
-	struct queue_t* fixed_name_queue, * can_queue;
+	struct queue_t* fixed_name_queue = NULL, * can_queue = NULL;
 	
 	struct queue_node_t* fixed_name_prev;
 	
 	fixed_name_prev = NULL;
+	
+	switch (prot) {
+		case ANY:
+		case LNS:
+			can_queue = hash[s->total_secrets -1].can_lab_queue;
+			fixed_name_queue = 
+				hash[s->total_secrets -1].fixed_name_queue;	
+		break;
+		case CO:
+			can_queue = hash[s->total_calls].can_lab_queue;	
+		break;
+	}	
 		
-	fixed_name_queue = hash[s->total_secrets -1].fixed_name_queue;
-	
-	can_queue = hash[s->total_secrets -1].can_lab_queue;
-	
 	if ( prot == ANY &&
-		 search_in_sorted_queue
-			(fixed_name_queue, fixed_name_start, 
-			 &fixed_name_prev, found, s))
+		 search_in_sorted_queue (fixed_name_queue, fixed_name_start, 
+			 &fixed_name_prev, found, s) )
 		return DUPLICATE_ITEM;
 	
 	result=
@@ -335,7 +342,8 @@ int enqueue_to_hash
 
 /* searches for a state in twin queues
  * return value: 1 if found, 0 ow */
-int search_in_twin_queues 
+int 
+search_in_twin_queues 
 (twin_queues twin_q, 
  struct queue_node_t* fixed_name_start,
  struct queue_node_t* can_start,
@@ -352,14 +360,12 @@ int search_in_twin_queues
 	
 	if ( prot == ANY &&
 		 search_in_sorted_queue
-		 (fixed_name_queue, 
-		  fixed_name_start, 
-		  fixed_name_prev, found, child))
+		 (fixed_name_queue, fixed_name_start, fixed_name_prev, found, 
+		  child) )
 		return 1;
 	
-	return 
-		search_in_sorted_queue
-			(can_queue, can_start, can_prev, found, child); 					
+	return search_in_sorted_queue(can_queue, can_start, can_prev,found,
+		child); 					
 }
 
 

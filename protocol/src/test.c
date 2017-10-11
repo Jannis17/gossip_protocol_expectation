@@ -17,7 +17,8 @@ void print_trans_matrix(float**tm, int n)
 	}
 }
 
-void print_expect_vec_and_trans_matrix
+void 
+print_expect_vec_and_trans_matrix
 (int no_states, float* expect_vec, pstate_t** trans_matrix,
  int agents, int prot, int rand_ag)
 {
@@ -30,8 +31,9 @@ void print_expect_vec_and_trans_matrix
 	printf("Transition Matrix (%d agents)\n", agents);
 	
 	for (i=0; i < no_states; i++) {
+		printf("%d: ", i);
 		for (j=0; j < no_states; j++)
-			printf("%f ", get_prob(trans_matrix, i, j, prot, 
+			printf("%.1f ", get_prob(trans_matrix, i, j, prot, 
 				rand_ag));	
 		printf("\n");
 	}
@@ -49,9 +51,6 @@ void graph_test(int n, int m)
 	//~ diagonal(g2, n);
 		
 	//~ update_secrets(g1, 0, 1);
-	//~ update_secrets(g1, 2, 3);
-	//~ update_secrets(g1, 0, 2);
-	//~ update_secrets(g1, 1, 3);	
 	//~ print_graph(g1, n, m);
 	
 	//~ find_can_label(g1, g3, n);
@@ -71,7 +70,7 @@ void graph_test(int n, int m)
 			
 	//~ printf ("edges of g1 = %d \n", edges_of(g1,n));
 	
-	int c1[MAXN][MAXN], c2[MAXN][MAXN], i, j; 	
+	int c1[MAXN][MAXN], c2[MAXN][MAXN]; 	
 	graph can_calls1[MAXM*MAXN];
 	
 	graph can_calls2[MAXM*MAXN];
@@ -84,33 +83,43 @@ void graph_test(int n, int m)
 	
 	init_calls_graph(c1,n);
 	init_calls_graph(c2,n);
-	
-	int c=1;
-	
-	for(i=0;i<n;i++)
-		for(j=i+1;j<n;j++, c++)
-			c1[i][j] = (c1[j][i] = c);
-	c=1;
-	
-	for(i=0;i<n;i++)
-		for(j=n-1;j>i;j--, c++)
-			c2[i][j] = (c2[j][i] = c);		
 
-	//~ c1[0][1]=c1[1][0]=1;
-	//~ c1[0][2]=c1[2][0]=2;
+	c1[0][1]=c1[1][0]=1;
+	c1[3][2]=c1[2][3]=2;
+	c1[2][0]=c1[0][2]=3;
+	c1[1][3]=c1[3][1]=4;
 	
-	//~ c2[0][1]=c2[1][0]=1;
-	//~ c2[0][4]=c2[4][0]=2;
+	/*
+	0 1 3 0 
+	1 0 0 4 
+	3 0 0 2 
+	0 4 2 0 */
+
 	
+	c2[0][1]=c2[1][0]=1;
+	c2[0][2]=c2[2][0]=3;
+	c2[0][3]=c2[3][0]=4;
+	c2[2][3]=c2[3][2]=2;
+	
+	/*
+	0 1 3 4 
+	1 0 0 0 
+	3 0 0 2 
+	4 0 2 0
+	*/
+		
 	printf("Initial c1\n");
 	print_calls_graph(c1,n);
 	printf("Initial c2\n");
 	print_calls_graph(c2,n);
 	
-	can_label_calls(c1,can_calls1,n);
-	can_label_calls(c2,can_calls2,n);
+	int nl = n * ceil(log2( ( (double) n * (n-1) ) /2 +1 ));
+	int ml = SETWORDSNEEDED(nl);
+	
+	can_label_calls(c1,can_calls1,n, nl, ml);
+	can_label_calls(c2,can_calls2,n, nl, ml);
 			
-	printf("%d\n", cmp_graphs(can_calls1,can_calls2,MAXN));
+	printf("%d\n", cmp_graphs(can_calls1,can_calls2,n, m));
 }
 
 void multiply_matrices(float **c, float** a, float**b, int n)

@@ -8,6 +8,8 @@
 #define EQUAL 0
 #define GREATER 1
 
+int cmp_can_calls(const void* item1, const void* item2);
+
 int cmp_call_graphs(int c1[MAXN][MAXN], int c2[MAXN][MAXN], int n);
 
 int cmp_can_children(const void* item1, const void* item2);
@@ -20,6 +22,6 @@ int cmp_can_secrets(const void* item1, const void* item2);
 
 int cmp_fixed_name_secrets(const void* item1, const void* item2);
 
-int cmp_graphs(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n);
+int cmp_graphs(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n, int m);
 
 #endif /* H_COMPAR_H_ */

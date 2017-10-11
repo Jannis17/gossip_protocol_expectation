@@ -47,23 +47,29 @@ struct queue_t {
 	int (*compar)(const void *, const void *);
 };
 
-void enqueue_unique_to_twin_queues
+void 
+enqueue_unique_to_twin_queues
 (twin_queues twin_q, 
 struct queue_node_t* fixed_name_prev,
 struct queue_node_t* can_prev, 
 void* item,
 int prot);
 
-void delete_queue(struct queue_t *hd);
+void 
+delete_queue
+(struct queue_t *hd);
 
-int enqueue_unique_to_sorted_queue
+int
+enqueue_unique_to_sorted_queue
 (struct queue_t *hd, struct queue_node_t *start,
  struct queue_node_t **found, void *data);
 
-struct queue_t * new_queue(unsigned long max, 
-	int (*compar)(const void *, const void *));
+struct queue_t*
+new_queue
+(unsigned long max, int (*compar)(const void *, const void *));
 
-int enqueue_to_hash
+int
+enqueue_to_hash
 (twin_queues hash[MAXN*MAXN], 
  struct queue_node_t* fixed_name_start,
  struct queue_node_t* can_start,
@@ -71,7 +77,8 @@ int enqueue_to_hash
  struct queue_node_t** found, 
  int prot);
 
-int search_in_twin_queues 
+int
+search_in_twin_queues 
 (twin_queues twin_q, 
  struct queue_node_t* fixed_name_start,
  struct queue_node_t* can_start,

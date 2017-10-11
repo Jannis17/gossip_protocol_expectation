@@ -8,7 +8,7 @@
 #define ANY 0
 
 /* MAXN = ULTIMATELY MAXIMUM number of agents */
-#define MAXN 500
+#define MAXN 50
 
 #include "../../nauty26r7/nauty.h"
 

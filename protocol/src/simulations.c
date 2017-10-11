@@ -17,7 +17,7 @@ void execute_call(int caller, int callee, graph secrets[MAXN*MAXM],
 {
 	size_t k;
 		
-	update_secrets(secrets, caller, callee, n);
+	update_secrets(secrets, caller, callee, n, m);
 	if (prot == LNS) {
 		for(k=0;k<n;k++)
 		if (ISELEMENT(GRAPHROW(secrets,caller,m),k)) {

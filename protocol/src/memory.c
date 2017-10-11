@@ -1,3 +1,4 @@
+#include <math.h>
 #include "main.h"
 #include "memory.h"
 #include "queue.h"
@@ -6,19 +7,17 @@
 #include "graph.h"
 
 /* creates a new protocol state */
-pstate_t* new_pstate 
-(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN], int total_calls,
- int n, int m, int prot)
+pstate_t* 
+new_pstate
+(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN], int total_calls, 
+int n, int m, int prot)
 {
 	pstate_t* s;
 	
 	MALLOC_SAFE(s, sizeof(pstate_t));
 	
 	copy_graph(s->fixed_name_secrets, secrets, n, m);
-	find_can_label(secrets, s->can_secrets, n); 
-	
-	copy_calls_graph(s->fixed_name_calls, calls, n);
-	can_label_calls(calls, s->can_calls,n);
+	find_can_label(secrets, s->can_secrets, n, m); 
 	
 	s->children.fixed_name_queue = 
 		new_queue(MAXN*(MAXN-1), cmp_fixed_name_children);
@@ -31,13 +30,20 @@ pstate_t* new_pstate
 		qsort(s->fixed_name_secrets_sorted, 
 			n*m, sizeof(graph), cmp_graph_nodes);
 	}
-					
+	
+	s->nl = n * ceil(log2( ( (double) n * (n-1) ) /2 +1 ));
+	s->ml = SETWORDSNEEDED(s->nl);
 	s->id=0;
 	s->n=n;
 	s->m=m;
 	s->total_secrets=edges_of(secrets, n, m);
 	s->total_calls=total_calls;
-				
+	
+	s->is_absorption = (s->total_secrets == n*n)?1:0;
+	
+	copy_calls_graph(s->fixed_name_calls, calls, n);
+	can_label_calls(calls, s->can_calls,n, s->nl, s-> ml);
+			
 	return s;		
 }
 
@@ -82,11 +88,8 @@ void destroy_twin_queues(twin_queues* twin_q)
 void destroy_hash(int n, twin_queues hash[MAXN*MAXN]) 
 {
 	int i;
-	//~ printf("\nMarkov chain (%d agents)\n", agents);
 		
-	/* destroy the hash */		
 	FOR_ALL_EDGES(i, n) {
-		//~ printf("%d secrets\n", i+1);
 		destroy_twin_queues(&hash[i]);
 	}	
 }

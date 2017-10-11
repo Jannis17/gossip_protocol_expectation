@@ -94,12 +94,11 @@ void copy_calls_graph(int to[MAXN][MAXN],int from[MAXN][MAXN],int n)
 
 /* g2 will be equal to the canonical labeling of g1
  * n : size of g1 and g2 */
-void find_can_label(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n)
+void
+find_can_label(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n, int m)
 {
 	int lab[MAXN], ptn[MAXN], orbits[MAXN];
-	
-	int m = SETWORDSNEEDED(n);
-		
+				
 	/* this is a function for vertex invariants. If it is set to NULL
 	 * we loose some optimizations. I am not sure if there are any
 	 * other side-effects */
@@ -117,16 +116,13 @@ void find_can_label(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n)
 
 
 /* finds the canonical labeling of a calls graph*/
-void can_label_calls(int init_calls[MAXN][MAXN],
-graph can_calls[MAXN*MAXM], int n)
+void
+can_label_calls(int init_calls[MAXN][MAXN], graph can_calls[MAXN*MAXM], 
+int n, int nl, int ml)
 {
 	int lab[MAXN], ptn[MAXN], orbits[MAXN], c;
 	
 	size_t i,j,k;
-	
-	int max_layers = ceil(log2( ( (double)n * (n-1) )/2 +1 ));
-		
-	int n_layered = max_layers*n;
 	
 	/* this is the layered graph that originates from the original
 	 * graph */
@@ -145,42 +141,38 @@ graph can_calls[MAXN*MAXM], int n)
 	/* select option for canonical labelling */
     options.getcanon = TRUE;
         
-    for(i=0;i<MAXN;i++) {
+    for(i=0;i<nl;i++) {
 		lab[i]=i;
 		ptn[i]= (i % n == n-1)? 0: 1;		
 	}
         
-	int m_layered = SETWORDSNEEDED(n_layered);
-	
-	EMPTYGRAPH(init_calls_layered, m_layered, n_layered);
-    
-    for(i=0; i < max_layers-1; i++) 
+	EMPTYGRAPH(init_calls_layered, ml, nl);
+            
+    for(i=0; i < nl/n-1; i++) 
 		for(j=0; j < n; j++) {
-			ADDONEARC(init_calls_layered,j,j+n, m_layered);
-			ADDONEARC(init_calls_layered,j+n,j, m_layered);
+			ADDONEARC(init_calls_layered,j,j+n, ml);
+			ADDONEARC(init_calls_layered,j+n,j, ml);
 		}
     
     for(i=0;i<n;i++)
 		for(j=0;j<n;j++)
 			if ((c = init_calls[i][j]) > 0) {
-				for (k = 0; k < max_layers;k++) {
+				for (k = 0; k < nl/n;k++) {
 					if (c % 2 == 1)
-						ADDONEARC(init_calls_layered,k*n+i,k*n+j,m_layered);
+						ADDONEARC(init_calls_layered,k*n+i,k*n+j,ml);
 					c>>=1;
 				}
 			}
 	
     /* create the cannonicaly labeled graph */        		
-	densenauty(init_calls_layered,lab,ptn,orbits,&options,&stats,m_layered, 
-		n_layered, can_calls);
+	densenauty(init_calls_layered,lab,ptn,orbits,&options,&stats,ml, 
+		nl, can_calls);
 }			
 
 
-void update_secrets(graph g[MAXN*MAXM], int i, int j, int n) 
+void update_secrets(graph g[MAXN*MAXM], int i, int j, int n, int m) 
 {	
 	size_t k;
-	
-	int m = SETWORDSNEEDED(n);
 	
 	for (k=0; k < m;k++) {
 		g[i + k] = g[i + k] | g[j + k];
@@ -189,21 +181,17 @@ void update_secrets(graph g[MAXN*MAXM], int i, int j, int n)
 }
 
 
-int can_call(graph g[MAXN * MAXM], int i, int j, int n) 
+int can_call(graph g[MAXN * MAXM], int i, int j, int n, int m) 
 {	
-	int m = SETWORDSNEEDED(n);
-	
 	return !ISELEMENT(GRAPHROW(g,i,m), j);
 }
 
 /* returns the number of possible bidirectional calls between
  * i and j according to prot */
-int no_poss_calls(pstate_t * pstate, int i, int j, int prot, int n)
+int no_poss_calls(pstate_t * pstate, int i, int j, int prot, int n, int m)
 {
 	int poss_calls = 0;
 	
-	int m = SETWORDSNEEDED(n);
-		
 	switch (prot) {
 		case (ANY):
 			poss_calls = 2;
@@ -214,14 +202,16 @@ int no_poss_calls(pstate_t * pstate, int i, int j, int prot, int n)
 	       	!ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,j,m),i);
 			break;
 		case (CO):
-			poss_calls= 2 * !pstate->fixed_name_calls[i][j];
+			if (pstate->fixed_name_calls[i][j] != 
+			    pstate->fixed_name_calls[j][i])
+			    INTERNAL_ERROR("hans\n");
+			if (pstate->fixed_name_calls[i][j] == 0)
+				poss_calls= 2;
 			break;
 		case (TOK):
 			break;
 		case (SPI):
 			break;
-		default:
-			INTERNAL_ERROR("Unknown protocol name!");
 		}
 	
 	return poss_calls;	

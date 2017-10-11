@@ -4,11 +4,9 @@
 #include "compar.h"
 
 /* compares g1 and g2 lexicographically */
-int cmp_graphs (graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n) 
+int cmp_graphs(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n, int m) 
 {
 	size_t k;
-	
-	int m = SETWORDSNEEDED(n);
 	
 	for (k = 0; k < m*(size_t)n; ++k) {
 		 if (g1[k] < g2[k])
@@ -60,9 +58,22 @@ int cmp_can_secrets(const void* item1, const void* item2)
 	state1 = (pstate_t *) item1;
 	state2 = (pstate_t *) item2;
 	
-	return cmp_graphs(state1->can_secrets, state2->can_secrets, 
-			state1->n);
+	return cmp_graphs(state1->can_secrets,state2->can_secrets,
+		state1->n, state1->m);
 }
+
+/* compares the canonical secrets of the args */
+int cmp_can_calls(const void* item1, const void* item2)
+{
+	pstate_t* state1, *state2;
+			
+	state1 = (pstate_t *) item1;
+	state2 = (pstate_t *) item2;
+	
+	return cmp_graphs(state1->can_calls,state2->can_calls,state1->n,
+		state1->m);
+}
+
 
 /* compares the fixed name secrets (as unordered tuple ) of the args */
 int cmp_fixed_name_secrets(const void* item1, const void* item2)
@@ -73,8 +84,7 @@ int cmp_fixed_name_secrets(const void* item1, const void* item2)
 	state2 = (pstate_t *) item2;
 	
 	return cmp_graphs(state1->fixed_name_secrets_sorted, 
-			state2->fixed_name_secrets_sorted, 
-			state1->n);
+			state2->fixed_name_secrets_sorted, state1->n,state1->m);
 }
 
 int cmp_can_children(const void* item1, const void* item2)
@@ -86,7 +96,7 @@ int cmp_can_children(const void* item1, const void* item2)
 	
 	return cmp_graphs(child1->childs_state->can_secrets, 
 			child2->childs_state->can_secrets,
-			child1->childs_state->n);
+			child1->childs_state->n, child1->childs_state->m);
 }
 
 int cmp_fixed_name_children(const void* item1, const void* item2)
@@ -98,5 +108,5 @@ int cmp_fixed_name_children(const void* item1, const void* item2)
 	
 	return cmp_graphs(child1->childs_state->fixed_name_secrets_sorted, 
 			child2->childs_state->fixed_name_secrets_sorted,
-			child1->childs_state->n);
+			child1->childs_state->n, child1->childs_state->m);
 }
