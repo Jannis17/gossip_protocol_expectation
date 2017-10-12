@@ -63,15 +63,17 @@ int cmp_can_secrets(const void* item1, const void* item2)
 }
 
 /* compares the canonical secrets of the args */
-int cmp_can_calls(const void* item1, const void* item2)
+int 
+cmp_can_calls
+(const void* item1, const void* item2)
 {
 	pstate_t* state1, *state2;
 			
 	state1 = (pstate_t *) item1;
 	state2 = (pstate_t *) item2;
 	
-	return cmp_graphs(state1->can_calls,state2->can_calls,state1->n,
-		state1->m);
+	return cmp_graphs(state1->can_calls,state2->can_calls,state1->nl,
+		state1->ml);
 }
 
 
@@ -87,7 +89,7 @@ int cmp_fixed_name_secrets(const void* item1, const void* item2)
 			state2->fixed_name_secrets_sorted, state1->n,state1->m);
 }
 
-int cmp_can_children(const void* item1, const void* item2)
+int cmp_can_children_secrets(const void* item1, const void* item2)
 {
 	child_t* child1, *child2;
 	
@@ -98,6 +100,19 @@ int cmp_can_children(const void* item1, const void* item2)
 			child2->childs_state->can_secrets,
 			child1->childs_state->n, child1->childs_state->m);
 }
+
+int cmp_can_children_calls(const void* item1, const void* item2)
+{
+	child_t* child1, *child2;
+	
+	child1 = (child_t *) item1;
+	child2 = (child_t *) item2;
+	
+	return cmp_graphs(child1->childs_state->can_calls, 
+			child2->childs_state->can_calls,
+			child1->childs_state->nl, child1->childs_state->ml);
+}
+
 
 int cmp_fixed_name_children(const void* item1, const void* item2)
 {

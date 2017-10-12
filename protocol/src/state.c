@@ -45,12 +45,12 @@ generate_children
 		childs_state = new_pstate(temp_secrets,temp_calls,
 			parent->total_calls+1,n,m,prot);
 		
-		if (childs_state -> is_absorption) {
-			printf("Absorption state found!\n");
-			print_calls_graph(childs_state->fixed_name_calls, n);
-			printf("\n");
-			print_graph(childs_state->fixed_name_secrets, n, m);
-		}
+		//~ if (childs_state -> is_absorption) {
+			//~ printf("Absorption state found!\n");
+			//~ print_calls_graph(childs_state->fixed_name_calls, n);
+			//~ printf("\n");
+			//~ print_graph(childs_state->fixed_name_secrets, n, m);
+		//~ }
 				
 		//add the child to the parent  
 		potential_child = new_child(childs_state, calls_to_child);
@@ -81,11 +81,11 @@ generate_children
 		  if ( enqueue_to_hash(hash, NULL, NULL, childs_state, 
 				 &found_child_node, prot) == DUPLICATE_ITEM ) 
 		  {
-			if (childs_state -> is_absorption)
-				printf("Duplicate of absorption state is:\n");
+			//~ if (childs_state -> is_absorption)
+				//~ printf("Duplicate of absorption state is:\n");
 			destroy_protocol_state(&childs_state);
 			potential_child->childs_state = found_child_node->data;				
-			print_calls_graph(potential_child->childs_state->fixed_name_calls,n);
+			//~ print_calls_graph(potential_child->childs_state->fixed_name_calls,n);
 		  }
 		  enqueue_unique_to_twin_queues
 		   ( parent->children, NULL, NULL, potential_child, prot );
@@ -100,7 +100,7 @@ void build_the_markov_chain(twin_queues hash[MAXN*MAXN], int n, int m,
 	struct queue_node_t * p;
 	*no_states = 0;
 	
-	//~ printf("\nAgents=%d:\n", n);
+	printf("\nAgents=%d:\n", n);
 	
 	FOR_ALL_EDGES(i, n) {
 		printf("edges=%d:", i);
@@ -241,7 +241,7 @@ int rand_ag)
 		
 		MALLOC_SAFE(is_absorption, *no_states * sizeof(int));
 		
-		printf("\nAgents=%d\n", n);
+		//~ printf("\nAgents=%d\n", n);
 		
 		FOR_ALL_EDGES(i, n)
 			QUEUE_FOREACH(p, hash[i].can_lab_queue) {
@@ -249,14 +249,14 @@ int rand_ag)
 				trans_matrix[label] = s;
 				s->id = label++;
 				is_absorption[s->id] = s->is_absorption;
-				printf("edges of calls graph = %d\n", i);
-				printf("absorption[%d] = %d\n", s->id, 
-					is_absorption[s->id]);
-				printf("Secrets:\n");
-				print_graph(s->fixed_name_secrets, s->n, s->m);
-				printf("Calls:\n");
-				print_calls_graph(s->fixed_name_calls, s->n);
-				printf("\n");
+				//~ printf("edges of calls graph = %d\n", i);
+				//~ printf("absorption[%d] = %d\n", s->id, 
+					//~ is_absorption[s->id]);
+				//~ printf("Secrets:\n");
+				//~ print_graph(s->fixed_name_secrets, s->n, s->m);
+				//~ printf("Calls:\n");
+				//~ print_calls_graph(s->fixed_name_calls, s->n);
+				//~ printf("\n");
 			}
 		
 		MALLOC_SAFE(expect_vec, *no_states * sizeof(float));
@@ -279,7 +279,7 @@ int rand_ag)
 			}
 		
 		result = expect_vec[0];
-		print_expect_vec_and_trans_matrix(*no_states, expect_vec, trans_matrix, n, prot, rand_ag);
+		//~ print_expect_vec_and_trans_matrix(*no_states, expect_vec, trans_matrix, n, prot, rand_ag);
 	}		
 	FREE_SAFE(is_absorption);
 	FREE_SAFE(expect_vec);

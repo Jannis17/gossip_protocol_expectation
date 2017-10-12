@@ -97,29 +97,34 @@ void graph_test(int n, int m)
 
 	
 	c2[0][1]=c2[1][0]=1;
-	c2[0][2]=c2[2][0]=3;
-	c2[0][3]=c2[3][0]=4;
-	c2[2][3]=c2[3][2]=2;
+	c2[0][2]=c2[2][0]=2;
+	c2[1][3]=c2[3][1]=3;
+	c2[2][3]=c2[3][2]=4;
 	
 	/*
-	0 1 3 4 
-	1 0 0 0 
-	3 0 0 2 
-	4 0 2 0
-	*/
+0 1 2 0 
+1 0 0 3 
+2 0 0 4 
+0 3 4 0 	*/
 		
 	printf("Initial c1\n");
 	print_calls_graph(c1,n);
 	printf("Initial c2\n");
 	print_calls_graph(c2,n);
 	
-	int nl = n * ceil(log2( ( (double) n * (n-1) ) /2 +1 ));
+	int nl = n * ceil(log2( ( n * (n-1) ) /2 +1 ));
 	int ml = SETWORDSNEEDED(nl);
 	
 	can_label_calls(c1,can_calls1,n, nl, ml);
 	can_label_calls(c2,can_calls2,n, nl, ml);
 			
-	printf("%d\n", cmp_graphs(can_calls1,can_calls2,n, m));
+	printf("%d\n", cmp_graphs(can_calls1,can_calls2,nl, ml));
+	
+	//~ printf("Canonical c1\n");
+	//~ print_graph(can_calls1,nl,ml);
+	//~ printf("Canonical c2\n");
+	//~ print_graph(can_calls2,nl,ml);
+
 }
 
 void multiply_matrices(float **c, float** a, float**b, int n)

@@ -143,35 +143,35 @@ int main (int argc, char * argv[]){
 		
 	srand(time(NULL));
 		
-	//~ for (n=3; n<=max_n; n++) {
-		//~ /* calculate the number of words needed to hold n bits */
-		 //~ m = SETWORDSNEEDED(n);
+	for (n=3; n<=max_n; n++) {
+		/* calculate the number of words needed to hold n bits */
+		 m = SETWORDSNEEDED(n);
 		 			
-		 //~ /* verify that we are linking to compatible versions of the
-		  //~ * nauty routines. */
-		 //~ nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
+		 /* verify that we are linking to compatible versions of the
+		  * nauty routines. */
+		 nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
 		 
-		 //~ start = clock();		
+		 start = clock();		
 		 
-		 //~ /* compute the simulated or exact expectation */
-		 //~ expectation[n] = (sim)?simulated(n, m, prot, rand_ag, max_sim):
-	     //~ exact_expectation(n, m, &no_states[n], prot, calc_exp, rand_ag);								
+		 /* compute the simulated or exact expectation */
+		 expectation[n] = (sim)?simulated(n, m, prot, rand_ag, max_sim):
+	     exact_expectation(n, m, &no_states[n], prot, calc_exp, rand_ag);								
 		 
-		 //~ end = clock();
-		 //~ elps_time[n] = ((float) end - start)/CLOCKS_PER_SEC;
-	//~ }
+		 end = clock();
+		 elps_time[n] = ((float) end - start)/CLOCKS_PER_SEC;
+	}
 	
-	//~ expectation[1]=0;
-	//~ expectation[2]=1;
-	//~ elps_time[1]=elps_time[2]=0;
-	//~ no_states[1]=1;
-	//~ no_states[2]=2;
+	expectation[1]=0;
+	expectation[2]=1;
+	elps_time[1]=elps_time[2]=0;
+	no_states[1]=1;
+	no_states[2]=2;
 			
-	//~ print_results(max_n, no_states, expectation, elps_time, prot, 
-		//~ calc_exp, sim, rand_ag);
+	print_results(max_n, no_states, expectation, elps_time, prot, 
+		calc_exp, sim, rand_ag);
 	
-	m = SETWORDSNEEDED(max_n);
-	graph_test(max_n,m);
+	//~ m = SETWORDSNEEDED(max_n);
+	//~ graph_test(max_n,m);
 		
 	return 0;
 }

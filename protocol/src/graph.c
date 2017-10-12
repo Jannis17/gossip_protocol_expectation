@@ -122,7 +122,7 @@ int n, int nl, int ml)
 {
 	int lab[MAXN], ptn[MAXN], orbits[MAXN], c;
 	
-	size_t i,j,k;
+	size_t i,j, k;
 	
 	/* this is the layered graph that originates from the original
 	 * graph */
@@ -145,28 +145,38 @@ int n, int nl, int ml)
 		lab[i]=i;
 		ptn[i]= (i % n == n-1)? 0: 1;		
 	}
-        
+     
+    //~ printf("lab:\n");
+    //~ for (i=0;i<nl; i++)
+		//~ printf("lab[%lu] = %d\n", i, lab[i]);
+    
+    //~ printf("\n ptn:\n");
+	//~ for (i=0;i<nl; i++)
+		//~ printf("ptn[%lu] = %d\n", i, ptn[i]);
+	
 	EMPTYGRAPH(init_calls_layered, ml, nl);
             
     for(i=0; i < nl/n-1; i++) 
 		for(j=0; j < n; j++) {
-			ADDONEARC(init_calls_layered,j,j+n, ml);
-			ADDONEARC(init_calls_layered,j+n,j, ml);
+			ADDONEARC(init_calls_layered,i*n+j,(i+1)*n+j, ml);
+			ADDONEARC(init_calls_layered,(i+1)*n+j,i*n+j, ml);
 		}
     
     for(i=0;i<n;i++)
 		for(j=0;j<n;j++)
-			if ((c = init_calls[i][j]) > 0) {
+			if ((c = init_calls[i][j]) > 0)
 				for (k = 0; k < nl/n;k++) {
-					if (c % 2 == 1)
+					if (c % 2)
 						ADDONEARC(init_calls_layered,k*n+i,k*n+j,ml);
-					c>>=1;
+					c/=2;
 				}
-			}
 	
     /* create the cannonicaly labeled graph */        		
 	densenauty(init_calls_layered,lab,ptn,orbits,&options,&stats,ml, 
 		nl, can_calls);
+	//~ printf("\n lab after canon:\n");	
+	//~ for (i=0;i<nl; i++)
+		//~ printf("lab[%lu] = %d\n", i, lab[i]);
 }			
 
 

@@ -19,19 +19,26 @@ int n, int m, int prot)
 	copy_graph(s->fixed_name_secrets, secrets, n, m);
 	find_can_label(secrets, s->can_secrets, n, m); 
 	
-	s->children.fixed_name_queue = 
-		new_queue(MAXN*(MAXN-1), cmp_fixed_name_children);
-	
-	s->children.can_lab_queue = 
-		new_queue(MAXN*(MAXN-1), cmp_can_children);
-				
+	if (prot == ANY)
+		s->children.fixed_name_queue = 
+			new_queue(MAXN*(MAXN-1), cmp_fixed_name_children);
+	else
+		s->children.fixed_name_queue = NULL;
+		
+	if (prot == CO)
+		s->children.can_lab_queue =
+			new_queue(MAXN*(MAXN-1), cmp_can_children_calls);
+	else
+		s->children.can_lab_queue =
+			new_queue(MAXN*(MAXN-1), cmp_can_children_secrets);
+					
 	if (prot == ANY) {
 		copy_graph(s->fixed_name_secrets_sorted, secrets, n, m);
 		qsort(s->fixed_name_secrets_sorted, 
 			n*m, sizeof(graph), cmp_graph_nodes);
 	}
 	
-	s->nl = n * ceil(log2( ( (double) n * (n-1) ) /2 +1 ));
+	s->nl = n * ceil(log2( (n * (n-1))/2 + 1 ));
 	s->ml = SETWORDSNEEDED(s->nl);
 	s->id=0;
 	s->n=n;
@@ -89,9 +96,8 @@ void destroy_hash(int n, twin_queues hash[MAXN*MAXN])
 {
 	int i;
 		
-	FOR_ALL_EDGES(i, n) {
+	FOR_ALL_EDGES(i, n)
 		destroy_twin_queues(&hash[i]);
-	}	
 }
 
 void malloc_safe_2D_float(float ***p, int n) 
