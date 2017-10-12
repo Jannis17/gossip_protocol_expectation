@@ -39,7 +39,7 @@ typedef struct child_tag {
 float 
 exact_expectation
 (int agents, int m, int* no_states, int prot, int calc_exp,
- int rand_ag);
+ int rand_ag, int * no_ordered_tuples);
 
 float 
 get_prob

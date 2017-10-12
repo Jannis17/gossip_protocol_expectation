@@ -85,17 +85,20 @@ void destroy_twin_queues(twin_queues* twin_q)
 	pstate_t *s;
 	struct queue_node_t * p;
 	
-	QUEUE_FOREACH(p, twin_q->can_lab_queue) {
-			s = (pstate_t *) (p->data);
-			destroy_protocol_state(&s);			
-		}
-	DELETE_QUEUE(twin_q->can_lab_queue);
+	if (!QUEUE_IS_EMPTY(twin_q->can_lab_queue)) {
+		QUEUE_FOREACH(p, twin_q->can_lab_queue) {
+				s = (pstate_t *) (p->data);
+				destroy_protocol_state(&s);			
+			}
+		DELETE_QUEUE(twin_q->can_lab_queue);
+		DELETE_QUEUE(twin_q->fixed_name_queue);
+	}
 }
 
 void destroy_hash(int n, twin_queues hash[MAXN*MAXN]) 
 {
 	int i;
-		
+	
 	FOR_ALL_EDGES(i, n)
 		destroy_twin_queues(&hash[i]);
 }

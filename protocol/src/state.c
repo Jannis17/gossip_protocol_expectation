@@ -29,6 +29,8 @@ twin_queues ordered_hash[MAXN*MAXN])
 	struct queue_node_t* childs_fixed_name_prev = NULL;
 	child_t * potential_child;
 	pstate_t* childs_state;
+	int exists_in_hash;
+	pstate_t* state_for_ordered_hash;
 						
 	for (i=0; i<n; i++)
 	 for (j=i+1; j<n; j++)
@@ -72,14 +74,29 @@ twin_queues ordered_hash[MAXN*MAXN])
 		} 
 		else 
 		{ 
-		  if ( enqueue_to_hash(hash, NULL, NULL, childs_state, 
-				 &found_child_node, prot) == DUPLICATE_ITEM ) 
+		  exists_in_hash = enqueue_to_hash
+			(hash, NULL, NULL, childs_state, &found_child_node, prot);
+		  if ( exists_in_hash == DUPLICATE_ITEM ) 
 		  {
 			destroy_protocol_state(&childs_state);
 			potential_child->childs_state = found_child_node->data;
 		  }
 		  enqueue_unique_to_twin_queues
 		   ( parent->children, NULL, NULL, potential_child, prot );
+		  
+		  /* if we are in CO, TOK or SPI we want to count
+		   * the ordered tuples too */		  
+		  if ( (prot == CO || prot == TOK || prot == SPI)  &&
+		        exists_in_hash == NEW_ITEM ) 
+		  {
+			  state_for_ordered_hash= 
+			  	new_pstate(temp_secrets,temp_calls,
+			  		parent->total_calls+1,n,m,LNS);
+			  enqueue_to_hash
+				(ordered_hash, NULL, NULL, state_for_ordered_hash, 
+					NULL, LNS);
+		  }
+		        
 		}		  
 	  }		  
 }	
@@ -115,6 +132,21 @@ int *no_states, twin_queues ordered_hash[MAXN*MAXN])
 		if (!calc_exp)
 			destroy_twin_queues(&hash[i]);		
 	}
+}
+
+int
+count_ordered_tuples
+(twin_queues ordered_hash[MAXN*MAXN], int n)
+{
+	int result = 0;
+	int i;
+			
+	FOR_ALL_EDGES(i, n) {
+		result += QUEUE_COUNT(ordered_hash[i].can_lab_queue);
+		//~ destroy_twin_queues(&ordered_hash[i]);
+	}
+	
+	return result;	
 }
 
 float
@@ -208,8 +240,9 @@ init_markov_chain
 }
 
 float 
-exact_expectation(int n, int m, int* no_states, int prot, int calc_exp,
-int rand_ag)
+exact_expectation
+(int n, int m, int* no_states, int prot, int calc_exp,
+int rand_ag, int * no_ordered_tuples)
 {		
 	twin_queues hash[MAXN*MAXN];
 	pstate_t *s;
@@ -268,7 +301,12 @@ int rand_ag)
 			}
 		
 		result = expect_vec[0];
-	}		
+	}
+	
+	//if we are in CO, TOK or SPI we count the ordered tuples
+	if (prot == CO || prot == TOK || prot == SPI)
+		*no_ordered_tuples = count_ordered_tuples(ordered_hash, n);
+			
 	FREE_SAFE(is_absorption);
 	FREE_SAFE(expect_vec);
 	FREE_SAFE(trans_matrix);

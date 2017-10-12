@@ -11,29 +11,36 @@
 
 void print_results
 (int n, int no_states[MAXN], float expectation[MAXN], 
- float elps_time[MAXN], int prot, int calc_exp, int sim, int rand_ag) 
+ float elps_time[MAXN], int prot, int calc_exp, int sim, int rand_ag,
+ int no_ordered_tuples[MAXN]) 
 {
 	time_t timeNow = time(NULL);
 	struct tm localTime = *localtime(&timeNow);
 	char filename[300];
 	int i;
 	char *pname;
+	char *name_of_states;
 		
 	switch (prot) {
 		case (ANY):
 			pname = "ANY";
+			name_of_states = "unordered tuples";
 			break;
 		case (LNS):
 			pname = "LNS";
+			name_of_states = "ordered tuples";
 			break;
 		case (CO):
 			pname = "CO";
+			name_of_states = "weighted graphs";
 			break;
 		case (TOK):
 			pname = "TOK";
+			name_of_states = "coloured ordered tuples";
 			break;
 		case (SPI):
 			pname = "SPI";
+			name_of_states = "coloured ordered tuples";
 			break;
 		default:
 			INTERNAL_ERROR("Unknown protocol name!");
@@ -63,11 +70,19 @@ void print_results
 		fprintf(fp,"%f, ", expectation[i]);
 				
 	if (!sim) {
-		fprintf(fp,"\nstates, ");
+		fprintf(fp,"\n%s, ", name_of_states);
 		
 		for (i=1; i<=n; i++)	
 			fprintf(fp,"%d, ", no_states[i]);		
 	}	
+	
+	if ( prot == CO || prot == SPI || prot == TOK ){
+		fprintf(fp,"\nordered tuples, ");
+		
+		for (i=1; i<=n; i++)	
+			fprintf(fp,"%d, ", no_ordered_tuples[i]);		
+	}	
+		
 	
 	fprintf(fp,"\ntime, ");
 		
@@ -131,11 +146,15 @@ int main (int argc, char * argv[]){
 	if ( max_n > MAXN || max_n<=0 ) 
 		print_usage_and_exit(argc, argv);			
 			
-	/* expectation[i] = expected execution length for i i */
+	/* expectation[i] = expected execution length for i agents */
 	float expectation[MAXN];
 
-	/* totalStates[i] = number of different states for i i */
+	/* totalStates[i] = number of different states for i agents */
 	int no_states[MAXN];
+	
+	/* no_ordered_tuples[i] = number of non-iso ordered tuples for
+	 * i agents */
+	int no_ordered_tuples[MAXN];
 		
 	clock_t start, end;
 	int n, m;
@@ -155,7 +174,8 @@ int main (int argc, char * argv[]){
 		 
 		 /* compute the simulated or exact expectation */
 		 expectation[n] = (sim)?simulated(n, m, prot, rand_ag, max_sim):
-	     exact_expectation(n, m, &no_states[n], prot, calc_exp, rand_ag);								
+	     exact_expectation(n, m, &no_states[n], prot, calc_exp, rand_ag,
+	     &no_ordered_tuples[n]);								
 		 
 		 end = clock();
 		 elps_time[n] = ((float) end - start)/CLOCKS_PER_SEC;
@@ -166,9 +186,11 @@ int main (int argc, char * argv[]){
 	elps_time[1]=elps_time[2]=0;
 	no_states[1]=1;
 	no_states[2]=2;
+	no_ordered_tuples[1]=1;
+	no_ordered_tuples[2]=2;
 			
 	print_results(max_n, no_states, expectation, elps_time, prot, 
-		calc_exp, sim, rand_ag);
+		calc_exp, sim, rand_ag, no_ordered_tuples);
 	
 	//~ m = SETWORDSNEEDED(max_n);
 	//~ graph_test(max_n,m);
