@@ -13,7 +13,8 @@
 
 void 
 generate_children
-(pstate_t *parent, int n, int m, twin_queues hash[MAXN*MAXN], int prot) 
+(pstate_t *parent, int n, int m, twin_queues hash[MAXN*MAXN], int prot,
+twin_queues ordered_hash[MAXN*MAXN]) 
 {
 	if (parent->is_absorption)
 		return;
@@ -44,13 +45,6 @@ generate_children
 		//create a new child state 		  
 		childs_state = new_pstate(temp_secrets,temp_calls,
 			parent->total_calls+1,n,m,prot);
-		
-		//~ if (childs_state -> is_absorption) {
-			//~ printf("Absorption state found!\n");
-			//~ print_calls_graph(childs_state->fixed_name_calls, n);
-			//~ printf("\n");
-			//~ print_graph(childs_state->fixed_name_secrets, n, m);
-		//~ }
 				
 		//add the child to the parent  
 		potential_child = new_child(childs_state, calls_to_child);
@@ -81,11 +75,8 @@ generate_children
 		  if ( enqueue_to_hash(hash, NULL, NULL, childs_state, 
 				 &found_child_node, prot) == DUPLICATE_ITEM ) 
 		  {
-			//~ if (childs_state -> is_absorption)
-				//~ printf("Duplicate of absorption state is:\n");
 			destroy_protocol_state(&childs_state);
-			potential_child->childs_state = found_child_node->data;				
-			//~ print_calls_graph(potential_child->childs_state->fixed_name_calls,n);
+			potential_child->childs_state = found_child_node->data;
 		  }
 		  enqueue_unique_to_twin_queues
 		   ( parent->children, NULL, NULL, potential_child, prot );
@@ -93,41 +84,41 @@ generate_children
 	  }		  
 }	
 
-void build_the_markov_chain(twin_queues hash[MAXN*MAXN], int n, int m,
- int prot, int calc_exp, int *no_states)
+void 
+build_the_markov_chain
+(twin_queues hash[MAXN*MAXN], int n, int m, int prot, int calc_exp,
+int *no_states, twin_queues ordered_hash[MAXN*MAXN])
 {
 	int i;
 	struct queue_node_t * p;
 	*no_states = 0;
 	
-	printf("\nAgents=%d:\n", n);
-	
 	FOR_ALL_EDGES(i, n) {
-		printf("edges=%d:", i);
-		QUEUE_FOREACH(p, hash[i].can_lab_queue) 
-			generate_children(p->data, n, m, hash, prot);
+		QUEUE_FOREACH(p, hash[i].can_lab_queue)
+			generate_children
+			(p->data, n, m, hash, prot, ordered_hash);
 
-		/* count the states */	
-		if ( prot == ANY &&
-			 QUEUE_COUNT(hash[i].can_lab_queue) != 
-			 QUEUE_COUNT(hash[i].fixed_name_queue) ) 
-		{
-			printf("canonical = %lu	\n", 
-				QUEUE_COUNT(hash[i].can_lab_queue));
-			printf("fixed name = %lu\n", 
-				QUEUE_COUNT(hash[i].fixed_name_queue));
-		   INTERNAL_ERROR("Queues do not have\
-		   the same number of elements\n");			 
-		}
+		//~ if ( prot == ANY &&
+			 //~ QUEUE_COUNT(hash[i].can_lab_queue) != 
+			 //~ QUEUE_COUNT(hash[i].fixed_name_queue) ) 
+		//~ {
+			//~ printf("canonical = %lu	\n", 
+				//~ QUEUE_COUNT(hash[i].can_lab_queue));
+			//~ printf("fixed name = %lu\n", 
+				//~ QUEUE_COUNT(hash[i].fixed_name_queue));
+		   //~ INTERNAL_ERROR("Queues do not have the same number of elements\n");			 
+		//~ }
 		
+		/* count the states */	
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
-		printf("states=%lu\n", QUEUE_COUNT(hash[i].can_lab_queue));
+		
 		if (!calc_exp)
 			destroy_twin_queues(&hash[i]);		
 	}
 }
 
-float get_prob
+float
+get_prob
 (pstate_t ** trans_matrix, int from, int to, int prot, int rand_ag) 
 {
 	pstate_t* s = trans_matrix[from], * t;
@@ -168,7 +159,8 @@ float get_prob
 						prob /= ((s->n) * (s->n) - s->total_secrets);
 						break;
 					case (CO):
-						prob /= ((s->n) * (s->n -1 ) - 2 * s-> total_calls);
+						prob /= 
+							((s->n) * (s->n -1 ) - 2 * s-> total_calls);
 						break;
 					case (TOK):
 						break;
@@ -182,7 +174,8 @@ float get_prob
 	return prob;	
 }
 
-void init_markov_chain
+void
+init_markov_chain
 (twin_queues hash[MAXN*MAXN], int n, int m, int prot)
 {
 	int i;
@@ -226,12 +219,18 @@ int rand_ag)
 	float* expect_vec = NULL;
 	int* is_absorption = NULL;
 	float result = 0;
+	//this has will store only ordered tuples, regardless the protocol
+	twin_queues ordered_hash[MAXN*MAXN];
 	
 	init_markov_chain(hash, n, m, prot);
 			
+	/* if we are in CO, TOK, SPI we want to count the ordered tuples */
+	init_markov_chain(ordered_hash, n, m, LNS);
+		
 	/* build the markov chain */
-	build_the_markov_chain(hash, n, m, prot, calc_exp, no_states);
-	
+	build_the_markov_chain(hash, n, m, prot, calc_exp, no_states,
+		ordered_hash);
+		
 	if (calc_exp)
 	{		
 		MALLOC_SAFE(trans_matrix,(*no_states)*sizeof(pstate_t *) );
@@ -241,22 +240,12 @@ int rand_ag)
 		
 		MALLOC_SAFE(is_absorption, *no_states * sizeof(int));
 		
-		//~ printf("\nAgents=%d\n", n);
-		
 		FOR_ALL_EDGES(i, n)
 			QUEUE_FOREACH(p, hash[i].can_lab_queue) {
 				s = (pstate_t *) (p->data);
 				trans_matrix[label] = s;
 				s->id = label++;
 				is_absorption[s->id] = s->is_absorption;
-				//~ printf("edges of calls graph = %d\n", i);
-				//~ printf("absorption[%d] = %d\n", s->id, 
-					//~ is_absorption[s->id]);
-				//~ printf("Secrets:\n");
-				//~ print_graph(s->fixed_name_secrets, s->n, s->m);
-				//~ printf("Calls:\n");
-				//~ print_calls_graph(s->fixed_name_calls, s->n);
-				//~ printf("\n");
 			}
 		
 		MALLOC_SAFE(expect_vec, *no_states * sizeof(float));
@@ -279,12 +268,12 @@ int rand_ag)
 			}
 		
 		result = expect_vec[0];
-		//~ print_expect_vec_and_trans_matrix(*no_states, expect_vec, trans_matrix, n, prot, rand_ag);
 	}		
 	FREE_SAFE(is_absorption);
 	FREE_SAFE(expect_vec);
 	FREE_SAFE(trans_matrix);
 	destroy_hash(n, hash); 
+	destroy_hash(n, ordered_hash);
 				
 	return result;	
 }
