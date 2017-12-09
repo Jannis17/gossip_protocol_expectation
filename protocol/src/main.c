@@ -10,7 +10,7 @@
 #include "simulations.h"
 
 void print_results
-(int n, int no_states[MAXN], float expectation[MAXN], 
+(int n, int no_states[MAXN], float expectation[MAXN_SIM], 
  float elps_time[MAXN], int prot, int calc_exp, int sim, int rand_ag,
  int no_ordered_tuples[MAXN]) 
 {
@@ -76,19 +76,19 @@ void print_results
 			fprintf(fp,"%d, ", no_states[i]);		
 	}	
 	
-	if ( prot == CO || prot == SPI || prot == TOK ){
+	if (!sim && (prot == CO || prot == SPI || prot == TOK) ){
 		fprintf(fp,"\nordered tuples, ");
 		
 		for (i=1; i<=n; i++)	
 			fprintf(fp,"%d, ", no_ordered_tuples[i]);		
 	}	
 		
-	
-	fprintf(fp,"\ntime, ");
+	if (!sim){
+		fprintf(fp,"\ntime, ");
 		
-	for (i=1; i<=n; i++)	
-		fprintf(fp,"%f, ", elps_time[i]);
-	
+		for (i=1; i<=n; i++)	
+			fprintf(fp,"%f, ", elps_time[i]);
+	}
 	fclose(fp);
 }
 
@@ -96,10 +96,11 @@ void print_usage_and_exit(int argc, char * argv[])
 {
 	printf("Usage: %s [name] [n] -s=[max_sim] -ra -ne \n\n", argv[0]);
 	printf("name: ANY or LNS\n");
-	printf("n:  number of agents (in the range 1..%d) \n", MAXN);
+	printf("n:  number of agents \n");
 	printf("-ne:  if it is present, the program will not calculate the expectation. If it is used with the s option, it has no effect.\n");
 	printf("-s: if it is present, the expected duration is computed using max_sim simulations. If it is absent, the program caluclates exact values\n");
 	printf("-ra: if it is present, we have randomization over agents. If it is absent, we have randomization over calls\n");
+	printf("If the option -s is used then n has to be in the range 1..%d. If -s is absent, n has to be in the range 1..%d", MAXN_SIM, MAXN);	
 	printf("\nThe results will be generated in a file with timestamp in the folder gossip_protocol_expectation/results.\n");
 			
 	exit(1);
@@ -143,11 +144,11 @@ int main (int argc, char * argv[]){
 			print_usage_and_exit(argc, argv);
 	}
 
-	if ( max_n > MAXN || max_n<=0 ) 
+	if ( max_n<=0 || (sim && max_n > MAXN_SIM) || (!sim && max_n > MAXN) ) 
 		print_usage_and_exit(argc, argv);			
 			
 	/* expectation[i] = expected execution length for i agents */
-	float expectation[MAXN];
+	float expectation[MAXN_SIM];
 
 	/* totalStates[i] = number of different states for i agents */
 	int no_states[MAXN];
@@ -173,7 +174,7 @@ int main (int argc, char * argv[]){
 		 start = clock();		
 		 
 		 /* compute the simulated or exact expectation */
-		 expectation[n] = (sim)?simulated(n, m, prot, rand_ag, max_sim):
+		 expectation[n] = (sim)?simulated(n, prot, rand_ag, max_sim):
 	     exact_expectation(n, m, &no_states[n], prot, calc_exp, rand_ag,
 	     &no_ordered_tuples[n]);								
 		 

@@ -4,44 +4,110 @@
 #include <stdlib.h>
 #include <math.h>
 #include "main.h"
-#include "graph.h"
-#include "state.h"
-#include "test.h"
-#include "../../nauty26r7/nauty.h"
-#include "../../nauty26r7/naututil.h"
 
-
-
-void execute_call(int caller, int callee, graph secrets[MAXN*MAXM], 
-	graph avail_calls[MAXN*MAXM],int n, int m, int prot) 
-{
-	size_t k;
+void print_g(int g[MAXN_SIM][MAXN_SIM], int n) {
+	int i,j;
+	
+	for (i=0; i<n; i++) {
+		for (j=0; j<n; j++)
+			printf("%d ", g[i][j]);
 		
-	update_secrets(secrets, caller, callee, n, m);
-	if (prot == LNS) {
-		for(k=0;k<n;k++)
-		if (ISELEMENT(GRAPHROW(secrets,caller,m),k)) {
-			DELELEMENT(GRAPHROW(avail_calls,caller,m),k);
-			DELELEMENT(GRAPHROW(avail_calls,callee,m),k);							
-		} else {
-			ADDELEMENT(GRAPHROW(avail_calls,caller,m),k);
-			ADDELEMENT(GRAPHROW(avail_calls,callee,m),k);
-		}
-	} else if (prot == CO) {
-				DELELEMENT(GRAPHROW(avail_calls,caller,m),callee);
-				DELELEMENT(GRAPHROW(avail_calls,callee,m),caller);
-			}		
+		printf("\n");	
+	}
+	
 }
 
-int count_callers(graph avail_calls[MAXN*MAXM], int n, int m) 
+
+void init_tokens(int tokens[MAXN_SIM], int n)
+{
+	int i;
+	
+	for(i=0;i<n;i++)
+		tokens[i]=1;
+}
+
+void init_sec(int secrets[MAXN_SIM][MAXN_SIM], int n)
+{
+	int i,j;
+	
+	for(i=0;i<n;i++)
+		for(j=0;j<n;j++)
+			secrets[i][j]=(i==j)?1:0;				
+}
+
+void init_avail_calls(int avail_calls[MAXN_SIM][MAXN_SIM], int n)
+{
+	int i,j;
+	
+	for(i=0;i<n;i++)
+		for(j=0;j<n;j++)
+			avail_calls[i][j]=(i==j)?0:1;					
+}
+
+int edges(int g[MAXN_SIM][MAXN_SIM], int n)
+{
+	int i,j, result=0;
+	
+	for(i=0;i<n;i++)
+		for(j=0;j<n;j++)
+			result+=g[i][j];
+	
+	return result;						
+}
+
+void execute_call(int caller, int callee, int secrets[MAXN_SIM][MAXN_SIM],
+	int avail_calls[MAXN_SIM][MAXN_SIM], int tokens[MAXN_SIM], int n, int prot) 
+{		
+	int k;
+		
+	//~ print_g(secrets,n);
+	
+	//~ printf("\n");
+		
+	for(k=0;k<n;k++)
+		secrets[caller][k] = secrets[callee][k] = (secrets[caller][k] || secrets[callee][k]);				
+	
+	switch (prot) {	
+		case (LNS) :
+			for(k=0;k<n;k++)
+				if (secrets[caller][k])
+					avail_calls[caller][k]= avail_calls[callee][k]=0;
+		break;
+		case (CO) :	
+			avail_calls[caller][callee] = avail_calls[callee][caller] =0;
+			break;
+		case (ANY) :
+			break;
+		case (TOK) :
+			tokens[caller] = 0;
+			tokens[callee] = 1;
+			for(k=0;k<n;k++) {
+				avail_calls[caller][k] = 0;
+				avail_calls[callee][k] = 1;
+			}
+			
+			break;
+		case (SPI) :
+			tokens[caller] = 1;
+			tokens[callee] = 0;
+			for(k=0;k<n;k++) {
+				avail_calls[callee][k]=0;
+				avail_calls[caller][k]=1;
+			}
+			
+			break;		
+	}		
+}
+
+int count_callers(int avail_calls[MAXN_SIM][MAXN_SIM], int n) 
 {
 	int count=0;
 	
-	size_t i, j;
+	int i, j;
 	
-	for(i=0; i < MAXM*(size_t) n ; i++)
-		for(j=0; j < MAXM*(size_t) n ; j++) 		
-			if (ISELEMENT(GRAPHROW(avail_calls,i,m),j)) { 
+	for(i=0; i < n ; i++)
+		for(j=0; j < n ; j++) 		
+			if (avail_calls[i][j]) { 
 				count++;
 				break;
 			}
@@ -49,24 +115,23 @@ int count_callers(graph avail_calls[MAXN*MAXM], int n, int m)
 	return count;
 }
 
-int count_callees(graph avail_calls[MAXN*MAXM], int i, int n, int m) {
+int count_callees(int avail_calls[MAXN_SIM][MAXN_SIM], int i, int n) {
 	int count=0;
 	
-	size_t j;
+	int j;
 	
-	for(j=0; j < MAXM*(size_t) n ; j++) 		
-		if (ISELEMENT(GRAPHROW(avail_calls,i,m),j))
-			count++;
+	for(j=0; j < n ; j++) 		
+		count+= avail_calls[i][j];
 	
 	return count;
 }
 
-int get_caller(graph avail_calls[MAXN*MAXM], int r_caller, int n, int m)
+int get_caller(int avail_calls[MAXN_SIM][MAXN_SIM], int r_caller, int n)
 {
-	size_t i;
+	int i;
 	
-	for(i=0; i < MAXM*(size_t) n ; i++) {
-		if (count_callees(avail_calls, i, n, m) > 0)
+	for(i=0; i < n ; i++) {
+		if (count_callees(avail_calls, i, n) > 0)
 			r_caller--;
 		if (!r_caller)
 			break;
@@ -75,12 +140,12 @@ int get_caller(graph avail_calls[MAXN*MAXM], int r_caller, int n, int m)
 	return i;
 }
 
-int get_callee(graph avail_calls[MAXN*MAXM], int caller, 
-	int r_callee, int n, int m){
-	size_t j;
+int get_callee(int avail_calls[MAXN_SIM][MAXN_SIM], int caller, 
+	int r_callee, int n){
+	int j;
 	
-	for(j=0; j < m*(size_t) n ; j++) {
-		if (ISELEMENT(GRAPHROW(avail_calls,caller,m),j))
+	for(j=0; j < n ; j++) {
+		if (avail_calls[caller][j])
 			r_callee--;
 		if (!r_callee)
 			break;
@@ -89,16 +154,16 @@ int get_callee(graph avail_calls[MAXN*MAXM], int caller,
 	return j;
 }
 
-void get_call_parts(graph avail_calls[MAXN*MAXM], int r_call, 
-	int *caller, int *callee, int n, int m){
+void get_call_parts(int avail_calls[MAXN_SIM][MAXN_SIM], int r_call, 
+	int *caller, int *callee, int n){
 	
-	size_t i,j;
+	int i,j;
 	
 	*caller=*callee=0;
 	
-	for (i=0; i < m*(size_t) n; i++)
-		for (j=0; j < m*(size_t) n; j++) {
-			r_call-=ISELEMENT(GRAPHROW(avail_calls,i,m), j);
+	for (i=0; i <  n; i++)
+		for (j=0; j < n; j++) {
+			r_call-=avail_calls[i][j];
 			if (!r_call) {
 				*caller = i;
 				*callee =j;
@@ -108,28 +173,35 @@ void get_call_parts(graph avail_calls[MAXN*MAXM], int r_call,
 }
 
 
-float simulated(int n, int m, int prot, int rand_ag, int max_sim) {
+float simulated(int n, int prot, int rand_ag, int max_sim) {
 	int s, r_caller, r_callee, duration=0;		
-	graph secrets[MAXN*MAXM];
-	graph avail_calls[MAXN*MAXM];
+	int secrets[MAXN_SIM][MAXN_SIM];
+	int avail_calls[MAXN_SIM][MAXN_SIM];
+	int tokens[MAXN_SIM];
 							
 	for(s=0; s<max_sim;s++) {
-		diagonal(secrets, n, m);
-		init_avail_calls_graph(avail_calls,n,m);
+		init_sec(secrets, n);
+		init_avail_calls(avail_calls,n);
+		init_tokens(tokens, n);
+		
 		while (1) {
 			if (rand_ag) {
 				r_caller = get_caller(avail_calls, 
-					rand() % count_callers(avail_calls,n, m)+1, n, m);
+					rand() % count_callers(avail_calls,n)+1, n);
 				r_callee = get_callee(avail_calls, r_caller,
-					rand() % count_callees(avail_calls,r_caller,n, m)+1, n, m);
+					rand() % count_callees(avail_calls,r_caller,n)+1, n);
 			} else
 				get_call_parts(avail_calls, 
-					rand() % edges_of(avail_calls,n,m) + 1, &r_caller, 
-					&r_callee, n, m);
-			execute_call(r_caller, r_callee, secrets, avail_calls, n, m, prot);
+					rand() % edges(avail_calls,n) + 1, &r_caller, 
+					&r_callee, n);
+					
+			//~ printf("caller=%d\n", r_caller);
+			//~ printf("callee=%d\n", r_callee);
+					
+			execute_call(r_caller, r_callee, secrets, avail_calls, tokens, n, prot);
 			duration++;
 			
-			if (edges_of(secrets,n,m) == n * n)
+			if (edges(secrets,n) == n * n)
 				break;
 		}
 	}
