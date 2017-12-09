@@ -1,9 +1,7 @@
-#include "simulations.h"
-#include <time.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include "main.h"
+#include "simulations.h"
+
 
 void print_g(int g[MAXN_SIM][MAXN_SIM], int n) {
 	int i,j;
@@ -16,7 +14,6 @@ void print_g(int g[MAXN_SIM][MAXN_SIM], int n) {
 	}
 	
 }
-
 
 void init_tokens(int tokens[MAXN_SIM], int n)
 {
