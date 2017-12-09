@@ -44,4 +44,4 @@ Navigate to "gossip_protocol_expectation/protocol/src" and type "make".
 
 ### Run:
 Navigate to "gossip_protocol_expectation/protocl/src" and type
-"./protocol". Then the instructions will be typed in your terminal.
+"./protocol". Follow the insctructions in your terminal.
