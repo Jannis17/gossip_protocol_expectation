@@ -107,7 +107,7 @@ void print_usage_and_exit(int argc, char * argv[])
 }
 
 int main (int argc, char * argv[]){
-	int max_n, prot;
+	int max_n = 0, prot;
 	int calc_exp = 1;
 	int rand_ag = 0;
 	int sim =0;

@@ -95,8 +95,10 @@ void copy_calls_graph(int to[MAXN][MAXN],int from[MAXN][MAXN],int n)
 /* g2 will be equal to the canonical labeling of g1
  * n : size of g1 and g2 */
 void
-find_can_label(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n, int m)
+can_label_secrets(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int token[MAXN], int prot, int n, int m)
 {
+	int i, j;
+	
 	int lab[MAXN], ptn[MAXN], orbits[MAXN];
 				
 	/* this is a function for vertex invariants. If it is set to NULL
@@ -110,6 +112,28 @@ find_can_label(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n, int m)
 	/* select option for canonical labelling */
     options.getcanon = TRUE;
     
+    if (prot== TOK || prot==SPI) {
+		/* the following means that we will deal with coloured graphs */
+		options.defaultptn = FALSE;		
+	
+		for(i=0;i<n-1;i++)
+			ptn[i]=1;
+    
+		ptn[n-1]=0;
+    
+		for(i=j=0;i<n;i++)
+			if (token[i])
+				lab[j++]=i;
+    
+		if (j<n) {
+			ptn[j]=0;
+		
+			for(i=0;i<n;i++)
+				if (!token[i])
+					lab[j++]=i;
+		}
+	}
+	
     /* create the cannonicaly labeled graph */        		
 	densenauty(from,lab,ptn,orbits,&options,&stats, m, n, to);
 }
@@ -214,13 +238,13 @@ int no_poss_calls(pstate_t * pstate, int i, int j, int prot, int n, int m)
 		case (CO):
 			if (pstate->fixed_name_calls[i][j] != 
 			    pstate->fixed_name_calls[j][i])
-			    INTERNAL_ERROR("hans\n");
+			    INTERNAL_ERROR("Assymetric calls in CO!\n");
 			if (pstate->fixed_name_calls[i][j] == 0)
 				poss_calls= 2;
 			break;
 		case (TOK):
-			break;
 		case (SPI):
+			poss_calls = pstate->token[i] + pstate->token[j];
 			break;
 		}
 	

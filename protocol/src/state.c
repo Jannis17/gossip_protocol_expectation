@@ -22,6 +22,7 @@ twin_queues ordered_hash[MAXN*MAXN])
 	int i, j, calls_to_child;
 	graph temp_secrets[MAXN*MAXM];
 	int temp_calls[MAXN][MAXN];
+	int temp_token[MAXN];
 	child_t* found_child;
 	struct queue_node_t* found_child_node;
 	struct queue_node_t* child_pos_in_par_list;
@@ -44,9 +45,15 @@ twin_queues ordered_hash[MAXN*MAXN])
 		copy_calls_graph(temp_calls,parent-> fixed_name_calls,n);
 		temp_calls[i][j]=temp_calls[j][i]=parent->total_calls+1;
 		
+		//copy the tokens
+		copy_tokens(parent->token, temp_token, n);
+		
+		temp_token[i]=1;
+		temp_token[j]=0;
+		
 		//create a new child state 		  
-		childs_state = new_pstate(temp_secrets,temp_calls,
-			parent->total_calls+1,n,m,prot);
+		childs_state = new_pstate(temp_secrets,temp_calls, temp_token,
+			parent->total_calls+1, parent->total_tokens-1, n,m,prot);
 				
 		//add the child to the parent  
 		potential_child = new_child(childs_state, calls_to_child);
@@ -90,8 +97,8 @@ twin_queues ordered_hash[MAXN*MAXN])
 		        exists_in_hash == NEW_ITEM ) 
 		  {
 			  state_for_ordered_hash= 
-			  	new_pstate(temp_secrets,temp_calls,
-			  		parent->total_calls+1,n,m,LNS);
+			  	new_pstate(temp_secrets,temp_calls, temp_token,
+			  		parent->total_calls+1, parent->total_calls-1, n,m,LNS);
 			  enqueue_to_hash
 				(ordered_hash, NULL, NULL, state_for_ordered_hash, 
 					NULL, LNS);
@@ -217,6 +224,7 @@ init_markov_chain
 	int i;
 	graph init_secrets [MAXN*MAXM];
 	int init_calls [MAXN][MAXN];
+	int init_token[MAXN];
 	pstate_t *s;
 		
 	FOR_ALL_EDGES(i, n){
@@ -232,6 +240,12 @@ init_markov_chain
 				hash[i].can_lab_queue=
 					new_queue(MAXSTATES, cmp_can_calls);
 				hash[i].fixed_name_queue=NULL;
+			case (TOK):
+			case (SPI):
+				hash[i].can_lab_queue=
+					new_queue(MAXSTATES, cmp_can_secrets);
+				hash[i].fixed_name_queue=
+					new_queue(MAXSTATES, cmp_fixed_name_secrets);	
 			break;	
 		}
 	}
@@ -239,7 +253,10 @@ init_markov_chain
 	diagonal(init_secrets, n, m);
 	init_calls_graph(init_calls, n);
 	
-	s=new_pstate(init_secrets, init_calls, 0, n, m, prot);
+	for(i=0;i<n;i++)
+		init_token[i]=1;
+	
+	s=new_pstate(init_secrets, init_calls, init_token, 0, n, n, m, prot);
 	enqueue_to_hash(hash, NULL, NULL, s, NULL, prot);
 }
 
@@ -256,7 +273,7 @@ int rand_ag, int * no_ordered_tuples)
 	float* expect_vec = NULL;
 	int* is_absorption = NULL;
 	float result = 0;
-	//this has will store only ordered tuples, regardless the protocol
+	//this hash will store only ordered tuples, regardless the protocol
 	twin_queues ordered_hash[MAXN*MAXN];
 	
 	init_markov_chain(hash, n, m, prot);

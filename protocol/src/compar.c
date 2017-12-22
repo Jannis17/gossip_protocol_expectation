@@ -62,7 +62,7 @@ int cmp_can_secrets(const void* item1, const void* item2)
 		state1->n, state1->m);
 }
 
-/* compares the canonical secrets of the args */
+/* compares the canonical calls of the args */
 int 
 cmp_can_calls
 (const void* item1, const void* item2)

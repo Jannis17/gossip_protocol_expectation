@@ -50,7 +50,8 @@ do {	\
 
 pstate_t* 
 new_pstate(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN],
-int total_calls, int n, int m, int prot);
+int token[MAXN], int total_calls, int total_tokens, int n, int m,
+int prot);
   
 void
 destroy_hash(int agents, twin_queues hash[MAXN*MAXN]);
@@ -69,5 +70,8 @@ malloc_safe_2D_float(float ***p, int n);
 
 void
 free_safe_2D_float(float ***p, int n);
+
+void
+copy_tokens(int from[MAXN], int to[MAXN], int n);
 
 #endif /* H_MEMORY_H_ */

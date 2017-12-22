@@ -6,20 +6,43 @@
 #include "compar.h"
 #include "graph.h"
 
+
+void copy_tokens(int from[MAXN], int to[MAXN], int n)
+{
+		int i;
+		
+		for(i=0; i<n; i++)
+			to[i]=from[i];
+}
+
+
 /* creates a new protocol state */
 pstate_t* 
-new_pstate
-(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN], int total_calls, 
-int n, int m, int prot)
+new_pstate(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN],
+int token[MAXN], int total_calls, int total_tokens, int n, int m,
+int prot)
 {
 	pstate_t* s;
 	
 	MALLOC_SAFE(s, sizeof(pstate_t));
 	
-	copy_graph(s->fixed_name_secrets, secrets, n, m);
-	find_can_label(secrets, s->can_secrets, n, m); 
+	graph w_token[MAXN*MAXM];
+	graph wo_token[MAXN*MAXM];
 	
-	if (prot == ANY)
+	//printf("total tokes = %d\n", total_tokens);
+	
+	int i, j;
+	
+	if (prot == TOK || prot==SPI)
+		copy_tokens(token,s->token, n);
+	else
+		for(i=0;i<n;i++)
+			token[i]=1;
+	
+	copy_graph(s->fixed_name_secrets, secrets, n, m);
+	can_label_secrets(secrets, s->can_secrets, s-> token, prot, n, m); 
+	
+	if (prot == ANY || prot == SPI || prot == TOK)
 		s->children.fixed_name_queue = 
 			new_queue(MAXN*(MAXN-1), cmp_fixed_name_children);
 	else
@@ -31,11 +54,35 @@ int n, int m, int prot)
 	else
 		s->children.can_lab_queue =
 			new_queue(MAXN*(MAXN-1), cmp_can_children_secrets);
-					
+	
 	if (prot == ANY) {
 		copy_graph(s->fixed_name_secrets_sorted, secrets, n, m);
 		qsort(s->fixed_name_secrets_sorted, 
 			n*m, sizeof(graph), cmp_graph_nodes);
+	}
+					
+	if (prot == SPI || prot == TOK) {
+		for(i=j=0;i<n;i++)
+			if (token[i])
+				w_token[j++]=secrets[i];
+    
+		qsort(w_token, 
+			total_tokens*m, sizeof(graph), cmp_graph_nodes);
+		
+		if (j<n) {
+			for(i=0;i<n;i++)
+				if (!token[i])
+					wo_token[j++]=secrets[i];
+			
+			qsort(wo_token, 
+				(n-total_tokens)*m, sizeof(graph), cmp_graph_nodes);
+		}
+			
+		for(i=0;i<total_tokens; i++)
+			s->fixed_name_secrets_sorted[i]=w_token[i];
+			
+		for(;i<n; i++)
+			s->fixed_name_secrets_sorted[i]=wo_token[i];			
 	}
 	
 	s->nl = n * ceil(log2( (n * (n-1))/2 + 1 ));
@@ -45,6 +92,7 @@ int n, int m, int prot)
 	s->m=m;
 	s->total_secrets=edges_of(secrets, n, m);
 	s->total_calls=total_calls;
+	s->total_tokens=total_tokens;
 	
 	s->is_absorption = (s->total_secrets == n*n)?1:0;
 	

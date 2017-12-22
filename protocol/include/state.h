@@ -20,6 +20,8 @@ typedef struct pstate_tag {
 	int fixed_name_calls[MAXN][MAXN];
 	graph can_calls[MAXM*MAXN];
 	int id;
+	int total_tokens;
+	int token[MAXN];
 	int nl; //number of agents/bits in the layered graph
 	int ml; //number of setwords in the layered graph
 	int n; //number of agents/bits

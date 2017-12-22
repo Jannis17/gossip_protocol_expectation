@@ -20,8 +20,8 @@ void
 copy_calls_graph(int to[MAXN][MAXN],int from[MAXN][MAXN],int n);
 
 void
-find_can_label(graph from[MAXN*MAXM], graph to[MAXN*MAXM], int n,
-int m);
+can_label_secrets(graph from[MAXN*MAXM], graph to[MAXN*MAXM], 
+int token[MAXN], int prot, int n, int m);
 	
 void
 update_secrets(graph g[MAXN*MAXM], int i, int j, int n, int m);
