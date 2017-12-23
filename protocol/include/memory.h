@@ -73,4 +73,7 @@ free_safe_2D_float(float ***p, int n);
 void
 copy_tokens(int from[MAXN], int to[MAXN], int n);
 
+int
+count_tokens(int token[MAXN], int n);
+
 #endif /* H_MEMORY_H_ */

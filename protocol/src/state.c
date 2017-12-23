@@ -231,6 +231,8 @@ init_markov_chain
 		switch (prot) {
 			case (LNS):
 			case (ANY):
+			case (TOK):
+			case (SPI):
 				hash[i].can_lab_queue=
 					new_queue(MAXSTATES, cmp_can_secrets);
 				hash[i].fixed_name_queue=
@@ -240,12 +242,6 @@ init_markov_chain
 				hash[i].can_lab_queue=
 					new_queue(MAXSTATES, cmp_can_calls);
 				hash[i].fixed_name_queue=NULL;
-			case (TOK):
-			case (SPI):
-				hash[i].can_lab_queue=
-					new_queue(MAXSTATES, cmp_can_secrets);
-				hash[i].fixed_name_queue=
-					new_queue(MAXSTATES, cmp_fixed_name_secrets);	
 			break;	
 		}
 	}
@@ -280,6 +276,7 @@ exact_expectation
 			
 	/* if we are in CO, TOK, SPI we want to count the ordered tuples too*/
 	init_markov_chain(ordered_hash, n, m, LNS);
+	
 		
 	/* build the markov chain */
 	build_the_markov_chain(hash, n, m, prot, calc_exp, no_states,

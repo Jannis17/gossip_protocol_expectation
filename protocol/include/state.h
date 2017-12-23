@@ -26,6 +26,7 @@ typedef struct pstate_tag {
 	int ml; //number of setwords in the layered graph
 	int n; //number of agents/bits
 	int m; //number of setwords
+	int prot;
 	int total_secrets;
 	int total_calls;
 	int is_absorption;

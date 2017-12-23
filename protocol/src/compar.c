@@ -2,6 +2,7 @@
 #include "state.h"
 #include "graph.h"
 #include "compar.h"
+#include "memory.h"
 
 /* compares g1 and g2 lexicographically */
 int cmp_graphs(graph g1[MAXN*MAXM], graph g2[MAXN*MAXM], int n, int m) 
@@ -85,31 +86,21 @@ int cmp_fixed_name_secrets(const void* item1, const void* item2)
 	state1 = (pstate_t *) item1;
 	state2 = (pstate_t *) item2;
 	
-	return cmp_graphs(state1->fixed_name_secrets_sorted, 
-			state2->fixed_name_secrets_sorted, state1->n,state1->m);
-}
-
-int cmp_token_states(const void* item1, const void* item2)
-{
-	pstate_t* state1, *state2;
-			
-	state1 = (pstate_t *) item1;
-	state2 = (pstate_t *) item2;
-	
 	int tokens1 = count_tokens(state1->token, state1->n);
 	
 	int tokens2 = count_tokens(state2->token, state2->n);
 	
-	if (tokens1 < tokens2)
-		return LESS;
+	if (state1->prot == SPI || state1->prot == TOK) {
+		if (tokens1 < tokens2)
+			return LESS;
 		
-	if (tokens2 < tokens1)
-		return GREATER;	
+		if (tokens2 < tokens1)
+			return GREATER;	
+	}
 	
 	return cmp_graphs(state1->fixed_name_secrets_sorted, 
 			state2->fixed_name_secrets_sorted, state1->n,state1->m);
 }
-
 
 int cmp_can_children_secrets(const void* item1, const void* item2)
 {
@@ -142,6 +133,22 @@ int cmp_fixed_name_children(const void* item1, const void* item2)
 	
 	child1 = (child_t *) item1;
 	child2 = (child_t *) item2;
+	
+	int tokens1 = count_tokens(child1->childs_state->token, 
+		child1->childs_state->n);
+	
+	int tokens2 = count_tokens(child2->childs_state->token, 
+		child2->childs_state->n);
+	
+	if (child1->childs_state->prot == SPI || 
+		child1->childs_state->prot == TOK) {
+		if (tokens1 < tokens2)
+			return LESS;
+		
+		if (tokens2 < tokens1)
+			return GREATER;	
+	}
+
 	
 	return cmp_graphs(child1->childs_state->fixed_name_secrets_sorted, 
 			child2->childs_state->fixed_name_secrets_sorted,

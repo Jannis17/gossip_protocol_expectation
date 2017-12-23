@@ -314,6 +314,8 @@ int enqueue_to_hash
 	fixed_name_prev = NULL;
 	
 	switch (prot) {
+		case TOK:
+		case SPI:
 		case ANY:
 		case LNS:
 			can_queue = hash[s->total_secrets -1].can_lab_queue;
@@ -325,7 +327,7 @@ int enqueue_to_hash
 		break;
 	}	
 		
-	if ( prot == ANY &&
+	if ( (prot == ANY || prot == SPI || prot == TOK) &&
 		 search_in_sorted_queue (fixed_name_queue, fixed_name_start, 
 			 &fixed_name_prev, found, s) )
 		return DUPLICATE_ITEM;
@@ -333,7 +335,7 @@ int enqueue_to_hash
 	result=
 		enqueue_unique_to_sorted_queue(can_queue, can_start, found, s);
 	
-	if (prot == ANY && result == NEW_ITEM)
+	if ((prot == ANY || prot == SPI || prot == TOK) && result == NEW_ITEM)
 		enqueue_unique_to_sorted_queue
 			(fixed_name_queue, fixed_name_prev, found, s);
 	

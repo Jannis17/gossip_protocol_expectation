@@ -103,6 +103,7 @@ int token[MAXN], int total_calls, int n, int m, int prot)
 	s->m=m;
 	s->total_secrets=edges_of(secrets, n, m);
 	s->total_calls=total_calls;
+	s->prot=prot;
 	
 	s->is_absorption = (s->total_secrets == n*n)?1:0;
 	
