@@ -89,6 +89,28 @@ int cmp_fixed_name_secrets(const void* item1, const void* item2)
 			state2->fixed_name_secrets_sorted, state1->n,state1->m);
 }
 
+int cmp_token_states(const void* item1, const void* item2)
+{
+	pstate_t* state1, *state2;
+			
+	state1 = (pstate_t *) item1;
+	state2 = (pstate_t *) item2;
+	
+	int tokens1 = count_tokens(state1->token, state1->n);
+	
+	int tokens2 = count_tokens(state2->token, state2->n);
+	
+	if (tokens1 < tokens2)
+		return LESS;
+		
+	if (tokens2 < tokens1)
+		return GREATER;	
+	
+	return cmp_graphs(state1->fixed_name_secrets_sorted, 
+			state2->fixed_name_secrets_sorted, state1->n,state1->m);
+}
+
+
 int cmp_can_children_secrets(const void* item1, const void* item2)
 {
 	child_t* child1, *child2;

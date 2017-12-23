@@ -53,7 +53,7 @@ twin_queues ordered_hash[MAXN*MAXN])
 		
 		//create a new child state 		  
 		childs_state = new_pstate(temp_secrets,temp_calls, temp_token,
-			parent->total_calls+1, parent->total_tokens-1, n,m,prot);
+			parent->total_calls+1, n, m, prot);
 				
 		//add the child to the parent  
 		potential_child = new_child(childs_state, calls_to_child);
@@ -98,7 +98,7 @@ twin_queues ordered_hash[MAXN*MAXN])
 		  {
 			  state_for_ordered_hash= 
 			  	new_pstate(temp_secrets,temp_calls, temp_token,
-			  		parent->total_calls+1, parent->total_calls-1, n,m,LNS);
+			  		parent->total_calls+1, n,m,LNS);
 			  enqueue_to_hash
 				(ordered_hash, NULL, NULL, state_for_ordered_hash, 
 					NULL, LNS);
@@ -256,14 +256,14 @@ init_markov_chain
 	for(i=0;i<n;i++)
 		init_token[i]=1;
 	
-	s=new_pstate(init_secrets, init_calls, init_token, 0, n, n, m, prot);
+	s=new_pstate(init_secrets, init_calls, init_token, 0, n, m, prot);
 	enqueue_to_hash(hash, NULL, NULL, s, NULL, prot);
 }
 
 float 
 exact_expectation
-(int n, int m, int* no_states, int prot, int calc_exp,
-int rand_ag, int * no_ordered_tuples)
+(int n, int m, int* no_states, int prot, int calc_exp, int rand_ag,
+ int * no_ordered_tuples)
 {		
 	twin_queues hash[MAXN*MAXN];
 	pstate_t *s;
@@ -272,13 +272,13 @@ int rand_ag, int * no_ordered_tuples)
 	struct queue_node_t * p;
 	float* expect_vec = NULL;
 	int* is_absorption = NULL;
-	float result = 0;
+	float result = 0;	
 	//this hash will store only ordered tuples, regardless the protocol
 	twin_queues ordered_hash[MAXN*MAXN];
 	
 	init_markov_chain(hash, n, m, prot);
 			
-	/* if we are in CO, TOK, SPI we want to count the ordered tuples */
+	/* if we are in CO, TOK, SPI we want to count the ordered tuples too*/
 	init_markov_chain(ordered_hash, n, m, LNS);
 		
 	/* build the markov chain */

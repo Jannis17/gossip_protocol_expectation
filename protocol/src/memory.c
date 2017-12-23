@@ -6,7 +6,7 @@
 #include "compar.h"
 #include "graph.h"
 
-
+//copy_token
 void copy_tokens(int from[MAXN], int to[MAXN], int n)
 {
 		int i;
@@ -15,12 +15,20 @@ void copy_tokens(int from[MAXN], int to[MAXN], int n)
 			to[i]=from[i];
 }
 
+int count_tokens(int token[MAXN], int n)
+{
+		int i, result;
+		
+		for (i=result=0;i<n;i++)
+			result+=token[i];
+		
+		return result;	
+}
 
 /* creates a new protocol state */
 pstate_t* 
 new_pstate(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN],
-int token[MAXN], int total_calls, int total_tokens, int n, int m,
-int prot)
+int token[MAXN], int total_calls, int n, int m, int prot)
 {
 	pstate_t* s;
 	
@@ -28,6 +36,8 @@ int prot)
 	
 	graph w_token[MAXN*MAXM];
 	graph wo_token[MAXN*MAXM];
+	
+	int total_tokens;
 	
 	//printf("total tokes = %d\n", total_tokens);
 	
@@ -65,9 +75,10 @@ int prot)
 		for(i=j=0;i<n;i++)
 			if (token[i])
 				w_token[j++]=secrets[i];
+		
+		total_tokens=j;		
     
-		qsort(w_token, 
-			total_tokens*m, sizeof(graph), cmp_graph_nodes);
+		qsort(w_token, total_tokens*m, sizeof(graph), cmp_graph_nodes);
 		
 		if (j<n) {
 			for(i=0;i<n;i++)
@@ -92,7 +103,6 @@ int prot)
 	s->m=m;
 	s->total_secrets=edges_of(secrets, n, m);
 	s->total_calls=total_calls;
-	s->total_tokens=total_tokens;
 	
 	s->is_absorption = (s->total_secrets == n*n)?1:0;
 	
