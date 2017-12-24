@@ -91,9 +91,9 @@ twin_queues ordered_hash[MAXN*MAXN])
 		  enqueue_unique_to_twin_queues
 		   ( parent->children, NULL, NULL, potential_child, prot );
 		  
-		  /* if we are in CO, TOK or SPI we want to count
+		  /* if we are in CO, TOK or SPI we want to count (TODO: remove ANY)
 		   * the ordered tuples too */		  
-		  if ( (prot == CO || prot == TOK || prot == SPI)  &&
+		  if ( (prot ==ANY || prot == CO || prot == TOK || prot == SPI)  &&
 		        exists_in_hash == NEW_ITEM ) 
 		  {
 			  state_for_ordered_hash= 
@@ -321,14 +321,17 @@ exact_expectation
 		result = expect_vec[0];
 	}
 	
-	//if we are in CO, TOK or SPI we count the ordered tuples
-	if (prot == CO || prot == TOK || prot == SPI)
+	//if we are in CO, TOK or SPI we count the ordered tuples (TODO: REMOVE ANY)
+	if (prot ==ANY || prot == CO || prot == TOK || prot == SPI)
 		*no_ordered_tuples = count_ordered_tuples(ordered_hash, n);
 			
 	FREE_SAFE(is_absorption);
 	FREE_SAFE(expect_vec);
 	FREE_SAFE(trans_matrix);
-	destroy_hash(n, hash); 
+	destroy_hash(n, hash);
+	
+	printf("Oredered hash starts\n");
+		 
 	destroy_hash(n, ordered_hash);
 				
 	return result;	
