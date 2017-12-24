@@ -149,7 +149,7 @@
 					s = (pstate_t *) (p->data);
 					
 					//print fixed names graph
-					print_graph(s->fixed_name_secrets,s->n, s->m);
+					print_graph(s->can_secrets,s->n, s->m);
 					
 					printf("=======================\n");
 					

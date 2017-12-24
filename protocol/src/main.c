@@ -76,7 +76,8 @@ void print_results
 			fprintf(fp,"%d, ", no_states[i]);		
 	}	
 	
-	if (!sim && (prot == CO || prot == SPI || prot == TOK) ){
+	//remove ANY
+	if (!sim && (prot ==ANY || prot == CO || prot == SPI || prot == TOK) ){
 		fprintf(fp,"\nordered tuples, ");
 		
 		for (i=1; i<=n; i++)	

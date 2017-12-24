@@ -48,8 +48,8 @@ twin_queues ordered_hash[MAXN*MAXN])
 		//copy the tokens
 		copy_tokens(parent->token, temp_token, n);
 		
-		temp_token[i]=1;
-		temp_token[j]=0;
+		temp_token[i]=0;
+		temp_token[j]=1;
 		
 		//create a new child state 		  
 		childs_state = new_pstate(temp_secrets,temp_calls, temp_token,
@@ -322,7 +322,7 @@ exact_expectation
 	}
 	
 	//if we are in CO, TOK or SPI we count the ordered tuples (TODO: REMOVE ANY)
-	if (prot ==ANY || prot == CO || prot == TOK || prot == SPI)
+	if (prot == ANY || prot == CO || prot == TOK || prot == SPI)
 		*no_ordered_tuples = count_ordered_tuples(ordered_hash, n);
 			
 	FREE_SAFE(is_absorption);
