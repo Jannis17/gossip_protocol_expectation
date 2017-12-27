@@ -35,7 +35,7 @@ generate_children
 	pstate_t* state_for_ordered_hash;
 						
 	for (i=0; i<n; i++)
-	 for (j=0; j<n; j++)
+	 for (j= (prot == SPI || prot == TOK)? 0: i+1; j<n; j++)
 	  if ( (i!=j) && 
 		(calls_to_child = no_poss_calls(parent,i,j,prot,n,m)) > 0 )
 	  {
@@ -241,6 +241,10 @@ init_markov_chain
 	FOR_ALL_EDGES(i, n){
 		switch (prot) {
 			case (LNS):
+				hash[i].can_lab_queue=
+					new_queue(MAXSTATES, cmp_can_secrets);
+				hash[i].fixed_name_queue=NULL;
+			break;
 			case (ANY):
 			case (TOK):
 			case (SPI):
