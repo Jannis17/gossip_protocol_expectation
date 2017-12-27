@@ -149,9 +149,9 @@
 					s = (pstate_t *) (p->data);
 					
 					//print fixed names graph
-					print_graph(s->can_secrets,s->n, s->m);
+					//print_graph(s->can_secrets,s->n, s->m);
 					
-					printf("=======================\n");
+					//printf("=======================\n");
 					
 					destroy_protocol_state(&s);			
 				}

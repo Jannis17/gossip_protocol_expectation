@@ -117,10 +117,10 @@ int *no_states, twin_queues ordered_hash[MAXN*MAXN])
 	struct queue_node_t * p;
 	*no_states = 0;
 	
-	printf("%d agents:\n", n);
+	//printf("%d agents:\n", n);
 		
 	FOR_ALL_EDGES(i, n) {
-		printf("\nEdges: %d, ", i);		
+		//printf("\nEdges: %d, ", i);		
 		QUEUE_FOREACH(p, hash[i].can_lab_queue)
 			generate_children
 				(p->data, n, m, hash, prot, ordered_hash);
@@ -138,11 +138,11 @@ int *no_states, twin_queues ordered_hash[MAXN*MAXN])
 		
 		/* count the states */	
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
-		printf("states: %lu", QUEUE_COUNT(hash[i].can_lab_queue));
+		//printf("states: %lu", QUEUE_COUNT(hash[i].can_lab_queue));
 		if (!calc_exp)
 			destroy_twin_queues(&hash[i]);		
 	}
-	printf("\n");
+	//printf("\n");
 }
 
 int
@@ -330,7 +330,7 @@ exact_expectation
 	FREE_SAFE(trans_matrix);
 	destroy_hash(n, hash);
 	
-	printf("Oredered hash starts\n");
+	//printf("Oredered hash starts\n");
 		 
 	destroy_hash(n, ordered_hash);
 				
