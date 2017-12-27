@@ -11,7 +11,7 @@
 
 void print_results
 (int n, int no_states[MAXN], float expectation[MAXN_SIM], 
- float elps_time[MAXN], int prot, int calc_exp, int sim, int rand_ag,
+ float elps_time[MAXN_SIM], int prot, int calc_exp, int sim, int rand_ag,
  int no_ordered_tuples[MAXN]) 
 {
 	time_t timeNow = time(NULL);
@@ -102,7 +102,7 @@ void print_usage_and_exit(int argc, char * argv[])
 	printf("-s: if it is present, the expected duration is computed using max_sim simulations. If it is absent, the program caluclates exact values\n");
 	printf("-ra: if it is present, we have randomization over agents. If it is absent, we have randomization over calls\n");
 	printf("If the option -s is used then n has to be in the range 1..%d. If -s is absent, n has to be in the range 1..%d", MAXN_SIM, MAXN);	
-	printf("\nThe results will be generated in a file with timestamp in the folder gossip_protocol_expectation/results.\n");
+	printf("\nThe results will be generated in a file marked with timestamp in the folder gossip_protocol_expectation/results.\n");
 			
 	exit(1);
 }
@@ -145,13 +145,14 @@ int main (int argc, char * argv[]){
 			print_usage_and_exit(argc, argv);
 	}
 
-	if ( max_n<=0 || (sim && max_n > MAXN_SIM) || (!sim && max_n > MAXN) ) 
+	if ( max_n<=0 || (sim && max_n > MAXN_SIM) 
+		 || (!sim && max_n > MAXN) ) 
 		print_usage_and_exit(argc, argv);			
 			
 	/* expectation[i] = expected execution length for i agents */
 	float expectation[MAXN_SIM];
 
-	/* totalStates[i] = number of different states for i agents */
+	/* no_tates[i] = number of different states for i agents */
 	int no_states[MAXN];
 	
 	/* no_ordered_tuples[i] = number of non-iso ordered tuples for
@@ -160,7 +161,9 @@ int main (int argc, char * argv[]){
 		
 	clock_t start, end;
 	int n, m;
-	float elps_time[MAXN];
+	float elps_time[MAXN_SIM];
+	
+	pars_t pars;
 		
 	srand(time(NULL));
 		
@@ -172,12 +175,17 @@ int main (int argc, char * argv[]){
 		  * nauty routines. */
 		 nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
 		 
-		 start = clock();		
-		 
+		 pars.n = n;
+		 pars.m = m;
+		 pars.prot=prot;
+		 pars.calc_exp=calc_exp;
+	     pars.rand_ag=rand_ag;
+		 pars.max_sim=max_sim;
+		  
+		 start = clock();
 		 /* compute the simulated or exact expectation */
-		 expectation[n] = (sim)?simulated(n, prot, rand_ag, max_sim):
-	     exact_expectation(n, m, &no_states[n], prot, calc_exp, rand_ag,
-	     &no_ordered_tuples[n]);								
+		 expectation[n] = (sim)?simulated(pars):
+	     exact_expectation(&no_states[n], &no_ordered_tuples[n], pars);								
 		 
 		 end = clock();
 		 elps_time[n] = ((float) end - start)/CLOCKS_PER_SEC;
@@ -191,7 +199,7 @@ int main (int argc, char * argv[]){
 	no_ordered_tuples[1]=1;
 	no_ordered_tuples[2]=2;
 			
-	print_results(max_n, no_states, expectation, elps_time, prot, 
+	print_results(max_n, no_states, expectation, elps_time, prot,
 		calc_exp, sim, rand_ag, no_ordered_tuples);
 	
 	//~ m = SETWORDSNEEDED(max_n);

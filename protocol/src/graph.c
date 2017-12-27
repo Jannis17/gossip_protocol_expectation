@@ -244,12 +244,10 @@ int no_poss_calls(pstate_t * pstate, int i, int j, int prot, int n, int m)
 			break;
 		case (TOK):
 		case (SPI):
-			poss_calls = pstate->token[i] + pstate->token[j];
+			//for SPI, TOK we have one directional calls!!!!!!!
+			poss_calls = pstate->token[i];
 			break;
 		}
 	
 	return poss_calls;	
 }
-
-
-

@@ -15,14 +15,6 @@ void print_g(int g[MAXN_SIM][MAXN_SIM], int n) {
 	
 }
 
-void init_tokens(int tokens[MAXN_SIM], int n)
-{
-	int i;
-	
-	for(i=0;i<n;i++)
-		tokens[i]=1;
-}
-
 void init_sec(int secrets[MAXN_SIM][MAXN_SIM], int n)
 {
 	int i,j;
@@ -53,7 +45,7 @@ int edges(int g[MAXN_SIM][MAXN_SIM], int n)
 }
 
 void execute_call(int caller, int callee, int secrets[MAXN_SIM][MAXN_SIM],
-	int avail_calls[MAXN_SIM][MAXN_SIM], int tokens[MAXN_SIM], int n, int prot) 
+	int avail_calls[MAXN_SIM][MAXN_SIM], int n, int prot) 
 {		
 	int k;
 		
@@ -76,22 +68,18 @@ void execute_call(int caller, int callee, int secrets[MAXN_SIM][MAXN_SIM],
 		case (ANY) :
 			break;
 		case (TOK) :
-			tokens[caller] = 0;
-			tokens[callee] = 1;
 			for(k=0;k<n;k++) {
 				avail_calls[caller][k] = 0;
 				avail_calls[callee][k] = 1;
 			}
-			
+			avail_calls[callee][callee] = 0;
 			break;
 		case (SPI) :
-			tokens[caller] = 1;
-			tokens[callee] = 0;
 			for(k=0;k<n;k++) {
 				avail_calls[callee][k]=0;
 				avail_calls[caller][k]=1;
 			}
-			
+			avail_calls[caller][caller] = 0;
 			break;		
 	}		
 }
@@ -151,9 +139,10 @@ int get_callee(int avail_calls[MAXN_SIM][MAXN_SIM], int caller,
 	return j;
 }
 
-void get_call_parts(int avail_calls[MAXN_SIM][MAXN_SIM], int r_call, 
-	int *caller, int *callee, int n){
-	
+void get_call_parts
+(int avail_calls[MAXN_SIM][MAXN_SIM], int r_call, int *caller,
+ int *callee, int n)
+{
 	int i,j;
 	
 	*caller=*callee=0;
@@ -170,39 +159,40 @@ void get_call_parts(int avail_calls[MAXN_SIM][MAXN_SIM], int r_call,
 }
 
 
-float simulated(int n, int prot, int rand_ag, int max_sim) {
+float simulated(pars_t pars) {
 	int s, r_caller, r_callee, duration=0;		
 	int secrets[MAXN_SIM][MAXN_SIM];
 	int avail_calls[MAXN_SIM][MAXN_SIM];
-	int tokens[MAXN_SIM];
 							
-	for(s=0; s<max_sim;s++) {
-		init_sec(secrets, n);
-		init_avail_calls(avail_calls,n);
-		init_tokens(tokens, n);
+	for(s=0; s<pars.max_sim;s++)  {
+		init_sec(secrets, pars.n);
+		init_avail_calls(avail_calls, pars.n);
 		
 		while (1) {
-			if (rand_ag) {
+			if (pars.rand_ag) {
 				r_caller = get_caller(avail_calls, 
-					rand() % count_callers(avail_calls,n)+1, n);
+					rand() % count_callers(avail_calls,pars.n)+1,
+						pars.n);
 				r_callee = get_callee(avail_calls, r_caller,
-					rand() % count_callees(avail_calls,r_caller,n)+1, n);
+					rand() % count_callees(avail_calls,r_caller,
+						pars.n)+1, pars.n);
 			} else
 				get_call_parts(avail_calls, 
-					rand() % edges(avail_calls,n) + 1, &r_caller, 
-					&r_callee, n);
+					rand() % edges(avail_calls,pars.n) + 1, &r_caller, 
+					&r_callee, pars.n);
 					
 			//~ printf("caller=%d\n", r_caller);
 			//~ printf("callee=%d\n", r_callee);
 					
-			execute_call(r_caller, r_callee, secrets, avail_calls, tokens, n, prot);
+			execute_call(r_caller, r_callee, secrets, avail_calls,
+				pars.n, pars.prot);
 			duration++;
 			
-			if (edges(secrets,n) == n * n)
+			if (edges(secrets,pars.n) == pars.n * pars.n)
 				break;
 		}
 	}
 		
-	printf("Agents %d done!\n", n);
-	return ((float) duration)/max_sim;
+	printf("Agents %d done!\n", pars.n);
+	return ((float) duration)/pars.max_sim;
 }

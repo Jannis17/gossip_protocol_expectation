@@ -4,6 +4,6 @@
 #define MAXN_SIM 200
 
 float
-simulated (int n, int prot, int rand_ag, int max_sim);
+simulated (pars_t pars);
 
 #endif /* H_SIMULATIONS_H_ */

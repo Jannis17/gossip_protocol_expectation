@@ -10,11 +10,12 @@
 #include "compar.h"
 #include "test.h"
 #include "../../nauty26r7/nauty.h"
+				
 
 void 
 generate_children
-(pstate_t *parent, int n, int m, twin_queues hash[MAXN*MAXN], int prot,
-twin_queues ordered_hash[MAXN*MAXN]) 
+(pstate_t *parent, int n, int m, twin_queues hash[MAXN*MAXN], 
+ int prot, twin_queues ordered_hash[MAXN*MAXN]) 
 {
 	if (parent->is_absorption)
 		return;
@@ -34,8 +35,9 @@ twin_queues ordered_hash[MAXN*MAXN])
 	pstate_t* state_for_ordered_hash;
 						
 	for (i=0; i<n; i++)
-	 for (j=i+1; j<n; j++)
-	  if ( (calls_to_child = no_poss_calls(parent,i,j,prot,n,m)) > 0 )
+	 for (j=0; j<n; j++)
+	  if ( (i!=j) && 
+		(calls_to_child = no_poss_calls(parent,i,j,prot,n,m)) > 0 )
 	  {
 		//create the new secrets graph  
 		copy_graph(temp_secrets, parent->fixed_name_secrets, n, m);
@@ -48,9 +50,16 @@ twin_queues ordered_hash[MAXN*MAXN])
 		//copy the tokens
 		copy_tokens(parent->token, temp_token, n);
 		
-		temp_token[i]=0;
-		temp_token[j]=1;
+		if (prot==TOK) {
+			temp_token[i]=0;
+			temp_token[j]=1;
+		}
 		
+		if (prot==SPI) {
+			temp_token[i]=1;
+			temp_token[j]=0;
+		}
+
 		//create a new child state 		  
 		childs_state = new_pstate(temp_secrets,temp_calls, temp_token,
 			parent->total_calls+1, n, m, prot);
@@ -91,13 +100,14 @@ twin_queues ordered_hash[MAXN*MAXN])
 		  enqueue_unique_to_twin_queues
 		   ( parent->children, NULL, NULL, potential_child, prot );
 		  
-		  /* if we are in CO, TOK or SPI we want to count (TODO: remove ANY)
+		  /* if we are in CO, TOK or SPI we want to count 
+		   * (TODO: remove ANY)
 		   * the ordered tuples too */		  
 		  if ( (prot ==ANY || prot == CO || prot == TOK || prot == SPI)  &&
 		        exists_in_hash == NEW_ITEM ) 
 		  {
 			  state_for_ordered_hash= 
-			  	new_pstate(temp_secrets,temp_calls, temp_token,
+			  	new_pstate(temp_secrets,temp_calls,temp_token,
 			  		parent->total_calls+1, n,m,LNS);
 			  enqueue_to_hash
 				(ordered_hash, NULL, NULL, state_for_ordered_hash, 
@@ -110,8 +120,8 @@ twin_queues ordered_hash[MAXN*MAXN])
 
 void 
 build_the_markov_chain
-(twin_queues hash[MAXN*MAXN], int n, int m, int prot, int calc_exp,
-int *no_states, twin_queues ordered_hash[MAXN*MAXN])
+(twin_queues hash[MAXN*MAXN], int* no_states, pars_t pars, 
+ twin_queues ordered_hash[MAXN*MAXN])
 {
 	int i;
 	struct queue_node_t * p;
@@ -119,11 +129,11 @@ int *no_states, twin_queues ordered_hash[MAXN*MAXN])
 	
 	//printf("%d agents:\n", n);
 		
-	FOR_ALL_EDGES(i, n) {
+	FOR_ALL_EDGES(i, pars.n) {
 		//printf("\nEdges: %d, ", i);		
 		QUEUE_FOREACH(p, hash[i].can_lab_queue)
 			generate_children
-				(p->data, n, m, hash, prot, ordered_hash);
+				(p->data, pars.n, pars.m, hash, pars.prot, ordered_hash);
 
 		//~ if ( prot == ANY &&
 			 //~ QUEUE_COUNT(hash[i].can_lab_queue) != 
@@ -139,7 +149,7 @@ int *no_states, twin_queues ordered_hash[MAXN*MAXN])
 		/* count the states */	
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
 		//printf("states: %lu", QUEUE_COUNT(hash[i].can_lab_queue));
-		if (!calc_exp)
+		if (!pars.calc_exp)
 			destroy_twin_queues(&hash[i]);		
 	}
 	//printf("\n");
@@ -206,8 +216,9 @@ get_prob
 							((s->n) * (s->n -1 ) - 2 * s-> total_calls);
 						break;
 					case (TOK):
-						break;
 					case (SPI):
+						prob /= 
+							(count_tokens(s ->token, s->n) * (s->n -1));
 						break;
 				}
 			}									 
@@ -258,8 +269,7 @@ init_markov_chain
 
 float 
 exact_expectation
-(int n, int m, int* no_states, int prot, int calc_exp, int rand_ag,
- int * no_ordered_tuples)
+(int* no_states, int * no_ordered_tuples, pars_t pars)
 {		
 	twin_queues hash[MAXN*MAXN];
 	pstate_t *s;
@@ -272,17 +282,15 @@ exact_expectation
 	//this hash will store only ordered tuples, regardless the protocol
 	twin_queues ordered_hash[MAXN*MAXN];
 	
-	init_markov_chain(hash, n, m, prot);
+	init_markov_chain(hash, pars.n, pars.m, pars.prot);
 			
 	/* if we are in CO, TOK, SPI we want to count the ordered tuples too*/
-	init_markov_chain(ordered_hash, n, m, LNS);
-	
+	init_markov_chain(ordered_hash, pars.n, pars.m, LNS);
 		
 	/* build the markov chain */
-	build_the_markov_chain(hash, n, m, prot, calc_exp, no_states,
-		ordered_hash);
+	build_the_markov_chain(hash, no_states, pars, ordered_hash);
 		
-	if (calc_exp)
+	if (pars.calc_exp)
 	{		
 		MALLOC_SAFE(trans_matrix,(*no_states)*sizeof(pstate_t *) );
 		 	
@@ -291,7 +299,7 @@ exact_expectation
 		
 		MALLOC_SAFE(is_absorption, *no_states * sizeof(int));
 		
-		FOR_ALL_EDGES(i, n)
+		FOR_ALL_EDGES(i, pars.n)
 			QUEUE_FOREACH(p, hash[i].can_lab_queue) {
 				s = (pstate_t *) (p->data);
 				trans_matrix[label] = s;
@@ -310,29 +318,38 @@ exact_expectation
                                         
 				for(j=i+1; j<(* no_states); j++)
 					expect_vec[i] += 
-						get_prob(trans_matrix, i, j, prot, rand_ag) * 
+						get_prob(trans_matrix, i, j, pars.prot, 
+							pars.rand_ag) * 
 							expect_vec[j];
 		
-				if (prot == ANY)			       
+				if (pars.prot == ANY || pars.prot == SPI || pars.prot == TOK)			       
 					expect_vec[i] /= 
-						(1-get_prob(trans_matrix, i, i, prot, rand_ag));
+						(1-get_prob(trans_matrix, i, i, pars.prot, pars.rand_ag));
 			}
 		
 		result = expect_vec[0];
 	}
 	
 	//if we are in CO, TOK or SPI we count the ordered tuples (TODO: REMOVE ANY)
-	if (prot == ANY || prot == CO || prot == TOK || prot == SPI)
-		*no_ordered_tuples = count_ordered_tuples(ordered_hash, n);
+	switch (pars.prot) {
+		case ANY:
+		case CO:
+		case TOK: 
+		case SPI:
+			*no_ordered_tuples = count_ordered_tuples(ordered_hash, pars.n);
+			break;
+		default:
+			break;
+	}
 			
 	FREE_SAFE(is_absorption);
 	FREE_SAFE(expect_vec);
 	FREE_SAFE(trans_matrix);
-	destroy_hash(n, hash);
+	destroy_hash(pars.n, hash);
 	
-	//printf("Oredered hash starts\n");
+	//~ printf("Oredered hash starts\n");
 		 
-	destroy_hash(n, ordered_hash);
+	destroy_hash(pars.n, ordered_hash);
 				
 	return result;	
 }

@@ -18,9 +18,9 @@ typedef struct pstate_tag {
 	graph fixed_name_secrets[MAXN*MAXM];
 	graph fixed_name_secrets_sorted[MAXN*MAXM];
 	int fixed_name_calls[MAXN][MAXN];
-	graph can_calls[MAXM*MAXN];
+	graph can_calls[MAXN*MAXM];
 	int id;
-	int total_tokens;
+	//~ int total_tokens;
 	int token[MAXN];
 	int nl; //number of agents/bits in the layered graph
 	int ml; //number of setwords in the layered graph
@@ -41,8 +41,7 @@ typedef struct child_tag {
 
 float 
 exact_expectation
-(int agents, int m, int* no_states, int prot, int calc_exp,
- int rand_ag, int * no_ordered_tuples);
+(int* no_states, int * no_ordered_tuples, pars_t pars);
 
 float 
 get_prob
