@@ -10,6 +10,7 @@ Our implementation provides algorithms for:
 
 a) computing the exact value of the expected duration of the protocols for at most 10
 agents
+
 b) computing the approximated value of the expectation for at most 200 agents
 
 The exact value of the expected duration is computed by constructing the
