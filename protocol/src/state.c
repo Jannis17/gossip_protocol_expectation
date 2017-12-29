@@ -127,10 +127,10 @@ build_the_markov_chain
 	struct queue_node_t * p;
 	*no_states = 0;
 	
-	//printf("%d agents:\n", n);
+	printf("%d agents:\n", pars.n);
 		
 	FOR_ALL_EDGES(i, pars.n) {
-		//printf("\nEdges: %d, ", i);		
+		printf("\nEdges: %d, ", i);		
 		QUEUE_FOREACH(p, hash[i].can_lab_queue)
 			generate_children
 				(p->data, pars.n, pars.m, hash, pars.prot, ordered_hash);
@@ -148,11 +148,11 @@ build_the_markov_chain
 		
 		/* count the states */	
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
-		//printf("states: %lu", QUEUE_COUNT(hash[i].can_lab_queue));
+		printf("states: %lu", QUEUE_COUNT(hash[i].can_lab_queue));
 		if (!pars.calc_exp)
 			destroy_twin_queues(&hash[i]);		
 	}
-	//printf("\n");
+	printf("\n");
 }
 
 int
