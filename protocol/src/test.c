@@ -6,6 +6,12 @@
 #include "memory.h"
 #include "compar.h"
 
+typedef struct call_pair_tag {
+	int a;
+	int b;
+} call_pair_t;
+
+
 void print_trans_matrix(float**tm, int n)
 {
 	int i,j;
@@ -192,4 +198,116 @@ void print_probs_to_absorption
 	free_safe_2D_float(&tm1, no_states);
 	free_safe_2D_float(&tm2, no_states);
 	free_safe_2D_float(&tm3, no_states);
+}
+
+void copy_1D_array(int *to, int *from, int n)
+{
+	int i;
+	
+	for(i=0;i<n;i++)
+		to[i]=from[i];
+}
+
+void iter_calls
+(graph secrets [MAXN*MAXM], int token[MAXN],call_pair_t call_seq[11],
+ int n, int m)
+{
+	int i;
+	graph secrets_tmp[MAXN*MAXM]; 
+	int token_tmp[MAXN];
+	
+	/* 
+	 * 0: 02349
+	 * 1: 156
+	 * 2: 0234
+	 * 3: 02349
+	 * 4: 1345
+	 * 5: 1345
+	 * 6: 15678
+	 * 7: 15678
+	 * 8: 02789
+	 * 9: 02789 */
+	
+	
+	for(i=3;i<11;i++) {
+		if(token[call_seq[i].a]) {
+			copy_graph(secrets_tmp,secrets, n, m);
+			update_secrets
+				(secrets_tmp,call_seq[i].a,call_seq[i].b,n,m);
+			copy_1D_array(token_tmp, token,n);
+			token[call_seq[i].b]=0;
+		}
+		iter_calls
+			(secrets_tmp, token_tmp, call_seq, n, m);
+	}
+}
+
+void counterexample(int n) 
+{
+	call_pair_t call_seq[11];
+	
+	/* store the call sequence 15.20.43.23.45.09.61.87.67.89.03 
+	 * */
+	call_seq[0].a = 1;
+	call_seq[0].b = 5;
+	
+	call_seq[1].a = 2;
+	call_seq[1].b = 0;
+	
+	call_seq[2].a = 4;
+	call_seq[2].b = 3;
+	
+	call_seq[3].a = 2;
+	call_seq[3].b = 3;
+	
+	call_seq[4].a = 4;
+	call_seq[4].b = 5;
+	
+	call_seq[5].a = 0;
+	call_seq[5].b = 9;
+	
+	call_seq[6].a = 6;
+	call_seq[6].b = 1;
+
+	call_seq[7].a = 8;
+	call_seq[7].b = 7;
+	
+	call_seq[8].a = 6;
+	call_seq[8].b = 7;
+
+	call_seq[9].a = 8;
+	call_seq[9].b = 9;
+	
+	call_seq[9].a = 0;
+	call_seq[9].b = 3;
+		
+	/* calculate the number of words needed to hold n bits */
+	int m = SETWORDSNEEDED(n);
+		 			
+	/* verify that we are linking to compatible versions of the
+	 * nauty routines. */
+	nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
+
+	int token[MAXN];
+	graph secrets [MAXN*MAXM];
+	diagonal(secrets, n, m);
+	
+	int i;
+	
+	for(i=0;i<11;i++)
+		token[i]=1;
+	
+	//make the first 3 calls
+	update_secrets(secrets,1,5,n,m);
+	update_secrets(secrets,2,0,n,m);
+	update_secrets(secrets,4,3,n,m);
+	token[5]=token[0]=token[3]=0;
+	
+	graph ANY_secrets [MAXN*MAXM];
+	diagonal(ANY_secrets, n, m);
+	update_secrets(ANY_secrets,1,5,n,m);
+	update_secrets(ANY_secrets,2,0,n,m);
+	update_secrets(ANY_secrets,4,3,n,m);
+	
+	iter_calls(secrets, token, call_seq, n, m);
 }
