@@ -11,8 +11,7 @@
 #include "test.h"
 #include "../../nauty26r7/nauty.h"
 				
-
-void 
+void
 generate_children
 (pstate_t *parent, int n, int m, twin_queues hash[MAXN*MAXN], 
  int prot, twin_queues ordered_hash[MAXN*MAXN]) 

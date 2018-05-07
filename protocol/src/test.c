@@ -209,12 +209,15 @@ void copy_1D_array(int *to, int *from, int n)
 }
 
 void iter_calls
-(graph secrets [MAXN*MAXM], int token[MAXN],call_pair_t call_seq[11],
+(graph ANY_secrets [MAXN*MAXM],
+ graph secrets [MAXN*MAXM], int token[MAXN], int avail_call[MAXN],
+ call_pair_t call_seq[11],
  int n, int m)
 {
 	int i;
 	graph secrets_tmp[MAXN*MAXM]; 
 	int token_tmp[MAXN];
+	int avail_call_tmp[MAXN];
 	
 	/* 
 	 * 0: 02349
@@ -228,26 +231,35 @@ void iter_calls
 	 * 8: 02789
 	 * 9: 02789 */
 	
+	size_t k;
 	
-	for(i=3;i<11;i++) {
-		if(token[call_seq[i].a]) {
+	for (k = 0; k < m*(size_t)n && (secrets[k] == ANY_secrets[k]); k++);
+	
+	if (k == m*(size_t)n) {
+		printf("ANY reachable!\n");
+		return;
+	}	
+		
+	for(i=3;i<11;i++)
+		if(avail_call[i] && token[call_seq[i].a]) {
 			copy_graph(secrets_tmp,secrets, n, m);
-			update_secrets
-				(secrets_tmp,call_seq[i].a,call_seq[i].b,n,m);
-			copy_1D_array(token_tmp, token,n);
-			token[call_seq[i].b]=0;
+			update_secrets(secrets_tmp,call_seq[i].a,call_seq[i].b,n,m);
+			copy_1D_array(token_tmp,token,n);
+			token_tmp[call_seq[i].b]=0;
+			copy_1D_array(avail_call_tmp, avail_call, n);
+			avail_call_tmp[i]= 0;
+			iter_calls
+				(ANY_secrets, secrets_tmp, token_tmp, avail_call_tmp,
+				call_seq, n, m);
 		}
-		iter_calls
-			(secrets_tmp, token_tmp, call_seq, n, m);
-	}
 }
 
 void counterexample(int n) 
 {
 	call_pair_t call_seq[11];
 	
-	/* store the call sequence 15.20.43.23.45.09.61.87.67.89.03 
-	 * */
+	/* store the call sequence 15.20.43.23.45.09.61.87.67.89.03 */
+	
 	call_seq[0].a = 1;
 	call_seq[0].b = 5;
 	
@@ -278,8 +290,8 @@ void counterexample(int n)
 	call_seq[9].a = 8;
 	call_seq[9].b = 9;
 	
-	call_seq[9].a = 0;
-	call_seq[9].b = 3;
+	call_seq[10].a = 0;
+	call_seq[10].b = 3;
 		
 	/* calculate the number of words needed to hold n bits */
 	int m = SETWORDSNEEDED(n);
@@ -294,20 +306,26 @@ void counterexample(int n)
 	
 	int i;
 	
-	for(i=0;i<11;i++)
+	for(i=0;i<n;i++)
 		token[i]=1;
+		
+	int avail_call[11];	
 	
+	for(i=0;i<11;i++)
+		avail_call[i]=1;
+		
 	//make the first 3 calls
 	update_secrets(secrets,1,5,n,m);
 	update_secrets(secrets,2,0,n,m);
 	update_secrets(secrets,4,3,n,m);
 	token[5]=token[0]=token[3]=0;
+	avail_call[0]=avail_call[1]=avail_call[2]=0;
 	
+	//create the ANY reachable state
 	graph ANY_secrets [MAXN*MAXM];
 	diagonal(ANY_secrets, n, m);
-	update_secrets(ANY_secrets,1,5,n,m);
-	update_secrets(ANY_secrets,2,0,n,m);
-	update_secrets(ANY_secrets,4,3,n,m);
-	
-	iter_calls(secrets, token, call_seq, n, m);
+	for(i=0; i<11;i++)
+		update_secrets(ANY_secrets, call_seq[i].a, call_seq[i].b,n,m);
+		
+	iter_calls(ANY_secrets, secrets, token, avail_call, call_seq, n, m);
 }

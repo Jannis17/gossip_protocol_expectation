@@ -25,4 +25,6 @@ print_probs_to_absorption
 (int no_states, pstate_t** trans_matrix, int agents, int prot,
  int rand_ag, int max_calls, twin_queues hash[MAXN*MAXN]);
 
+void counterexample(int n);
+
 #endif /* H_TEST_H_ */

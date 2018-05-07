@@ -149,61 +149,66 @@ int main (int argc, char * argv[]){
 		 || (!sim && max_n > MAXN) ) 
 		print_usage_and_exit(argc, argv);			
 			
-	/* expectation[i] = expected execution length for i agents */
-	float expectation[MAXN_SIM];
+	//~ /* expectation[i] = expected execution length for i agents */
+	//~ float expectation[MAXN_SIM];
 
-	/* no_tates[i] = number of different states for i agents */
-	int no_states[MAXN];
+	//~ /* no_tates[i] = number of different states for i agents */
+	//~ int no_states[MAXN];
 	
-	/* no_ordered_tuples[i] = number of non-iso ordered tuples for
-	 * i agents */
-	int no_ordered_tuples[MAXN];
+	//~ /* no_ordered_tuples[i] = number of non-iso ordered tuples for
+	 //~ * i agents */
+	//~ int no_ordered_tuples[MAXN];
 		
-	clock_t start, end;
-	int n, m;
-	float elps_time[MAXN_SIM];
+	//~ clock_t start, end;
+	//~ int n, m;
+	//~ float elps_time[MAXN_SIM];
 	
-	pars_t pars;
+	//~ pars_t pars;
 		
-	srand(time(NULL));
+	//~ srand(time(NULL));
 		
-	for (n=3; n<=max_n; n++) {
-		/* calculate the number of words needed to hold n bits */
-		 m = SETWORDSNEEDED(n);
+	//for (n=3; n<=max_n; n++) {
+		///* calculate the number of words needed to hold n bits */
+		 //m = SETWORDSNEEDED(n);
 		 			
-		 /* verify that we are linking to compatible versions of the
-		  * nauty routines. */
-		 nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
+		 ///* verify that we are linking to compatible versions of the
+		  //* nauty routines. */
+		 //nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
 		 
-		 pars.n = n;
-		 pars.m = m;
-		 pars.prot=prot;
-		 pars.calc_exp=calc_exp;
-	     pars.rand_ag=rand_ag;
-		 pars.max_sim=max_sim;
+		 //pars.n = n;
+		 //pars.m = m;
+		 //pars.prot=prot;
+		 //pars.calc_exp=calc_exp;
+	     //pars.rand_ag=rand_ag;
+		 //pars.max_sim=max_sim;
 		  
-		 start = clock();
-		 /* compute the simulated or exact expectation */
-		 expectation[n] = (sim)?simulated(pars):
-	     exact_expectation(&no_states[n], &no_ordered_tuples[n], pars);								
+		 //start = clock();
+		 ///* compute the simulated or exact expectation */
+		 //expectation[n] = (sim)?simulated(pars):
+	     //exact_expectation(&no_states[n], &no_ordered_tuples[n], pars);								
 		 
-		 end = clock();
-		 elps_time[n] = ((float) end - start)/CLOCKS_PER_SEC;
-	}
+		 //end = clock();
+		 //elps_time[n] = ((float) end - start)/CLOCKS_PER_SEC;
+	//}
 	
-	expectation[1]=0;
-	expectation[2]=1;
-	elps_time[1]=elps_time[2]=0;
-	no_states[1]=1;
-	no_states[2]=2;
-	no_ordered_tuples[1]=1;
-	no_ordered_tuples[2]=2;
+	//~ expectation[1]=0;
+	//~ expectation[2]=1;
+	//~ elps_time[1]=elps_time[2]=0;
+	//~ no_states[1]=1;
+	//~ no_states[2]=2;
+	//~ no_ordered_tuples[1]=1;
+	//~ no_ordered_tuples[2]=2;
 			
-	print_results(max_n, no_states, expectation, elps_time, prot,
-		calc_exp, sim, rand_ag, no_ordered_tuples);
+	//~ print_results(max_n, no_states, expectation, elps_time, prot,
+		//~ calc_exp, sim, rand_ag, no_ordered_tuples);
 	
 	//~ m = SETWORDSNEEDED(max_n);
 	//~ graph_test(max_n,m);
+	
+	
+	counterexample(10);
+	
+	
 		
 	return 0;
 }
