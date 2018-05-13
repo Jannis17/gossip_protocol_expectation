@@ -219,29 +219,18 @@ void iter_calls
 	int token_tmp[MAXN];
 	int avail_call_tmp[MAXN];
 	
-	/* 
-	 * 0: 02349
-	 * 1: 156
-	 * 2: 0234
-	 * 3: 02349
-	 * 4: 1345
-	 * 5: 1345
-	 * 6: 15678
-	 * 7: 15678
-	 * 8: 02789
-	 * 9: 02789 */
-	
 	size_t k;
 	
-	for (k = 0; k < m*(size_t)n && (secrets[k] == ANY_secrets[k]); k++);
+	for (k = 0; k < m* (size_t) n && (secrets[k] == ANY_secrets[k]); k++);
 	
-	if (k == m*(size_t)n) {
+	if (k == m* (size_t) n) {
 		printf("ANY reachable!\n");
 		return;
 	}	
 		
-	for(i=3;i<11;i++)
+	for(i=3;i<11;i++) 
 		if(avail_call[i] && token[call_seq[i].a]) {
+			//printf("%d calls %d ", call_seq[i].a,call_seq[i].b);
 			copy_graph(secrets_tmp,secrets, n, m);
 			update_secrets(secrets_tmp,call_seq[i].a,call_seq[i].b,n,m);
 			copy_1D_array(token_tmp,token,n);
@@ -306,6 +295,7 @@ void counterexample(int n)
 	
 	int i;
 	
+	//everybody has a token in the beginning
 	for(i=0;i<n;i++)
 		token[i]=1;
 		
