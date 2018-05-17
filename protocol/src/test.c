@@ -228,7 +228,7 @@ void iter_calls
 		return;
 	}	
 		
-	for(i=3;i<11;i++) 
+	for(i=0;i<11;i++) 
 		if(avail_call[i] && token[call_seq[i].a]) {
 			//printf("%d calls %d ", call_seq[i].a,call_seq[i].b);
 			copy_graph(secrets_tmp,secrets, n, m);
@@ -305,17 +305,51 @@ void counterexample(int n)
 		avail_call[i]=1;
 		
 	//make the first 3 calls
-	update_secrets(secrets,1,5,n,m);
-	update_secrets(secrets,2,0,n,m);
-	update_secrets(secrets,4,3,n,m);
-	token[5]=token[0]=token[3]=0;
-	avail_call[0]=avail_call[1]=avail_call[2]=0;
+	//~ update_secrets(secrets,1,5,n,m);
+	//~ update_secrets(secrets,2,0,n,m);
+	//~ update_secrets(secrets,4,3,n,m);
+	//~ token[5]=token[0]=token[3]=0;
+	//~ avail_call[0]=avail_call[1]=avail_call[2]=0;
 	
 	//create the ANY reachable state
 	graph ANY_secrets [MAXN*MAXM];
 	diagonal(ANY_secrets, n, m);
 	for(i=0; i<11;i++)
 		update_secrets(ANY_secrets, call_seq[i].a, call_seq[i].b,n,m);
+	
+	call_seq[0].a = 5;
+	call_seq[0].b = 1;
+	
+	call_seq[1].a = 2;
+	call_seq[1].b = 0;
+	
+	call_seq[2].a = 3;
+	call_seq[2].b = 4;
+	
+	call_seq[3].a = 3;
+	call_seq[3].b = 2;
+	
+	call_seq[4].a = 5;
+	call_seq[4].b = 4;
+	
+	call_seq[5].a = 9;
+	call_seq[5].b = 0;
+	
+	call_seq[6].a = 6;
+	call_seq[6].b = 1;
+
+	call_seq[7].a = 8;
+	call_seq[7].b = 7;
+	
+	call_seq[8].a = 6;
+	call_seq[8].b = 7;
+
+	call_seq[9].a = 8;
+	call_seq[9].b = 9;
+	
+	call_seq[10].a = 3;
+	call_seq[10].b = 0;
+	
 		
 	iter_calls(ANY_secrets, secrets, token, avail_call, call_seq, n, m);
 }
