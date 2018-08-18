@@ -5,7 +5,7 @@ CFLAGS=-Wall -O3 -I$(IDIR)
 ODIR=obj
 LDIR =../lib
 
-LIBS=-lm ../../nauty26r7/nauty.a
+LIBS=-lm ../../nauty/nauty.a
 
 _DEPS = *.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))

@@ -2,7 +2,7 @@
 #define H_GRAPH_H_
 
 #include "state.h"
-#include "../../nauty26r7/nauty.h"
+#include "../../nauty/nauty.h"
 
 int
 edges_of(graph g[MAXN*MAXM], int n, int m);

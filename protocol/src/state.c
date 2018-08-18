@@ -9,7 +9,7 @@
 #include "queue.h"
 #include "compar.h"
 #include "test.h"
-#include "../../nauty26r7/nauty.h"
+#include "../../nauty/nauty.h"
 				
 void
 generate_children
@@ -99,11 +99,12 @@ generate_children
 		  enqueue_unique_to_twin_queues
 		   ( parent->children, NULL, NULL, potential_child, prot );
 		  
-		  /* if we are in CO, TOK or SPI we want to count 
+		  /* if we are in ANY, CO, TOK or SPI we want to count 
 		   * (TODO: remove ANY)
 		   * the ordered tuples too */		  
-		  if ( (prot ==ANY || prot == CO || prot == TOK || prot == SPI)  &&
-		        exists_in_hash == NEW_ITEM ) 
+		  if ( (prot == ANY || prot == CO || prot == TOK 
+				|| prot == SPI)  )
+				//~ && exists_in_hash == NEW_ITEM
 		  {
 			  state_for_ordered_hash= 
 			  	new_pstate(temp_secrets,temp_calls,temp_token,
@@ -126,10 +127,10 @@ build_the_markov_chain
 	struct queue_node_t * p;
 	*no_states = 0;
 	
-	printf("%d agents:\n", pars.n);
+	//~ printf("%d agents:\n", pars.n);
 		
 	FOR_ALL_EDGES(i, pars.n) {
-		printf("\nEdges: %d, ", i);		
+		//~ printf("\nEdges: %d, ", i);		
 		QUEUE_FOREACH(p, hash[i].can_lab_queue)
 			generate_children
 				(p->data, pars.n, pars.m, hash, pars.prot, ordered_hash);
@@ -147,11 +148,11 @@ build_the_markov_chain
 		
 		/* count the states */	
 		*no_states += QUEUE_COUNT(hash[i].can_lab_queue);
-		printf("states: %lu", QUEUE_COUNT(hash[i].can_lab_queue));
+		//~ printf("states: %lu", QUEUE_COUNT(hash[i].can_lab_queue));
 		if (!pars.calc_exp)
 			destroy_twin_queues(&hash[i]);		
 	}
-	printf("\n");
+	//~ printf("\n");
 }
 
 int
@@ -339,7 +340,8 @@ exact_expectation
 		case CO:
 		case TOK: 
 		case SPI:
-			*no_ordered_tuples = count_ordered_tuples(ordered_hash, pars.n);
+			*no_ordered_tuples = 
+				count_ordered_tuples(ordered_hash, pars.n);
 			break;
 		default:
 			break;

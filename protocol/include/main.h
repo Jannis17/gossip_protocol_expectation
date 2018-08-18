@@ -10,7 +10,7 @@
 /* MAXN = ULTIMATELY MAXIMUM number of agents */
 #define MAXN 40
 
-#include "../../nauty26r7/nauty.h"
+#include "../../nauty/nauty.h"
 
 typedef struct pars_tag {
 	int n;//number of agents

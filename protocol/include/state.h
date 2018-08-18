@@ -1,7 +1,7 @@
 #ifndef H_STATE_H_
 #define H_STATE_H_
 
-#include "../../nauty26r7/nauty.h"
+#include "../../nauty/nauty.h"
 
 #define MAXSTATES 100000000
 

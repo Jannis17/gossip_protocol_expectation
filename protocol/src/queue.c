@@ -293,9 +293,9 @@ int prot)
   enqueue_unique_to_sorted_queue
 	(twin_q.can_lab_queue, can_start, NULL, item);
 	
-  if (prot == ANY || prot == TOK || prot == SPI)	
+  if (prot == ANY || prot == TOK || prot == SPI)
 	 enqueue_unique_to_sorted_queue
-		(twin_q.fixed_name_queue, fixed_name_start, NULL, item);					
+		(twin_q.fixed_name_queue, fixed_name_start, NULL, item); 							
 }
 
 int enqueue_to_hash
@@ -329,9 +329,9 @@ int enqueue_to_hash
 		
 	if ( (prot == ANY || prot == SPI || prot == TOK) &&
 		 search_in_sorted_queue (fixed_name_queue, fixed_name_start, 
-			 &fixed_name_prev, found, s) )
+			 &fixed_name_prev, found, s) )		 
 		return DUPLICATE_ITEM;
-	
+			
 	result=
 		enqueue_unique_to_sorted_queue(can_queue, can_start, found, s);
 	

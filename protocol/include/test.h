@@ -1,7 +1,7 @@
 #ifndef H_TEST_H_
 #define H_TEST_H_
 
-#include "../../nauty26r7/nauty.h"
+#include "../../nauty/nauty.h"
 #include "state.h"
 
 void
