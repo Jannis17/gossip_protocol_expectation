@@ -1,4 +1,4 @@
-# Reachability and Expectation in Gossiping
+# Implementation for Reachability and Expectation in Gossiping
 
 Ioannis Kokkinis, ykokkinis@gmail.com
 
