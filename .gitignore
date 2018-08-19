@@ -1,0 +1,5 @@
+#exclude everything in directory nauty
+nauty/*
+#exclude object files and executable
+protocol/src/obj/*
+protocol/src/protocol

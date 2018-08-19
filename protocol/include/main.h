@@ -17,8 +17,8 @@ typedef struct pars_tag {
 	int m;//number of setwords 
 	int prot;//protocol name
 	int calc_exp;//calculate expectation flag
-	int rand_ag;//randomization over agents flag
-	int max_sim;
+	int max_sim;//maxi number of simulations
+	int o_ANY;//produce ordered tuples for ANY
 } pars_t;
 
 #endif /* H_MAIN_H_ */

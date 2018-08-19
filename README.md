@@ -1,4 +1,4 @@
-# Gossip Protocol Expectation
+# Reachability and Expectation in Gossiping
 
 Ioannis Kokkinis, ykokkinis@gmail.com
 
@@ -8,10 +8,9 @@ The aim of this project is to compute the expected duration of all the gossip pr
 defined in the paper: https://arxiv.org/abs/1511.00867.
 Our implementation provides algorithms for:
 
-a) computing the exact value of the expected duration of the protocols for at most 10
-agents
+a) computing the exact value of the expected duration of the protocols
 
-b) computing the approximated value of the expectation for at most 200 agents
+b) computing the approximated value of the expectation
 
 The exact value of the expected duration is computed by constructing the
 Markov chain that corresponds to the execution of
@@ -19,12 +18,10 @@ the protocols and then by computing the average time that this Markov
 chain needs in order to hit the absorption state (i.e. the state where
 all the agents know all the secrets). A detailed explanation of our algorithm
 can be found in section 4 of the following paper: https://sites.google.com/site/ykokkinis/prima17.pdf.
-The isomorphism check that is needed for
-our algorithm is done with the help of the software nauty (http://pallini.di.uniroma1.it/).
+The isomorphism check that is needed for our algorithm is done with the help of the software nauty (http://pallini.di.uniroma1.it/).
 The approximated value is computed via simulations. 
 
-The downloading, building and running instructions are
-for a UNIX system. The commands should be run in a terminal.
+The downloading, building and running instructions are for a UNIX system. The commands should be run in a terminal.
 
 ---
 
@@ -38,7 +35,8 @@ Navigate to a folder of your choosing an type
 ### Build:
 
 
-Navigate to "gossip_protocol_expectation/nauty26r7" and type "./configure" and then "make".
+Create the folder "gossip_protocol_expectation/nauty" and install the nauty software
+can be found in 
 Then navigate to "gossip_protocol_expectation/protocol/src" and type "make".
 
 ---

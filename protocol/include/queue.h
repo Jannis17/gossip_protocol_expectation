@@ -53,7 +53,7 @@ enqueue_unique_to_twin_queues
 struct queue_node_t* fixed_name_prev,
 struct queue_node_t* can_prev, 
 void* item,
-int prot);
+pars_t pars);
 
 void 
 delete_queue
@@ -75,7 +75,7 @@ enqueue_to_hash
  struct queue_node_t* can_start,
  pstate_t* s,
  struct queue_node_t** found, 
- int prot);
+ pars_t pars);
 
 int
 search_in_twin_queues 
@@ -85,6 +85,6 @@ search_in_twin_queues
  struct queue_node_t** fixed_name_prev,
  struct queue_node_t** can_prev,
  struct queue_node_t** found,  
- child_t* child, int prot);
+ child_t* child, pars_t pars);
 	
 #endif /* H_QUEUE_H_ */

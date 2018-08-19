@@ -222,18 +222,18 @@ int can_call(graph g[MAXN * MAXM], int i, int j, int n, int m)
 
 /* returns the number of possible bidirectional calls between
  * i and j according to prot */
-int no_poss_calls(pstate_t * pstate, int i, int j, int prot, int n, int m)
+int no_poss_calls(pstate_t * pstate, int i, int j, pars_t pars)
 {
 	int poss_calls = 0;
 	
-	switch (prot) {
+	switch (pars.prot) {
 		case (ANY):
 			poss_calls = 2;
 			break;
 		case (LNS):
 			poss_calls=
-	       	!ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,i,m),j) + 
-	       	!ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,j,m),i);
+	       	!ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,i,pars.m),j) + 
+	       	!ISELEMENT(GRAPHROW(pstate->fixed_name_secrets,j,pars.m),i);
 			break;
 		case (CO):
 			if (pstate->fixed_name_calls[i][j] != 

@@ -27,7 +27,7 @@ void
 update_secrets(graph g[MAXN*MAXM], int i, int j, int n, int m);
 
 int
-no_poss_calls(pstate_t * pstate, int i, int j, int prot, int n, int m);
+no_poss_calls(pstate_t * pstate, int i, int j, pars_t pars);
 
 int
 can_call(graph g[MAXN * MAXM], int i, int j, int n, int m);

@@ -14,7 +14,7 @@ print_trans_matrix
 void 
 print_expect_vec_and_trans_matrix
 (int no_states, float* expect_vec, pstate_t** trans_matrix, int n,
- int prot, int rand_ag);
+ int prot);
 
 void 
 multiply_matrices
@@ -23,7 +23,7 @@ multiply_matrices
 void
 print_probs_to_absorption
 (int no_states, pstate_t** trans_matrix, int agents, int prot,
- int rand_ag, int max_calls, twin_queues hash[MAXN*MAXN]);
+ int max_calls, twin_queues hash[MAXN*MAXN]);
 
 void counterexample(int n);
 

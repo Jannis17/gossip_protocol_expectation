@@ -28,7 +28,7 @@ int count_tokens(int token[MAXN], int n)
 /* creates a new protocol state */
 pstate_t* 
 new_pstate(graph secrets[MAXN*MAXM], int calls[MAXN][MAXN],
-int token[MAXN], int total_calls, int n, int m, int prot)
+int token[MAXN], int total_calls, pars_t pars)
 {
 	pstate_t* s;
 	
@@ -41,70 +41,75 @@ int token[MAXN], int total_calls, int n, int m, int prot)
 	
 	int i, j, total_tokens;
 	
-	if (prot == TOK || prot==SPI)
-		copy_tokens(token,s->token, n);
+	if (pars.prot == TOK || pars.prot==SPI)
+		copy_tokens(token,s->token, pars.n);
 	
-	copy_graph(s->fixed_name_secrets, secrets, n, m);
-	can_label_secrets(secrets, s->can_secrets, s-> token, prot, n, m); 
+	copy_graph(s->fixed_name_secrets, secrets, pars.n, pars.m);
+	can_label_secrets(secrets, s->can_secrets, s-> token, 
+		pars.prot, pars.n, pars.m); 
 	
-	if (prot == ANY || prot == SPI || prot == TOK)
+	if ( (pars.prot == ANY && !pars.o_ANY) || pars.prot == SPI 
+		 || pars.prot == TOK)
 		s->children.fixed_name_queue = 
 			new_queue(MAXN*(MAXN-1), cmp_fixed_name_children);
 	else
 		s->children.fixed_name_queue = NULL;
 		
-	if (prot == CO)
+	if (pars.prot == CO)
 		s->children.can_lab_queue =
 			new_queue(MAXN*(MAXN-1), cmp_can_children_calls);
 	else
 		s->children.can_lab_queue =
 			new_queue(MAXN*(MAXN-1), cmp_can_children_secrets);
 	
-	if (prot == ANY) {
-		copy_graph(s->fixed_name_secrets_sorted, secrets, n, m);
+	if ( (pars.prot == ANY && !pars.o_ANY) ) {
+		copy_graph(s->fixed_name_secrets_sorted, secrets, 
+			pars.n, pars.m);
 		qsort(s->fixed_name_secrets_sorted, 
-			n*m, sizeof(graph), cmp_graph_nodes);
+			pars.n*pars.m, sizeof(graph), cmp_graph_nodes);
 	}
 	
 					
-	if (prot == SPI || prot == TOK) {
-		for(i=j=0;i<n;i++)
+	if (pars.prot == SPI || pars.prot == TOK) {
+		for(i=j=0;i<pars.n;i++)
 			if (token[i])
 				w_token[j++]=secrets[i];
 		
 		total_tokens=j;		
 	
-		qsort(w_token, total_tokens*m, sizeof(graph), cmp_graph_nodes);
+		qsort(w_token, total_tokens*pars.m, sizeof(graph), 
+			cmp_graph_nodes);
 		
-		if (j<n) {
-			for(i=0;i<n;i++)
+		if (j<pars.n) {
+			for(i=0;i<pars.n;i++)
 				if (!token[i])
 					wo_token[j++]=secrets[i];
 			
 			qsort(wo_token, 
-				(n-total_tokens)*m, sizeof(graph), cmp_graph_nodes);
+				(pars.n-total_tokens)*pars.m, sizeof(graph), 
+					cmp_graph_nodes);
 		}
 			
 		for(i=0;i<total_tokens; i++)
 			s->fixed_name_secrets_sorted[i]=w_token[i];
 			
-		for(;i<n; i++)
+		for(;i<pars.n; i++)
 			s->fixed_name_secrets_sorted[i]=wo_token[i-total_tokens];			
 	}
 	
 	
-	s->nl = n * ceil(log2( (n * (n-1))/2 + 1 ));
+	s->nl = pars.n * ceil(log2( (pars.n * (pars.n-1))/2 + 1 ));
 	s->ml = SETWORDSNEEDED(s->nl);
 	s->id=0;
-	s->n=n;
-	s->m=m;
-	s->total_secrets=edges_of(secrets, n, m);
+	s->n=pars.n;
+	s->m=pars.m;
+	s->total_secrets=edges_of(secrets, pars.n, pars.m);
 	s->total_calls=total_calls;
-	s->prot=prot;
+	s->prot=pars.prot;
 	
-	s->is_absorption = (s->total_secrets == n*n)?1:0;
-	copy_calls_graph(s->fixed_name_calls, calls, n);
-	can_label_calls(calls, s->can_calls,n, s->nl, s-> ml);
+	s->is_absorption = (s->total_secrets == pars.n*pars.n)?1:0;
+	copy_calls_graph(s->fixed_name_calls, calls, pars.n);
+	can_label_calls(calls, s->can_calls,pars.n, s->nl, s-> ml);
 			
 	return s;		
 }
@@ -160,6 +165,8 @@ void destroy_twin_queues(twin_queues* twin_q)
 		DELETE_QUEUE(twin_q->can_lab_queue);
 		DELETE_QUEUE(twin_q->fixed_name_queue);
 	}
+	
+	twin_q->can_lab_queue = twin_q->fixed_name_queue = NULL;
 }
 
 void destroy_hash(int n, twin_queues hash[MAXN*MAXN]) 

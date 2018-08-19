@@ -11,8 +11,8 @@
 
 void print_results
 (int n, int no_states[MAXN], float expectation[MAXN_SIM], 
- float elps_time[MAXN_SIM], int prot, int calc_exp, int sim, int rand_ag,
- int no_ordered_tuples[MAXN]) 
+ float elps_time[MAXN_SIM], int prot, int calc_exp, int sim,
+ int no_ordered_tuples[MAXN], int o_ANY) 
 {
 	time_t timeNow = time(NULL);
 	struct tm localTime = *localtime(&timeNow);
@@ -24,7 +24,7 @@ void print_results
 	switch (prot) {
 		case (ANY):
 			pname = "ANY";
-			name_of_states = "unordered tuples";
+			name_of_states =  o_ANY? "ordered tuples" :"unordered tuples";
 			break;
 		case (LNS):
 			pname = "LNS";
@@ -47,13 +47,11 @@ void print_results
 	}
 	
 	char *mode=(sim)?"SIM":"EXACT";
-	
-	char *ra=(rand_ag)?"RA":"RC";
 			
 	/* create the name of the file with timestamp */
 	sprintf(filename, 
-	"../../results/%s-%s-%s-%d-%d-%d-%dh-%dm-%ds-agents_1_to_%d.CSV",
-	pname, mode, ra,
+	"../../results/%s-%s-%d-%d-%d-%dh-%dm-%ds-agents_1_to_%d.CSV",
+	pname, mode,
 	localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
 	localTime.tm_hour, localTime.tm_min, localTime.tm_sec, n);
 	
@@ -76,9 +74,7 @@ void print_results
 			fprintf(fp,"%d, ", no_states[i]);		
 	}	
 	
-	//remove ANY
-	if (!sim && (prot ==ANY || prot == CO || prot == SPI 
-		|| prot == TOK) ) {
+	if (!sim && (prot == CO || prot == SPI || prot == TOK) ) {
 		fprintf(fp,"\nordered tuples, ");
 		
 		for (i=1; i<=n; i++)	
@@ -96,12 +92,12 @@ void print_results
 
 void print_usage_and_exit(int argc, char * argv[])
 {
-	printf("Usage: %s [name] [n] -s=[max_sim] -ra -ne \n\n", argv[0]);
-	printf("name: ANY or LNS\n");
+	printf("Usage: %s [name] [n] -s=[max_sim] -o -ne \n\n", argv[0]);
+	printf("name: ANY, LNS, CO or SPI\n");
 	printf("n:  number of agents \n");
 	printf("-ne:  if it is present, the program will not calculate the expectation. If it is used with the s option, it has no effect.\n");
 	printf("-s: if it is present, the expected duration is computed using max_sim simulations. If it is absent, the program caluclates exact values\n");
-	printf("-ra: if it is present, we have randomization over agents. If it is absent, we have randomization over calls\n");
+	printf("-o: It should be used only with the name option ANY. If it is present, the program produces the ANY ordered tuples. If it is absent the program produces the ANY unordered tuples\n\n");
 	printf("If the option -s is used then n has to be in the range 1..%d. If -s is absent, n has to be in the range 1..%d", MAXN_SIM, MAXN);	
 	printf("\nThe results will be generated in a file marked with timestamp in the folder gossip_protocol_expectation/results.\n");
 			
@@ -111,7 +107,7 @@ void print_usage_and_exit(int argc, char * argv[])
 int main (int argc, char * argv[]){
 	int max_n = 0, prot;
 	int calc_exp = 1;
-	int rand_ag = 0;
+	int o_ANY = 0;
 	int sim =0;
 	int max_sim=0;
 	
@@ -119,14 +115,26 @@ int main (int argc, char * argv[]){
 		case 6:
 			if (strcmp(argv[5], "-ne") == 0)
 				calc_exp = 0;
+			else if (strcmp(argv[5], "-o") == 0)	
+				 o_ANY = 1;
+			else if (sscanf(argv[5], "-s=%d", &max_sim) ==1)
+				 sim = 1;
 			else print_usage_and_exit(argc, argv);
 		case 5:
-			if (strcmp(argv[4], "-ra") == 0)
-				rand_ag = 1;
+			if (strcmp(argv[4], "-ne") == 0)
+				calc_exp = 0;
+			else if (strcmp(argv[4], "-o") == 0)	
+				 o_ANY = 1;
+			else if (sscanf(argv[4], "-s=%d", &max_sim) ==1)
+				 sim = 1;
 			else print_usage_and_exit(argc, argv);
 		case 4:
-			if (sscanf(argv[3], "-s=%d", &max_sim) ==1)
-				sim = 1;
+			if (strcmp(argv[3], "-ne") == 0)
+				calc_exp = 0;
+			else if (strcmp(argv[3], "-o") == 0)	
+				 o_ANY = 1;
+			else if (sscanf(argv[3], "-s=%d", &max_sim) ==1)
+				 sim = 1;
 			else print_usage_and_exit(argc, argv);
 		case 3:
 			max_n = atoi(argv[2]);
@@ -147,7 +155,7 @@ int main (int argc, char * argv[]){
 	}
 
 	if ( max_n<=0 || (sim && max_n > MAXN_SIM) 
-		 || (!sim && max_n > MAXN) ) 
+		 || (!sim && max_n > MAXN) || (o_ANY && prot!= ANY)) 
 		print_usage_and_exit(argc, argv);			
 			
 	/* expectation[i] = expected execution length for i agents */
@@ -180,8 +188,8 @@ int main (int argc, char * argv[]){
 		pars.m = m;
 		pars.prot=prot;
 		pars.calc_exp=calc_exp;
-	    pars.rand_ag=rand_ag;
-		pars.max_sim=max_sim;
+	    pars.max_sim=max_sim;
+		pars.o_ANY=o_ANY;
 		  
 		start = clock();
 		/* compute the simulated or exact expectation */
@@ -201,15 +209,10 @@ int main (int argc, char * argv[]){
 	no_ordered_tuples[2]=2;
 			
 	print_results(max_n, no_states, expectation, elps_time, prot,
-		calc_exp, sim, rand_ag, no_ordered_tuples);
+		calc_exp, sim, no_ordered_tuples, o_ANY);
 	
 	//~ m = SETWORDSNEEDED(max_n);
 	//~ graph_test(max_n,m);
-	
-	
-	//~ counterexample(10);
-	
-	
 		
 	return 0;
 }

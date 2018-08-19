@@ -26,7 +26,7 @@ void print_trans_matrix(float**tm, int n)
 void 
 print_expect_vec_and_trans_matrix
 (int no_states, float* expect_vec, pstate_t** trans_matrix,
- int agents, int prot, int rand_ag)
+ int agents, int prot)
 {
 	int i,j;
 	
@@ -39,8 +39,7 @@ print_expect_vec_and_trans_matrix
 	for (i=0; i < no_states; i++) {
 		printf("%d: ", i);
 		for (j=0; j < no_states; j++)
-			printf("%.1f ", get_prob(trans_matrix, i, j, prot, 
-				rand_ag));	
+			printf("%.1f ", get_prob(trans_matrix, i, j, prot));	
 		printf("\n");
 	}
 }
@@ -157,7 +156,7 @@ void copy_matrix(float **to, float** from, int n)
 /* prints the probabilities to absorption*/
 void print_probs_to_absorption 
 (int no_states, pstate_t** trans_matrix,
- int agents, int prot, int rand_ag, int max_calls, 
+ int agents, int prot, int max_calls, 
  twin_queues hash[MAXN*MAXN])
 {
 	int i,j;	
@@ -169,7 +168,7 @@ void print_probs_to_absorption
 	for(i=0;i<no_states;i++)
 		for(j=0;j<no_states;j++)
 			tm1[i][j] = 
-				get_prob(trans_matrix,i,j,prot, rand_ag);
+				get_prob(trans_matrix,i,j,prot);
 	
 	FREE_SAFE(trans_matrix);
 	destroy_hash(agents, hash);

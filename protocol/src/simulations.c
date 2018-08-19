@@ -169,17 +169,9 @@ float simulated(pars_t pars) {
 		init_avail_calls(avail_calls, pars.n);
 		
 		while (1) {
-			if (pars.rand_ag) {
-				r_caller = get_caller(avail_calls, 
-					rand() % count_callers(avail_calls,pars.n)+1,
-						pars.n);
-				r_callee = get_callee(avail_calls, r_caller,
-					rand() % count_callees(avail_calls,r_caller,
-						pars.n)+1, pars.n);
-			} else
-				get_call_parts(avail_calls, 
-					rand() % edges(avail_calls,pars.n) + 1, &r_caller, 
-					&r_callee, pars.n);
+			get_call_parts(avail_calls, 
+			   rand() % edges(avail_calls,pars.n) + 1, &r_caller, 
+			   &r_callee, pars.n);
 					
 			//~ printf("caller=%d\n", r_caller);
 			//~ printf("callee=%d\n", r_callee);

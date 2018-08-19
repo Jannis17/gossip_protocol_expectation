@@ -45,7 +45,7 @@ exact_expectation
 
 float 
 get_prob
-(pstate_t ** trans_matrix, int from, int to, int prot, int rand_ag);
+(pstate_t ** trans_matrix, int from, int to, int prot);
 
 
 #endif /* H_STATE_H_ */

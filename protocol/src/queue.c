@@ -288,12 +288,13 @@ void enqueue_unique_to_twin_queues
 struct queue_node_t* fixed_name_start,
 struct queue_node_t* can_start, 
 void* item,
-int prot)
+pars_t pars)
 {
   enqueue_unique_to_sorted_queue
 	(twin_q.can_lab_queue, can_start, NULL, item);
 	
-  if (prot == ANY || prot == TOK || prot == SPI)
+  if ( (pars.prot == ANY && !pars.o_ANY) || 
+		pars.prot == TOK || pars.prot == SPI)
 	 enqueue_unique_to_sorted_queue
 		(twin_q.fixed_name_queue, fixed_name_start, NULL, item); 							
 }
@@ -304,7 +305,7 @@ int enqueue_to_hash
  struct queue_node_t* can_start,
  pstate_t* s,
  struct queue_node_t** found, 
- int prot)
+ pars_t pars)
 {
 	int result;
 	struct queue_t* fixed_name_queue = NULL, * can_queue = NULL;
@@ -313,7 +314,7 @@ int enqueue_to_hash
 	
 	fixed_name_prev = NULL;
 	
-	switch (prot) {
+	switch (pars.prot) {
 		case TOK:
 		case SPI:
 		case ANY:
@@ -327,7 +328,8 @@ int enqueue_to_hash
 		break;
 	}	
 		
-	if ( (prot == ANY || prot == SPI || prot == TOK) &&
+	if ( ( (pars.prot == ANY && !pars.o_ANY ) || pars.prot == SPI 
+			|| pars.prot == TOK) &&
 		 search_in_sorted_queue (fixed_name_queue, fixed_name_start, 
 			 &fixed_name_prev, found, s) )		 
 		return DUPLICATE_ITEM;
@@ -335,7 +337,9 @@ int enqueue_to_hash
 	result=
 		enqueue_unique_to_sorted_queue(can_queue, can_start, found, s);
 	
-	if ((prot == ANY || prot == SPI || prot == TOK) && result == NEW_ITEM)
+	if ( ( ( pars.prot == ANY && !pars.o_ANY ) || pars.prot == SPI || 
+			pars.prot == TOK) 
+			&& result == NEW_ITEM)
 		enqueue_unique_to_sorted_queue
 			(fixed_name_queue, fixed_name_prev, found, s);
 	
@@ -353,14 +357,15 @@ search_in_twin_queues
  struct queue_node_t** can_prev,
  struct queue_node_t** found,  
  child_t* child, 
- int prot)
+ pars_t pars)
 {
 	struct queue_t* fixed_name_queue, *can_queue;
 	
 	fixed_name_queue = twin_q.fixed_name_queue;
 	can_queue = twin_q.can_lab_queue;
 	
-	if ( (prot == ANY || prot == SPI || prot == TOK )&&
+	if ( ( (pars.prot == ANY && !pars.o_ANY) || 
+			pars.prot == SPI || pars.prot == TOK ) &&
 		 search_in_sorted_queue
 		 (fixed_name_queue, fixed_name_start, fixed_name_prev, found, 
 		  child) )

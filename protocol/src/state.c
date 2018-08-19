@@ -13,13 +13,13 @@
 				
 void
 generate_children
-(pstate_t *parent, int n, int m, twin_queues hash[MAXN*MAXN], 
- int prot, twin_queues ordered_hash[MAXN*MAXN]) 
+(pstate_t *parent, pars_t pars, twin_queues hash[MAXN*MAXN], 
+ twin_queues ordered_hash[MAXN*MAXN]) 
 {
 	if (parent->is_absorption)
 		return;
 	
-	int i, j, calls_to_child;
+	int i, j, calls_to_child, temp_prot;
 	graph temp_secrets[MAXN*MAXM];
 	int temp_calls[MAXN][MAXN];
 	int temp_token[MAXN];
@@ -33,48 +33,48 @@ generate_children
 	int exists_in_hash;
 	pstate_t* state_for_ordered_hash;
 						
-	for (i=0; i<n; i++)
-	 for (j= (prot == SPI || prot == TOK)? 0: i+1; j<n; j++)
+	for (i=0; i<pars.n; i++)
+	 for (j= (pars.prot == SPI || pars.prot == TOK)? 0: i+1; j<pars.n; j++)
 	  if ( (i!=j) && 
-		(calls_to_child = no_poss_calls(parent,i,j,prot,n,m)) > 0 )
+		(calls_to_child = no_poss_calls(parent,i,j,pars)) > 0 )
 	  {
 		//create the new secrets graph  
-		copy_graph(temp_secrets, parent->fixed_name_secrets, n, m);
-		update_secrets(temp_secrets, i ,j, n, m);
+		copy_graph(temp_secrets, parent->fixed_name_secrets, pars.n, pars.m);
+		update_secrets(temp_secrets, i ,j, pars.n, pars.m);
 		
 		//create the new calls graph  
-		copy_calls_graph(temp_calls,parent-> fixed_name_calls,n);
+		copy_calls_graph(temp_calls,parent-> fixed_name_calls,pars.n);
 		temp_calls[i][j]=temp_calls[j][i]=parent->total_calls+1;
 		
 		//copy the tokens
-		copy_tokens(parent->token, temp_token, n);
+		copy_tokens(parent->token, temp_token, pars.n);
 		
-		if (prot==TOK) {
+		if (pars.prot==TOK) {
 			temp_token[i]=0;
 			temp_token[j]=1;
 		}
 		
-		if (prot==SPI) {
+		if (pars.prot==SPI) {
 			temp_token[i]=1;
 			temp_token[j]=0;
 		}
 
 		//create a new child state 		  
 		childs_state = new_pstate(temp_secrets,temp_calls, temp_token,
-			parent->total_calls+1, n, m, prot);
+			parent->total_calls+1, pars);
 				
 		//add the child to the parent  
 		potential_child = new_child(childs_state, calls_to_child);
 		  
 		//needed only for rand over agents
 		potential_child->calls[i][j] = 
-			can_call( parent->fixed_name_secrets, i, j, n, m);
+			can_call( parent->fixed_name_secrets, i, j, pars.n, pars.m);
 		potential_child->calls[j][i] = 
-			can_call(parent->fixed_name_secrets, j, i, n, m);
+			can_call(parent->fixed_name_secrets, j, i, pars.n, pars.m);
 		  		  
 		if(search_in_twin_queues(parent->children, NULL, NULL,
 			&childs_fixed_name_prev, &childs_can_prev,
-			&child_pos_in_par_list, potential_child, prot))
+			&child_pos_in_par_list, potential_child, pars))
 		{
 		  FREE_SAFE(potential_child); 
 		  destroy_protocol_state(&childs_state);
@@ -83,35 +83,36 @@ generate_children
 			 
 		  //needed only for rand over agents
 		  found_child->calls[i][j] = 
-			can_call(parent->fixed_name_secrets, i, j, n, m);
+			can_call(parent->fixed_name_secrets, i, j, pars.n, pars.m);
 		  found_child->calls[j][i] = 
-			can_call(parent->fixed_name_secrets, j, i, n, m);
+			can_call(parent->fixed_name_secrets, j, i, pars.n, pars.m);
 		} 
 		else 
 		{ 
 		  exists_in_hash = enqueue_to_hash
-			(hash, NULL, NULL, childs_state, &found_child_node, prot);
+			(hash, NULL, NULL, childs_state, &found_child_node, pars);
 		  if ( exists_in_hash == DUPLICATE_ITEM ) 
 		  {
 			destroy_protocol_state(&childs_state);
 			potential_child->childs_state = found_child_node->data;
 		  }
 		  enqueue_unique_to_twin_queues
-		   ( parent->children, NULL, NULL, potential_child, prot );
+		   ( parent->children, NULL, NULL, potential_child, pars);
 		  
-		  /* if we are in ANY, CO, TOK or SPI we want to count 
-		   * (TODO: remove ANY)
+		  /* if we are in CO, TOK or SPI we want to count 
 		   * the ordered tuples too */		  
-		  if ( (prot == ANY || prot == CO || prot == TOK 
-				|| prot == SPI)  )
-				//~ && exists_in_hash == NEW_ITEM
+		  if ( (pars.prot == CO || pars.prot == TOK 
+				|| pars.prot == SPI) && exists_in_hash == NEW_ITEM )
 		  {
+			  temp_prot = pars.prot;
+			  pars.prot =LNS;
 			  state_for_ordered_hash= 
 			  	new_pstate(temp_secrets,temp_calls,temp_token,
-			  		parent->total_calls+1, n,m,LNS);
+			  		parent->total_calls+1, pars);
 			  enqueue_to_hash
 				(ordered_hash, NULL, NULL, state_for_ordered_hash, 
-					NULL, LNS);
+					NULL, pars);
+			  pars.prot = temp_prot;						
 		  }
 		        
 		}		  
@@ -133,9 +134,9 @@ build_the_markov_chain
 		//~ printf("\nEdges: %d, ", i);		
 		QUEUE_FOREACH(p, hash[i].can_lab_queue)
 			generate_children
-				(p->data, pars.n, pars.m, hash, pars.prot, ordered_hash);
+				(p->data, pars, hash, ordered_hash);
 
-		//~ if ( prot == ANY &&
+		//~ if ( pars.prot == ANY && pars.o_ANY &&
 			 //~ QUEUE_COUNT(hash[i].can_lab_queue) != 
 			 //~ QUEUE_COUNT(hash[i].fixed_name_queue) ) 
 		//~ {
@@ -172,55 +173,36 @@ count_ordered_tuples
 
 float
 get_prob
-(pstate_t ** trans_matrix, int from, int to, int prot, int rand_ag) 
+(pstate_t ** trans_matrix, int from, int to, int prot) 
 {
 	pstate_t* s = trans_matrix[from], * t;
 	struct queue_node_t *p;
 	child_t* child;	
 	float prob = 0;
-	int i, j, calls, avail_agents;
 	
 	QUEUE_FOREACH(p, s->children.can_lab_queue) {
 		child = (child_t*) (p-> data);
 		t = (pstate_t*) child->childs_state;
 		
 		if (t->id == to) {
-			if (rand_ag) {
-				for (avail_agents= i=0; i< s->n;i++) {
-					calls = s->n - POPCOUNT(s->fixed_name_secrets[i]);
-					if (calls)
-						avail_agents++;
-				}		
-								
-				for (i=0; i<s->n;i++) {
-					calls = s->n - 
-							POPCOUNT(s->fixed_name_secrets[i]);
-					if (calls)
-						for (j=0; j<s->n;j++) 
-							prob += ( ( (float) child->calls[i][j]) 
-										/ (calls * avail_agents) );
-				}							
-			}
-			else {	
-				prob = child->calls_to_child;			
+			prob = child->calls_to_child;			
 			
-				switch (prot) {
-					case (ANY):
-						prob /= ((s->n) * (s->n - 1));
-						break;
-					case (LNS):
-						prob /= ((s->n) * (s->n) - s->total_secrets);
-						break;
-					case (CO):
-						prob /= 
-							((s->n) * (s->n -1 ) - 2 * s-> total_calls);
-						break;
-					case (TOK):
-					case (SPI):
-						prob /= 
-							(count_tokens(s ->token, s->n) * (s->n -1));
-						break;
-				}
+			switch (prot) {
+				case (ANY):
+					prob /= ((s->n) * (s->n - 1));
+					break;
+				case (LNS):
+					prob /= ((s->n) * (s->n) - s->total_secrets);
+					break;
+				case (CO):
+					prob /= 
+						((s->n) * (s->n -1 ) - 2 * s-> total_calls);
+					break;
+				case (TOK):
+				case (SPI):
+					prob /= 
+						(count_tokens(s ->token, s->n) * (s->n -1));
+					break;
 			}									 
 		}
 	}		
@@ -230,7 +212,7 @@ get_prob
 
 void
 init_markov_chain
-(twin_queues hash[MAXN*MAXN], int n, int m, int prot)
+(twin_queues hash[MAXN*MAXN], pars_t pars)
 {
 	int i;
 	graph init_secrets [MAXN*MAXM];
@@ -238,8 +220,8 @@ init_markov_chain
 	int init_token[MAXN];
 	pstate_t *s;
 		
-	FOR_ALL_EDGES(i, n){
-		switch (prot) {
+	FOR_ALL_EDGES(i, pars.n){
+		switch (pars.prot) {
 			case (LNS):
 				hash[i].can_lab_queue=
 					new_queue(MAXSTATES, cmp_can_secrets);
@@ -261,14 +243,14 @@ init_markov_chain
 		}
 	}
 	
-	diagonal(init_secrets, n, m);
-	init_calls_graph(init_calls, n);
+	diagonal(init_secrets, pars.n, pars.m);
+	init_calls_graph(init_calls, pars.n);
 	
-	for(i=0;i<n;i++)
+	for(i=0;i<pars.n;i++)
 		init_token[i]=1;
 	
-	s=new_pstate(init_secrets, init_calls, init_token, 0, n, m, prot);
-	enqueue_to_hash(hash, NULL, NULL, s, NULL, prot);
+	s=new_pstate(init_secrets, init_calls, init_token, 0, pars);
+	enqueue_to_hash(hash, NULL, NULL, s, NULL, pars);
 }
 
 float 
@@ -277,7 +259,7 @@ exact_expectation
 {		
 	twin_queues hash[MAXN*MAXN];
 	pstate_t *s;
-	int i, j, label;
+	int i, j, label,  temp_prot;
 	pstate_t** trans_matrix = NULL;
 	struct queue_node_t * p;
 	float* expect_vec = NULL;
@@ -286,14 +268,18 @@ exact_expectation
 	//this hash will store only ordered tuples, regardless the protocol
 	twin_queues ordered_hash[MAXN*MAXN];
 	
-	init_markov_chain(hash, pars.n, pars.m, pars.prot);
-			
+	init_markov_chain(hash, pars);
+				
 	/* if we are in CO, TOK, SPI we want to count the ordered tuples too*/
-	init_markov_chain(ordered_hash, pars.n, pars.m, LNS);
-		
+	temp_prot = pars.prot;
+	pars.prot = LNS;
+	init_markov_chain(ordered_hash, pars);
+	pars.prot = temp_prot;
+	
 	/* build the markov chain */
 	build_the_markov_chain(hash, no_states, pars, ordered_hash);
 		
+	//compute the expectation	
 	if (pars.calc_exp)
 	{		
 		MALLOC_SAFE(trans_matrix,(*no_states)*sizeof(pstate_t *) );
@@ -322,21 +308,19 @@ exact_expectation
                                         
 				for(j=i+1; j<(* no_states); j++)
 					expect_vec[i] += 
-						get_prob(trans_matrix, i, j, pars.prot, 
-							pars.rand_ag) * 
+						get_prob(trans_matrix, i, j, pars.prot) * 
 							expect_vec[j];
 		
 				if (pars.prot == ANY || pars.prot == SPI || pars.prot == TOK)			       
 					expect_vec[i] /= 
-						(1-get_prob(trans_matrix, i, i, pars.prot, pars.rand_ag));
+						(1-get_prob(trans_matrix, i, i, pars.prot));
 			}
 		
 		result = expect_vec[0];
 	}
 	
-	//if we are in CO, TOK or SPI we count the ordered tuples (TODO: REMOVE ANY)
+	//if we are in CO, TOK or SPI we count the ordered tuples
 	switch (pars.prot) {
-		case ANY:
 		case CO:
 		case TOK: 
 		case SPI:
@@ -350,7 +334,9 @@ exact_expectation
 	FREE_SAFE(is_absorption);
 	FREE_SAFE(expect_vec);
 	FREE_SAFE(trans_matrix);
-	destroy_hash(pars.n, hash);
+	
+	if (pars.calc_exp)
+		destroy_hash(pars.n, hash);
 	
 	//~ printf("Oredered hash starts\n");
 		 
