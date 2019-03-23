@@ -18,7 +18,8 @@ Detailed definition for the above notions can be found in the paper "Reachabilit
 The algorithms are explained in section 4 of the aforementiond paper. The isomorphism check that is needed for our algorithms is done with the
 help of the software nauty (http://pallini.di.uniroma1.it/).
 
-An example of the states reachable by protocol ANY can be found here: https://drive.google.com/file/d/1F5TkkTqyiNAP7uUlZuCrOWqgHHtArrVG/view?usp=sharing.
+An example of the states reachable by protocol ANY can be found here:
+https://drive.google.com/open?id=1F5TkkTqyiNAP7uUlZuCrOWqgHHtArrVG.
 
 The downloading, building and running instructions are for a UNIX system. The commands should be run in a terminal.
 
