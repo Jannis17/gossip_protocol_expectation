@@ -21,6 +21,10 @@ help of the software nauty (http://pallini.di.uniroma1.it/).
 An example of the states reachable by protocol ANY can be found here:
 https://drive.google.com/open?id=1F5TkkTqyiNAP7uUlZuCrOWqgHHtArrVG.
 
+An example of the states reachable by protocol LNS can be found here:
+https://drive.google.com/file/d/1-YCz0MieU4f2kjrRbd02SWPtiE0dH-wg/view?usp=sharing
+
+
 The downloading, building and running instructions are for a UNIX system. The commands should be run in a terminal.
 
 ---
