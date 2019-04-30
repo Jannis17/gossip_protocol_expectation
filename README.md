@@ -30,14 +30,15 @@ The downloading, building and running instructions are for a UNIX system. The co
 ---
 
 ### Download:
-Type "git clone https://github.com/Jannis17/gossip_protocol_expectation".
+
+Type `git clone https://github.com/Jannis17/gossip_protocol_expectation`.
 
 ---
 
 ### Build:
 
 Run `make build`.
-This will run `./configure && make all` in the folder `nauty` and `make protocol` in the folder type `protocol/src`.
+This will run `./configure && make all` in the folder `nauty` and `make protocol` in the folder `protocol/src`.
 
 ---
 
