@@ -13,14 +13,16 @@ DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 _OBJ = main.o graph.o state.o queue.o compar.o memory.o test.o simulations.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
-
-$(ODIR)/%.o: %.c $(DEPS)
+$(ODIR)/%.o: %.c $(DEPS) $(ODIR)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 protocol: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
+$(ODIR):
+	mkdir $(ODIR)
+
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ 
+	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
