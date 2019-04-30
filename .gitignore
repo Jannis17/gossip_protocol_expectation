@@ -1,0 +1,7 @@
+nauty/*.o
+nauty/*.a
+nauty/config.log
+nauty/config.status
+protocol/src/obj
+protocol/src/protocol
+results

@@ -36,13 +36,12 @@ Type "git clone https://github.com/Jannis17/gossip_protocol_expectation".
 
 ### Build:
 
-
-Navigate to folder "gossip_protocol_expectation/nauty" and type "./confige" and then "make".
-Then navigate to "gossip_protocol_expectation/protocol/src" and type "make".
+Run `make build`.
+This will run `./configure && make all` in the folder `nauty` and `make protocol` in the folder type `protocol/src`.
 
 ---
 
 ### Run:
 
-Navigate to "gossip_protocol_expectation/protocl/src" and type
-"./protocol". Follow the instructions in your terminal.
+Navigate to `protocol/src` and type `./protocol`.
+Follow the instructions in your terminal.
