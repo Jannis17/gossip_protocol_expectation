@@ -19,7 +19,7 @@ void print_trans_matrix(float**tm, int n)
 	for(i=0;i<n;i++) {
 		for(j=0;j<n;j++)
 			printf("%f ", tm[i][j]);
-			printf("\n");
+		printf("\n");
 	}
 }
 
