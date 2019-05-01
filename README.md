@@ -4,11 +4,15 @@ Ioannis Kokkinis, ykokkinis@gmail.com
 
 ### Short Description:
 
-For every protocol defined in the paper "Dynamic Gossip" (https://arxiv.org/abs/1511.00867) our implementation provides algorithms for:
+For every protocol defined in the paper
+"Dynamic Gossip" (https://arxiv.org/abs/1511.00867)
+our implementation provides algorithms for:
 
-a) computing the exact value of its expected duration (for at most 8 agents - the upper bound varies on the protocol)
+a) computing the exact value of its expected duration
+(for at most 8 agents - the upper bound varies on the protocol)
 
-b) computing the approximate value of its expectated duration (for up to 200 agents)
+b) computing the approximate value of its expectated duration
+(for up to 200 agents)
 
 c) producing the reachable states
 
@@ -34,18 +38,30 @@ UNIX system. The commands should be run in a terminal.
 ---
 
 ### Download:
-Type "git clone https://github.com/Jannis17/gossip_protocol_expectation".
+Type
+"git clone https://github.com/Jannis17/gossip_protocol_expectation".
 
 ---
 
 ### Build:
 
 
-Navigate to the folder "gossip_protocol_expectation/protocol/src" and type "make all".
+Navigate to the folder "gossip_protocol_expectation/protocol/src"
+and type "make all".
 
 ---
 
 ### Run:
 
-Navigate to the folder "gossip_protocol_expectation/protocl/src" and type
-"./protocol". Follow the instructions in your terminal.
+Navigate to the folder "gossip_protocol_expectation/protocl/src"
+and type "./protocol". Follow the instructions in your terminal.
+
+---
+
+### Results:
+
+The results are generated in the folder
+"gossip_protocol_expectation/results". The results that use the most
+possible agents have been saved in
+"gossip_protocol_expectation/results/best"
+
