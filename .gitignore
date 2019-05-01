@@ -41,4 +41,5 @@ nauty/hamheuristic
 nauty/NRswitchg  
 nauty/shortg       
 nauty/watercluster2
+protocol/src/protocol
 
