@@ -17,6 +17,10 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 $(ODIR)/%.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
+all:
+	cd ../../nauty;./configure;make \
+	cd ../protocol/src/; make
+	
 protocol: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
