@@ -47,7 +47,7 @@ Type
 
 
 Navigate to the folder "gossip_protocol_expectation/protocol/src"
-and type "make all".
+and type "make".
 
 ---
 
