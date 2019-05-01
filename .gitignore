@@ -41,5 +41,7 @@ nauty/hamheuristic
 nauty/NRswitchg  
 nauty/shortg       
 nauty/watercluster2
+nauty/config.status
+nauty/ranlabg
 protocol/src/protocol
 
