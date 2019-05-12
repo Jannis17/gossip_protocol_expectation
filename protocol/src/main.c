@@ -93,10 +93,10 @@ void print_results
 void print_usage_and_exit(int argc, char * argv[])
 {
 	printf("Usage: %s [name] [n] -s=[max_sim] -o -ne \n\n", argv[0]);
-	printf("name: ANY, LNS, CO or SPI\n");
+	printf("name: ANY, LNS, CO, TOK or SPI\n");
 	printf("n: maximum number of agents \n");
 	printf("-ne:  Optional. If it is present, the program will not calculate the expectation. If it is used with the s option, it has no effect.\n");
-	printf("-s: Optional. If it is present, the expected duration is computed using max_sim simulations. If it is absent, the program caluclates exact values\n");
+	printf("-s: Optional. If it is present, the expected duration is simulated using max_sim simulations. If it is absent, the program caluclates exact values\n");
 	printf("-o: Optional. It should be used only with the name option ANY. If it is present, the program produces the ANY ordered tuples. If it is absent the program produces the ANY unordered tuples\n\n");
 	printf("If the option -s is used then n has to be in the range 1..%d. If -s is absent, n has to be in the range 1..%d", MAXN_SIM, MAXN);	
 	printf("\nThe results will be generated in a file marked with timestamp in the folder gossip_protocol_expectation/results.\n");
