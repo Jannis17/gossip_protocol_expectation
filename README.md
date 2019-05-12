@@ -32,6 +32,8 @@ An example of the states reachable by protocol LNS can be found here:
 https://drive.google.com/file/d/1-YCz0MieU4f2kjrRbd02SWPtiE0dH-wg/view?usp=sharing
 
 
+This program produced integer sequences https://oeis.org/A318154 and https://oeis.org/A307085.
+
 The downloading, building and running instructions are for a
 UNIX system. The commands should be run in a terminal.
 
@@ -39,7 +41,7 @@ UNIX system. The commands should be run in a terminal.
 
 ### Download:
 Type
-"git clone https://github.com/Jannis17/gossip_protocol_expectation".
+"git clone https://github.com/Jannis17/gossip_protocol_expectation"
 
 ---
 
