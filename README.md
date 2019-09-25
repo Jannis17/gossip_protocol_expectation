@@ -11,7 +11,7 @@ our implementation provides algorithms for:
 a) computing the exact value of its expected duration
 (for at most 8 agents - the upper bound varies on the protocol)
 
-b) computing the approximate value of its expectated duration
+b) approximating the value of its expectated duration
 (for up to 200 agents)
 
 c) producing the reachable states
